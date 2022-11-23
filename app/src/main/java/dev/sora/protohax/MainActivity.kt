@@ -39,6 +39,12 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
+        val seq = AntiModification.call
+        if (AntiModification.validateAppSignature(baseContext).let { it.first && it.second.startsWith("fuck") } && (seq == AntiModification.call || seq + 1 == AntiModification.call)) {
+            Toast.makeText(baseContext, "Internal error occurred, please contact the developer.", Toast.LENGTH_LONG).show()
+            throw IllegalStateException("aab0760046b3cea52940f1668245e65d")
+        }
+
         setContent {
             ProtoHaxTheme {
                 View()

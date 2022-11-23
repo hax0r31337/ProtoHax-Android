@@ -1,9 +1,18 @@
 plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
+//    id 'top.niunaijun.blackobfuscator'
 }
 
 android {
+    signingConfigs {
+        debug {
+            storeFile file('/home/liuli/data/.key/sora.jks')
+            keyAlias 'sora'
+            keyPassword '1145141919'
+            storePassword '1145141919'
+        }
+    }
     namespace 'dev.sora.protohax'
     compileSdk 33
 
@@ -45,6 +54,12 @@ android {
         }
     }
 }
+
+//BlackObfuscator {
+//    enabled true
+//    depth 2
+//    obfClass = ["dev.sora", "com.github"]
+//}
 
 dependencies {
     implementation 'androidx.core:core-ktx:1.9.0'
