@@ -2,7 +2,7 @@ package dev.sora.protohax.ui.theme
 
 import androidx.compose.ui.graphics.Color
 
-val Purple200 = Color(0xFFBB86FC)
-val Purple500 = Color(0xFF6200EE)
-val Purple700 = Color(0xFF3700B3)
-val Teal200 = Color(0xFF03DAC5)
+val LightBlue200 = Color(0xFF81D4FA)
+val LightBlue500 = Color(0xFF03A9F4)
+val LightBlue700 = Color(0xFF0288D1)
+val Amber200 = Color(0xFFFFE082)

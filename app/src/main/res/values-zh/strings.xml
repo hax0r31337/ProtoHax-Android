@@ -1,0 +1,5 @@
+<resources>
+    <string name="connected">已經連結至MITM代理</string>
+    <string name="not_connected">未建立連結</string>
+    <string name="package_name">目標包名</string>
+</resources>
