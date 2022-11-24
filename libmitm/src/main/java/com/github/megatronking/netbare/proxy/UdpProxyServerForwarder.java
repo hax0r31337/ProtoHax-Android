@@ -16,14 +16,14 @@
 package com.github.megatronking.netbare.proxy;
 
 import android.net.VpnService;
-import android.util.Log;
 
+import com.github.megatronking.netbare.NetBareLog;
+import com.github.megatronking.netbare.NetBareUtils;
 import com.github.megatronking.netbare.ip.IpHeader;
 import com.github.megatronking.netbare.ip.Protocol;
 import com.github.megatronking.netbare.ip.UdpHeader;
 import com.github.megatronking.netbare.net.Session;
 import com.github.megatronking.netbare.net.SessionProvider;
-import com.github.megatronking.netbare.net.UidDumper;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -39,9 +39,9 @@ public final class UdpProxyServerForwarder implements ProxyServerForwarder {
     private final SessionProvider mSessionProvider;
     private final UdpProxyServer mProxyServer;
 
-    public UdpProxyServerForwarder(VpnService vpnService, int mtu, UidDumper dumper)
+    public UdpProxyServerForwarder(VpnService vpnService, int mtu)
             throws IOException {
-        this.mSessionProvider = new SessionProvider(dumper);
+        this.mSessionProvider = new SessionProvider();
         this.mProxyServer = new UdpProxyServer(vpnService, mtu);
         this.mProxyServer.setSessionProvider(mSessionProvider);
     }
@@ -67,10 +67,10 @@ public final class UdpProxyServerForwarder implements ProxyServerForwarder {
         // UDP data size
         int udpDataSize = ipHeader.getDataLength() - udpHeader.getHeaderLength();
 
-//        NetBareLog.v("ip: %s:%d -> %s:%d", NetBareUtils.convertIp(localIp),
-//                NetBareUtils.convertPort(localPort), NetBareUtils.convertIp(remoteIp),
-//                NetBareUtils.convertPort(remotePort));
-//        NetBareLog.v("udp: %s, size: %d", udpHeader.toString(), udpDataSize);
+        NetBareLog.v("ip: %s:%d -> %s:%d", NetBareUtils.convertIp(localIp),
+                NetBareUtils.convertPort(localPort), NetBareUtils.convertIp(remoteIp),
+                NetBareUtils.convertPort(remotePort));
+        NetBareLog.v("udp: %s, size: %d", udpHeader.toString(), udpDataSize);
 
         Session session = mSessionProvider.ensureQuery(Protocol.UDP, localPort, remotePort, remoteIp);
         session.packetIndex++;
@@ -79,7 +79,7 @@ public final class UdpProxyServerForwarder implements ProxyServerForwarder {
             mProxyServer.send(udpHeader, output);
             session.sendDataSize += udpDataSize;
         } catch (IOException e) {
-            Log.e("LibMITM", e.getMessage());
+            NetBareLog.e(e.getMessage());
         }
     }
 

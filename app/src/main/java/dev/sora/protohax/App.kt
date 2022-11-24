@@ -1,7 +1,7 @@
 package dev.sora.protohax
 
 import android.app.Application
-import dev.sora.libmitm.MITM
+import com.github.megatronking.netbare.NetBare
 
 
 class App : Application() {
@@ -9,6 +9,6 @@ class App : Application() {
     override fun onCreate() {
         super.onCreate()
 
-        MITM.app = this
+        NetBare.get().attachApplication(this, true)
     }
 }

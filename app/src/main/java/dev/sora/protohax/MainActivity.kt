@@ -6,29 +6,33 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.*
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import dev.sora.libmitm.MITM
-import dev.sora.libmitm.MITMConfig
+import com.github.megatronking.netbare.NetBare
+import com.github.megatronking.netbare.NetBareConfig
+import com.github.megatronking.netbare.NetBareListener
+import com.github.megatronking.netbare.ip.IpAddress
 import dev.sora.protohax.ui.theme.ProtoHaxTheme
+import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.callbackFlow
 
 class MainActivity : ComponentActivity() {
+
+    private val configBuilder: NetBareConfig.Builder
+        get() = NetBareConfig.Builder()
+        .setMtu(4096)
+        .setAddress(IpAddress("10.1.10.1", 32))
+        .setSession("ProtoHax   ")
+        .addRoute(IpAddress("0.0.0.0", 0))
 
     private val requestVpnPermission = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
 //        if (it.resultCode == RESULT_OK) {
@@ -36,14 +40,45 @@ class MainActivity : ComponentActivity() {
 //        }
     }
 
+    @ExperimentalCoroutinesApi
+    fun observeConnectivityAsFlow() = callbackFlow {
+        val nb = NetBare.get()
+        val callback = NetworkCallback { state -> trySend(state) }
+        nb.registerNetBareListener(callback)
+
+        // Set current state
+        trySend(nb.isActive)
+
+        // Remove callback when not used
+        awaitClose {
+            nb.unregisterNetBareListener(callback)
+        }
+    }
+
+    fun NetworkCallback(callback: (Boolean) -> Unit): NetBareListener {
+        return object : NetBareListener {
+            override fun onServiceStarted() {
+                callback(true)
+            }
+
+            override fun onServiceStopped() {
+                callback(false)
+            }
+        }
+    }
+
+    @ExperimentalCoroutinesApi
+    @Composable
+    fun connectivityState(): State<Boolean> {
+        // Creates a State<ConnectionState> with current connectivity state as initial value
+        return produceState(initialValue = NetBare.get().isActive) {
+            // In a coroutine, can make suspend calls
+            observeConnectivityAsFlow().collect { value = it }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        val seq = AntiModification.call
-        if (AntiModification.validateAppSignature(baseContext).let { it.first && it.second.startsWith("fuck") } && (seq == AntiModification.call || seq + 1 == AntiModification.call)) {
-            Toast.makeText(baseContext, "Internal error occurred, please contact the developer.", Toast.LENGTH_LONG).show()
-            throw IllegalStateException("aab0760046b3cea52940f1668245e65d")
-        }
 
         setContent {
             ProtoHaxTheme {
@@ -52,11 +87,12 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    @OptIn(ExperimentalCoroutinesApi::class)
     @Composable
     private fun View() {
-        val connectState = remember { mutableStateOf(false) }
         val targetPkgName = rememberSaveable { mutableStateOf("com.mojang.minecraftpe") }
         val ctx = LocalContext.current
+        val connection by connectivityState()
 
         Scaffold(
             topBar = {
@@ -64,39 +100,37 @@ class MainActivity : ComponentActivity() {
                     title = {
                         Text(text = stringResource(R.string.app_name))
                     },
-//                    backgroundColor = MaterialTheme.colors.primary,
-//                    contentColor = Color.White,
                     elevation = 10.dp
                 )
             }, floatingActionButton = {
                 FloatingActionButton(onClick = {
-                    connectState.value = !connectState.value
                     try {
-                        if (connectState.value) {
-                            val intent = MITM.prepare()
+                        if (!NetBare.get().isActive) {
+                            val intent = NetBare.get().prepare()
                             if (intent == null) {
-                                MITM.start(MITMConfig(allowedApps = arrayOf(targetPkgName.value)))
-                                Toast.makeText(ctx, "Launching MITM proxy for ${targetPkgName.value}", Toast.LENGTH_LONG).show()
+                                NetBare.get().start(configBuilder
+                                    .addAllowedApplication(targetPkgName.value)
+                                    .build())
+                                Toast.makeText(ctx, getString(R.string.start_proxy_toast, targetPkgName.value), Toast.LENGTH_LONG).show()
                             } else {
                                 requestVpnPermission.launch(intent)
-                                connectState.value = false
                             }
                         } else {
-                            MITM.stop()
-                            Toast.makeText(ctx, "MITM proxy stopped", Toast.LENGTH_LONG).show()
+                            NetBare.get().stop()
+                            Toast.makeText(ctx, getString(R.string.stop_proxy_toast), Toast.LENGTH_LONG).show()
                         }
                     } catch (e: Throwable) {
                         Log.e("ProtoHax", "mitm", e)
                     }
                 },
-                    backgroundColor = if (connectState.value) Color(0xFF4CAF50) else Color.Gray) {
-                    Icon(Icons.Default.Send, "connIcon", tint = Color(0xFFDDDDDD))
+                    backgroundColor = if (connection) Color(0xFF4CAF50) else Color.Gray) {
+                    Icon(painter = painterResource(R.drawable.notification_icon), "connIcon", tint = Color(0xFFDDDDDD))
                 }
             },
             isFloatingActionButtonDocked = true,
             bottomBar = {
                 BottomAppBar {
-                    Text(text = stringResource(if(connectState.value) R.string.connected else R.string.not_connected),
+                    Text(text = stringResource(if(connection) R.string.connected else R.string.not_connected),
                         modifier = Modifier.padding(start = 10.dp))
                 }
             }, content = { _ ->

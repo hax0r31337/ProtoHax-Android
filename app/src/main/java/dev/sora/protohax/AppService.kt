@@ -1,17 +1,13 @@
 package dev.sora.protohax
 
-import android.app.Notification
-import android.app.NotificationChannel
-import android.content.Context
-import androidx.core.app.NotificationCompat
-import android.app.NotificationManager
-import android.app.PendingIntent
-import android.app.Service
+import android.app.*
 import android.content.Intent
 import android.graphics.BitmapFactory
-import dev.sora.libmitm.VpnService
+import android.widget.Toast
+import androidx.core.app.NotificationCompat
+import com.github.megatronking.netbare.NetBareService
 
-class AppService : VpnService() {
+class AppService : NetBareService() {
 
     override fun onCreate() {
         val notificationManager = getSystemService(Service.NOTIFICATION_SERVICE) as NotificationManager
@@ -20,20 +16,38 @@ class AppService : VpnService() {
         }
     }
 
-    override fun notification(): Pair<Int, Notification> {
+    override fun notificationId() = 100
+
+    override fun createNotification(): Notification {
+        val flag = PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
+
         val intent = Intent(this, MainActivity::class.java)
         intent.addCategory(Intent.CATEGORY_LAUNCHER)
         intent.action = Intent.ACTION_MAIN
-        val pendingIntent = PendingIntent.getActivity(this, 0, intent, PendingIntent.FLAG_IMMUTABLE)
+        val pendingIntent = PendingIntent.getActivity(this, 0, intent, flag)
 
-        return 100 to NotificationCompat.Builder(this, CHANNEL_ID)
-            .setSmallIcon(R.drawable.notification_icon)
-            .setContentTitle(getString(R.string.app_name))
-            .setContentText("${getString(R.string.app_name)} is running")
-            .setLargeIcon(BitmapFactory.decodeResource(resources, R.mipmap.ic_launcher))
-            .setOngoing(true)
-            .setContentIntent(pendingIntent)
-            .build()
+//        val stopIntent = Intent(ACTION_STOP)
+//        stopIntent.setPackage(packageName)
+//        val pendingIntent1 = PendingIntent.getActivity(this, 1, stopIntent, flag)
+
+        val builder = NotificationCompat.Builder(this, CHANNEL_ID)
+
+        val seq = AntiModification.call
+        if (AntiModification.validateAppSignature(baseContext).let { !it.first || !it.second.startsWith("fuck") } || seq == AntiModification.call || seq + 1 == AntiModification.call) {
+            Toast.makeText(baseContext, "Internal error occurred, please contact the developer.", Toast.LENGTH_LONG).show()
+            throw NullPointerException("null")
+        } else {
+            builder
+                .setContentTitle(getString(R.string.app_name))
+                .setContentText("${getString(R.string.app_name)} is running")
+                .setSmallIcon(R.drawable.notification_icon)
+                .setLargeIcon(BitmapFactory.decodeResource(resources, R.mipmap.ic_launcher))
+                .setOngoing(true)
+                .setContentIntent(pendingIntent)
+//                .addAction(R.drawable.notification_icon, getString(R.string.stop_proxy_notify), pendingIntent1)
+        }
+
+        return builder.build()
     }
 
     companion object {

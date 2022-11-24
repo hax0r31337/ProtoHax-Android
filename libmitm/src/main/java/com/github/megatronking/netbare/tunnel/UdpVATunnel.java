@@ -30,8 +30,7 @@
  */
 package com.github.megatronking.netbare.tunnel;
 
-import android.util.Log;
-
+import com.github.megatronking.netbare.NetBareLog;
 import com.github.megatronking.netbare.NetBareUtils;
 import com.github.megatronking.netbare.NetBareVirtualGateway;
 import com.github.megatronking.netbare.gateway.Request;
@@ -146,7 +145,7 @@ public class UdpVATunnel extends VirtualGatewayTunnel implements NioCallback,
         try {
             mGateway.onRequest(header.data());
         } catch (IOException e) {
-            Log.e("LibMITM", e.getMessage());
+            NetBareLog.e(e.getMessage());
             close();
         }
     }

@@ -17,8 +17,8 @@ package com.github.megatronking.netbare.proxy;
 
 import android.net.VpnService;
 import android.os.SystemClock;
-import android.util.Log;
 
+import com.github.megatronking.netbare.NetBareLog;
 import com.github.megatronking.netbare.NetBareUtils;
 import com.github.megatronking.netbare.gateway.VirtualGateway;
 import com.github.megatronking.netbare.ip.IpHeader;
@@ -117,10 +117,10 @@ import java.util.concurrent.ConcurrentHashMap;
 
     @Override
     public void run() {
-        Log.i("LibMITM", "[UDP]Server starts running.");
+        NetBareLog.i("[UDP]Server starts running.");
         super.run();
         NetBareUtils.closeQuietly(mSelector);
-        Log.i("LibMITM", "[UDP]Server stops running.");
+        NetBareLog.i("[UDP]Server stops running.");
     }
 
     @Override

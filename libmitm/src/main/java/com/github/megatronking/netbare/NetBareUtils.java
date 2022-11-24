@@ -15,9 +15,7 @@
  */
 package com.github.megatronking.netbare;
 
-import android.os.Build;
 import android.text.TextUtils;
-import android.util.Log;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -100,7 +98,7 @@ public final class NetBareUtils {
             try {
                 closeable.close();
             } catch (IOException e) {
-                Log.e("LibMITM", "closeQuietly", e);
+                NetBareLog.wtf(e);
             }
         }
     }

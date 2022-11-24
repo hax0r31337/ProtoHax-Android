@@ -15,7 +15,7 @@
  */
 package com.github.megatronking.netbare.proxy;
 
-import android.util.Log;
+import com.github.megatronking.netbare.NetBareLog;
 
 import java.io.IOException;
 
@@ -61,7 +61,7 @@ import java.io.IOException;
             try {
                 process();
             } catch (IOException e) {
-                Log.e("LibMITM", e.getMessage());
+                NetBareLog.e(e.getMessage());
             }
         }
     }

@@ -16,9 +16,7 @@
 package com.github.megatronking.netbare;
 
 import android.os.Process;
-import android.util.Log;
 
-import com.github.megatronking.netbare.gateway.DefaultVirtualGatewayFactory;
 import com.github.megatronking.netbare.gateway.Request;
 import com.github.megatronking.netbare.gateway.Response;
 import com.github.megatronking.netbare.gateway.VirtualGateway;
@@ -27,10 +25,6 @@ import com.github.megatronking.netbare.net.Session;
 
 import java.io.IOException;
 import java.nio.ByteBuffer;
-import java.util.HashSet;
-import java.util.Set;
-
-import dev.sora.libmitm.MITM;
 
 /**
  * The main virtual gateway used in proxy servers, it wraps the actual virtual gateway. We use this
@@ -58,7 +52,7 @@ public final class NetBareVirtualGateway extends VirtualGateway {
 
     private final VirtualGateway mGateway;
     private final Session mSession;
-//    private final NetBareXLog mLog;
+    private final NetBareXLog mLog;
 
     private int mPolicy;
 
@@ -67,17 +61,23 @@ public final class NetBareVirtualGateway extends VirtualGateway {
 
     public NetBareVirtualGateway(Session session, Request request, Response response) {
         super(session, request, response);
-        mGateway = MITM.INSTANCE.getConfig().getVirtualGatewayFactory().create(session, request, response);
+        mGateway = NetBare.get().getGatewayFactory().create(session, request, response);
         mSession = session;
-//        mLog = new NetBareXLog(session);
+        mLog = new NetBareXLog(session);
 
-        mPolicy = POLICY_INDETERMINATE;
+        if (session.uid == Process.myUid()) {
+            // Exclude the app itself.
+            mLog.w("Exclude an app-self connection!");
+            mPolicy = POLICY_DISALLOWED;
+        } else {
+            mPolicy = POLICY_INDETERMINATE;
+        }
     }
 
     @Override
     public void onRequest(ByteBuffer buffer) throws IOException {
         if (mRequestFinished) {
-            Log.w("LibMITM", "Drop a buffer due to request has finished.");
+            mLog.w("Drop a buffer due to request has finished.");
             return;
         }
         resolvePolicyIfNecessary(buffer);
@@ -91,7 +91,7 @@ public final class NetBareVirtualGateway extends VirtualGateway {
     @Override
     public void onResponse(ByteBuffer buffer) throws IOException {
         if (mResponseFinished) {
-            Log.w("LibMITM", "Drop a buffer due to response has finished.");
+            mLog.w("Drop a buffer due to response has finished.");
             return;
         }
         resolvePolicyIfNecessary(buffer);
@@ -107,7 +107,7 @@ public final class NetBareVirtualGateway extends VirtualGateway {
         if (mRequestFinished) {
             return;
         }
-        Log.i("LibMITM", "Gateway request finished!");
+        mLog.i("Gateway request finished!");
         mRequestFinished = true;
         if (mPolicy == POLICY_ALLOWED) {
             mGateway.onRequestFinished();
@@ -121,7 +121,7 @@ public final class NetBareVirtualGateway extends VirtualGateway {
         if (mResponseFinished) {
             return;
         }
-        Log.i("LibMITM", "Gateway response finished!");
+        mLog.i("Gateway response finished!");
         mResponseFinished = true;
         if (mPolicy == POLICY_ALLOWED) {
             mGateway.onResponseFinished();
@@ -145,22 +145,16 @@ public final class NetBareVirtualGateway extends VirtualGateway {
         }
 
         // Now we verify the TCP protocol host
+        mPolicy = POLICY_ALLOWED;
         String domain;
         if (isHttp(buffer)) {
             domain = parseHttpHost(buffer.array(), buffer.position(), buffer.remaining());
         } else {
             domain = parseHttpsHost(buffer.array(), buffer.position(), buffer.remaining());
         }
-        if (domain == null) {
-            // Maybe not http protocol.
-            mPolicy = POLICY_ALLOWED;
-            return;
-        } else {
+        if (domain != null) {
             mSession.host = domain;
         }
-
-        // No white and black list, it means allow everything.
-        mPolicy = POLICY_ALLOWED;
     }
 
     private boolean isHttp(ByteBuffer buffer) {
@@ -199,7 +193,7 @@ public final class NetBareVirtualGateway extends VirtualGateway {
             }
             String name = nameValue[0].trim();
             String value = requestHeader.replaceFirst(nameValue[0] + ": ", "").trim();
-            if (name.equalsIgnoreCase("host")) {
+            if (name.toLowerCase().equals("host")) {
                 return value;
             }
         }
@@ -210,7 +204,7 @@ public final class NetBareVirtualGateway extends VirtualGateway {
         int limit = offset + size;
         // Client Hello
         if (size <= 43 || buffer[offset] != 0x16) {
-            Log.w("LibMITM", "Failed to get host from SNI: Bad ssl packet.");
+            mLog.w("Failed to get host from SNI: Bad ssl packet.");
             return null;
         }
         // Skip 43 byte header
@@ -218,7 +212,7 @@ public final class NetBareVirtualGateway extends VirtualGateway {
 
         // Read sessionID
         if (offset + 1 > limit) {
-            Log.w("LibMITM", "Failed to get host from SNI: No session id.");
+            mLog.w("Failed to get host from SNI: No session id.");
             return null;
         }
         int sessionIDLength = buffer[offset++] & 0xFF;
@@ -226,7 +220,7 @@ public final class NetBareVirtualGateway extends VirtualGateway {
 
         // Read cipher suites
         if (offset + 2 > limit) {
-            Log.w("LibMITM", "Failed to get host from SNI: No cipher suites.");
+            mLog.w("Failed to get host from SNI: No cipher suites.");
             return null;
         }
 
@@ -236,7 +230,7 @@ public final class NetBareVirtualGateway extends VirtualGateway {
 
         // Read Compression method.
         if (offset + 1 > limit) {
-            Log.w("LibMITM", "Failed to get host from SNI: No compression method.");
+            mLog.w("Failed to get host from SNI: No compression method.");
             return null;
         }
         int compressionMethodLength = buffer[offset++] & 0xFF;
@@ -244,14 +238,14 @@ public final class NetBareVirtualGateway extends VirtualGateway {
 
         // Read Extensions
         if (offset + 2 > limit) {
-            Log.w("LibMITM", "Failed to get host from SNI: no extensions.");
+            mLog.w("Failed to get host from SNI: no extensions.");
             return null;
         }
         int extensionsLength = readShort(buffer, offset) & 0xFFFF;
         offset += 2;
 
         if (offset + extensionsLength > limit) {
-            Log.w("LibMITM", "Failed to get host from SNI: no sni.");
+            mLog.w("Failed to get host from SNI: no sni.");
             return null;
         }
 
@@ -273,7 +267,7 @@ public final class NetBareVirtualGateway extends VirtualGateway {
             }
 
         }
-        Log.w("LibMITM", "Failed to get host from SNI: no host.");
+        mLog.w("Failed to get host from SNI: no host.");
         return null;
     }
 

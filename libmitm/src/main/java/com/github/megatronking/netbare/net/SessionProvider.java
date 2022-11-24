@@ -34,16 +34,9 @@ public final class SessionProvider {
     private static final int MAX_SESSION = 100;
 
     private final Map<Short, Session> mSessions;
-    private final UidDumper mDumper;
 
-    /**
-     * Constructs a session provider with a {@link UidDumper}.
-     *
-     * @param dumper Use to dump uid, can be null.
-     */
-    public SessionProvider(UidDumper dumper) {
+    public SessionProvider() {
         this.mSessions = new ConcurrentHashMap<>(MAX_SESSION);
-        this.mDumper = dumper;
     }
 
     /**
@@ -54,12 +47,7 @@ public final class SessionProvider {
      */
     @Nullable
     public Session query(short localPort) {
-        Session session = mSessions.get(localPort);
-        if (mDumper != null && session != null && session.uid == 0) {
-            // Query uid again.
-            mDumper.request(session);
-        }
-        return session;
+        return mSessions.get(localPort);
     }
 
     /**
@@ -83,10 +71,6 @@ public final class SessionProvider {
         if (session == null) {
             session = new Session(protocol, localPort, remotePort, remoteIp);
             mSessions.put(localPort, session);
-            // Dump uid from /proc/net/
-            if (mDumper != null) {
-                mDumper.request(session);
-            }
         }
         return session;
     }

@@ -3,4 +3,6 @@
     <string name="connected">Connected</string>
     <string name="not_connected">Not connected</string>
     <string name="package_name">Package name</string>
+    <string name="start_proxy_toast">Launching MITM proxy for %s</string>
+    <string name="stop_proxy_toast">MITM proxy stopped</string>
 </resources>

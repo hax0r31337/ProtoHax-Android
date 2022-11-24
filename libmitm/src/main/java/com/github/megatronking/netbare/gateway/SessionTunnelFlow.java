@@ -15,6 +15,7 @@
  */
 package com.github.megatronking.netbare.gateway;
 
+import com.github.megatronking.netbare.NetBareConfig;
 import com.github.megatronking.netbare.NetBareUtils;
 import com.github.megatronking.netbare.ip.Protocol;
 import com.github.megatronking.netbare.net.Session;
@@ -53,7 +54,7 @@ public abstract class SessionTunnelFlow implements TunnelFlow {
 
     /**
      * Returns the identifier of this session's process uid. This value is not guaranteed, it is up
-     * to dumpUid. And if dumps the uid failed, it will return 0.
+     * to {@link NetBareConfig#dumpUid}. And if dumps the uid failed, it will return 0.
      *
      * @return The session's process uid.
      */
