@@ -1,6 +1,8 @@
 package dev.sora.protohax
 
+import android.content.Intent
 import android.os.Bundle
+import android.provider.Settings
 import android.util.Log
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -20,10 +22,13 @@ import com.github.megatronking.netbare.NetBare
 import com.github.megatronking.netbare.NetBareConfig
 import com.github.megatronking.netbare.NetBareListener
 import com.github.megatronking.netbare.ip.IpAddress
+import dev.sora.protohax.CacheManager.readStringOrDefault
+import dev.sora.protohax.CacheManager.writeString
 import dev.sora.protohax.ui.theme.ProtoHaxTheme
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
+
 
 class MainActivity : ComponentActivity() {
 
@@ -39,11 +44,12 @@ class MainActivity : ComponentActivity() {
 //            startV2Ray()
 //        }
     }
+    private val TARGET_PACKAGE_CACHE_KEY = "TARGET_PACKAGE"
 
     @ExperimentalCoroutinesApi
     fun observeConnectivityAsFlow() = callbackFlow {
         val nb = NetBare.get()
-        val callback = NetworkCallback { state -> trySend(state) }
+        val callback = networkCallback { state -> trySend(state) }
         nb.registerNetBareListener(callback)
 
         // Set current state
@@ -55,7 +61,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    fun NetworkCallback(callback: (Boolean) -> Unit): NetBareListener {
+    private fun networkCallback(callback: (Boolean) -> Unit): NetBareListener {
         return object : NetBareListener {
             override fun onServiceStarted() {
                 callback(true)
@@ -87,11 +93,20 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    private fun requestOverlayPermission(): Boolean {
+        if (!Settings.canDrawOverlays(this)) {
+            val myIntent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION)
+            startActivity(myIntent)
+            return true
+        }
+        return false
+    }
+
     @OptIn(ExperimentalCoroutinesApi::class)
     @Composable
     private fun View() {
-        val targetPkgName = rememberSaveable { mutableStateOf("com.mojang.minecraftpe") }
         val ctx = LocalContext.current
+        val targetPkgName = rememberSaveable { mutableStateOf(ctx.readStringOrDefault(TARGET_PACKAGE_CACHE_KEY, "com.mojang.minecraftpe")) }
         val connection by connectivityState()
 
         Scaffold(
@@ -105,9 +120,14 @@ class MainActivity : ComponentActivity() {
             }, floatingActionButton = {
                 FloatingActionButton(onClick = {
                     try {
+                        if (requestOverlayPermission()) {
+                            Toast.makeText(ctx, getString(R.string.request_overlay), Toast.LENGTH_LONG).show()
+                            return@FloatingActionButton
+                        }
                         if (!NetBare.get().isActive) {
                             val intent = NetBare.get().prepare()
                             if (intent == null) {
+                                ctx.writeString(TARGET_PACKAGE_CACHE_KEY, targetPkgName.value)
                                 NetBare.get().start(configBuilder
                                     .addAllowedApplication(targetPkgName.value)
                                     .build())

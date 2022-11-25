@@ -151,7 +151,7 @@ public final class NetBare {
         mListeners.remove(listener);
     }
 
-    /* package */ NetBareConfig getConfig() {
+    public NetBareConfig getConfig() {
         return mNetBareConfig;
     }
 

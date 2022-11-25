@@ -107,8 +107,9 @@ public abstract class NetBareService extends VpnService {
 
         NetBareLog.i("Start NetBare service!");
 //        SSLEngineFactory.updateProviders(config.keyManagerProvider, config.trustManagerProvider);
-        mNetBareThread = new NetBareThread(this, config);
+        mNetBareThread = new NetBareThread(this, config, this::onServiceStop);
         mNetBareThread.start();
+        onServiceStart();
     }
 
     private void stopNetBare() {
@@ -120,4 +121,7 @@ public abstract class NetBareService extends VpnService {
         mNetBareThread = null;
     }
 
+    protected void onServiceStart() {}
+
+    protected void onServiceStop() {}
 }

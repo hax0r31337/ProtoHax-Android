@@ -3,17 +3,32 @@ package dev.sora.protohax
 import android.app.*
 import android.content.Intent
 import android.graphics.BitmapFactory
+import android.graphics.PixelFormat
+import android.view.Gravity
+import android.view.MotionEvent
+import android.view.View
+import android.view.WindowManager
+import android.widget.ImageView
+import android.widget.LinearLayout
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
+import com.github.megatronking.netbare.NetBare
 import com.github.megatronking.netbare.NetBareService
 
+
 class AppService : NetBareService() {
+
+    private lateinit var windowManager: WindowManager
+    private var layoutView: View? = null
+    private val alertWindow = AlertWindow()
 
     override fun onCreate() {
         val notificationManager = getSystemService(Service.NOTIFICATION_SERVICE) as NotificationManager
         if (notificationManager.getNotificationChannel(CHANNEL_ID) == null) {
             notificationManager.createNotificationChannel(NotificationChannel(CHANNEL_ID, getString(R.string.app_name), NotificationManager.IMPORTANCE_LOW))
         }
+
+        windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
     }
 
     override fun notificationId() = 100
@@ -39,7 +54,7 @@ class AppService : NetBareService() {
         } else {
             builder
                 .setContentTitle(getString(R.string.app_name))
-                .setContentText("${getString(R.string.app_name)} is running")
+                .setContentText(getString(R.string.proxy_notification, getString(R.string.app_name), NetBare.get().config.allowedApplications.firstOrNull() ?: "unknown"))
                 .setSmallIcon(R.drawable.notification_icon)
                 .setLargeIcon(BitmapFactory.decodeResource(resources, R.mipmap.ic_launcher))
                 .setOngoing(true)
@@ -48,6 +63,77 @@ class AppService : NetBareService() {
         }
 
         return builder.build()
+    }
+
+    override fun onServiceStart() {
+        val params = WindowManager.LayoutParams(
+            WindowManager.LayoutParams.WRAP_CONTENT,
+            WindowManager.LayoutParams.WRAP_CONTENT,
+            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+            PixelFormat.TRANSLUCENT
+        )
+        params.gravity = Gravity.TOP or Gravity.END
+        params.x = 0   // Initial Position of window
+        params.y = 100 // Initial Position of window
+
+        val layout = LinearLayout(this)
+
+//        val imageView = Button(this)
+//        imageView.text = "BTN"
+        val imageView = ImageView(this)
+        imageView.setImageResource(R.mipmap.ic_launcher_round)
+        imageView.layoutParams = LinearLayout.LayoutParams(
+            LinearLayout.LayoutParams.MATCH_PARENT,
+            LinearLayout.LayoutParams.WRAP_CONTENT
+        )
+
+        var dragPosX = 0f
+        var dragPosY = 0f
+        var pressDownTime = System.currentTimeMillis()
+        imageView.setOnClickListener {
+            alertWindow.toggle(windowManager, this)
+        }
+        imageView.setOnTouchListener { v, event ->
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    dragPosX = event.rawX
+                    dragPosY = event.rawY
+                    pressDownTime = System.currentTimeMillis()
+                    true
+                }
+                MotionEvent.ACTION_UP -> {
+                    if (System.currentTimeMillis() - pressDownTime < 500) {
+                        v.performClick()
+                    }
+                    true
+                }
+                MotionEvent.ACTION_MOVE -> {
+                    if (System.currentTimeMillis() - pressDownTime < 500) {
+                        false
+                    } else {
+                        params.x += -((event.rawX - dragPosX)).toInt()
+                        params.y += (event.rawY - dragPosY).toInt()
+                        dragPosX = event.rawX
+                        dragPosY = event.rawY
+                        windowManager.updateViewLayout(layout, params)
+                        true
+                    }
+                }
+                else -> false
+            }
+        }
+
+        layout.addView(imageView)
+
+        this.layoutView = layout
+        windowManager.addView(layout, params)
+    }
+
+    override fun onServiceStop() {
+        layoutView ?: return
+        windowManager.removeView(layoutView)
+        alertWindow.destroy(windowManager)
     }
 
     companion object {

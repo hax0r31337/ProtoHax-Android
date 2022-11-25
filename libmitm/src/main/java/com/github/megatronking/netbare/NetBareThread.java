@@ -55,10 +55,13 @@ import java.util.Map;
 
 	private PacketsTransfer packetsTransfer;
 
-	/* package */ NetBareThread(VpnService vpnService, NetBareConfig config) {
+	private final Runnable stopCallback;
+
+	/* package */ NetBareThread(VpnService vpnService, NetBareConfig config, Runnable stopCallback) {
 		super("NetBare");
 		this.mVpnService = vpnService;
 		this.mConfig = config;
+		this.stopCallback = stopCallback;
 	}
 
 	@Override
@@ -89,7 +92,7 @@ import java.util.Map;
 
 		// Notify NetBareListener that the service is stopped now.
 		NetBare.get().notifyServiceStopped();
-
+		stopCallback.run();
 	}
 
 	private void establishVpn(PacketsTransfer packetsTransfer) {

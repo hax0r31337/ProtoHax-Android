@@ -48,6 +48,10 @@ public final class NetBareConfig {
     private NetBareConfig() {
     }
 
+    public Set<String> getAllowedApplications() {
+        return allowedApplications;
+    }
+
     /**
      * Create a new builder based on the current.
      *
