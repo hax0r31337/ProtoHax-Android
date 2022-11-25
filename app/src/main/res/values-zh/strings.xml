@@ -6,4 +6,6 @@
     <string name="stop_proxy_toast">MITM代理停止</string>
     <string name="proxy_notification">%s 正在爲應用程式 %s 處理數據包</string>
     <string name="request_overlay">此應用程式需要浮動視窗權限以顯示設置GUI</string>
+    <string name="close_overlay_menu">退出</string>
+    <string name="connect_to_proxy">連結至MITM代理</string>
 </resources>
