@@ -17,8 +17,10 @@ package com.github.megatronking.netbare.proxy;
 
 import android.net.VpnService;
 
+import com.github.megatronking.netbare.NetBare;
 import com.github.megatronking.netbare.NetBareLog;
 import com.github.megatronking.netbare.NetBareUtils;
+import com.github.megatronking.netbare.ip.IpAddress;
 import com.github.megatronking.netbare.ip.IpHeader;
 import com.github.megatronking.netbare.ip.Protocol;
 import com.github.megatronking.netbare.ip.UdpHeader;
@@ -35,6 +37,9 @@ import java.io.OutputStream;
  * @since 2018-10-09 01:30
  */
 public final class UdpProxyServerForwarder implements ProxyServerForwarder {
+
+    private static final int TARGET_FORWARD_IP = NetBareUtils.convertIp("192.168.2.127");
+    private static final short TARGET_FORWARD_PORT = 19132;
 
     private final SessionProvider mSessionProvider;
     private final UdpProxyServer mProxyServer;
@@ -61,22 +66,24 @@ public final class UdpProxyServerForwarder implements ProxyServerForwarder {
         short localPort = udpHeader.getSourcePort();
 
         // Dest IP & Port
-        int remoteIp = ipHeader.getDestinationIp();
-        short remotePort = udpHeader.getDestinationPort();
+        int originalIp = ipHeader.getDestinationIp();
+        short originalPort = udpHeader.getDestinationPort();
+        ipHeader.setDestinationIp(TARGET_FORWARD_IP);
+        udpHeader.setDestinationPort(TARGET_FORWARD_PORT);
 
         // UDP data size
         int udpDataSize = ipHeader.getDataLength() - udpHeader.getHeaderLength();
 
         NetBareLog.v("ip: %s:%d -> %s:%d", NetBareUtils.convertIp(localIp),
-                NetBareUtils.convertPort(localPort), NetBareUtils.convertIp(remoteIp),
-                NetBareUtils.convertPort(remotePort));
+                NetBareUtils.convertPort(localPort), NetBareUtils.convertIp(originalIp),
+                NetBareUtils.convertPort(originalPort));
         NetBareLog.v("udp: %s, size: %d", udpHeader.toString(), udpDataSize);
 
-        Session session = mSessionProvider.ensureQuery(Protocol.UDP, localPort, remotePort, remoteIp);
+        Session session = mSessionProvider.ensureQuery(Protocol.UDP, localPort, TARGET_FORWARD_PORT, TARGET_FORWARD_IP);
         session.packetIndex++;
 
         try {
-            mProxyServer.send(udpHeader, output);
+            mProxyServer.send(udpHeader, output, originalIp, originalPort);
             session.sendDataSize += udpDataSize;
         } catch (IOException e) {
             NetBareLog.e(e.getMessage());

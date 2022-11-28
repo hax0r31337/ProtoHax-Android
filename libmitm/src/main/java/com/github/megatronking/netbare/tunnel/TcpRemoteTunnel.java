@@ -49,7 +49,7 @@ public class TcpRemoteTunnel extends TcpTunnel {
     public void connect(InetSocketAddress address) throws IOException {
         if (mVpnService.protect(socket())) {
             super.connect(address);
-            mLog.i("Connect to remote server %s", address);
+//            mLog.i("Connect to remote server %s", address);
         } else {
             throw new IOException("[TCP]Can not protect remote tunnel socket.");
         }
@@ -57,26 +57,26 @@ public class TcpRemoteTunnel extends TcpTunnel {
 
     @Override
     public void onConnected() throws IOException {
-        mLog.i("Remote tunnel is connected.");
+//        mLog.i("Remote tunnel is connected.");
         super.onConnected();
     }
 
     @Override
     public int read(ByteBuffer buffer) throws IOException {
         int len = super.read(buffer);
-        mLog.i("Read from remote: " + len);
+//        mLog.i("Read from remote: " + len);
         return len;
     }
 
     @Override
     public void write(ByteBuffer buffer) throws IOException {
-        mLog.i("Write to remote: " + buffer.remaining());
+//        mLog.i("Write to remote: " + buffer.remaining());
         super.write(buffer);
     }
 
     @Override
     public void close() {
-        mLog.i("Remote tunnel is closed.");
+//        mLog.i("Remote tunnel is closed.");
         super.close();
     }
 

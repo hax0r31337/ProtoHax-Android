@@ -65,10 +65,20 @@ public class UdpVATunnel extends VirtualGatewayTunnel implements NioCallback,
 
     private UdpHeader mTemplateHeader;
 
+    private final int originalIp;
+    private final short originalPort;
+
     public UdpVATunnel(Session session, NioTunnel tunnel, OutputStream output, int mtu) {
+        this(session, tunnel, output, mtu, -1, (short) -1);
+    }
+
+    public UdpVATunnel(Session session, NioTunnel tunnel, OutputStream output, int mtu, int originalIp, short originalPort) {
         this.mRemoteTunnel = tunnel;
         this.mOutput = output;
         this.mMtu = mtu;
+
+        this.originalIp = originalIp;
+        this.originalPort = originalPort;
 
         this.mSession = session;
         this.mGateway = new NetBareVirtualGateway(session,
@@ -162,9 +172,15 @@ public class UdpVATunnel extends VirtualGatewayTunnel implements NioCallback,
 
         IpHeader ipHeader = new IpHeader(packet, 0);
         ipHeader.setTotalLength((short) packet.length);
+        if (originalIp != -1) {
+            ipHeader.setSourceIp(originalIp);
+        }
 
         UdpHeader udpHeader = new UdpHeader(ipHeader, packet, ipHeader.getHeaderLength());
         udpHeader.setTotalLength((short) (packet.length - ipHeader.getHeaderLength()));
+        if (originalPort != -1) {
+            udpHeader.setSourcePort(originalPort);
+        }
 
         ipHeader.updateChecksum();
         udpHeader.updateChecksum();

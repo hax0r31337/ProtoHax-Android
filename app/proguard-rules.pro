@@ -22,3 +22,4 @@
 
 #-keep class dev.sora.** { *; }
 #-keep class com.github.** { *; }
+#-keep class com.nukkitx.** { *; }

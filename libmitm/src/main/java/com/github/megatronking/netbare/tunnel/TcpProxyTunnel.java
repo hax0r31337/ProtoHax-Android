@@ -49,26 +49,26 @@ public class TcpProxyTunnel extends TcpTunnel {
 
     @Override
     public void onConnected() throws IOException {
-        mLog.i("Proxy tunnel is connected.");
+//        mLog.i("Proxy tunnel is connected.");
         super.onConnected();
     }
 
     @Override
     public int read(ByteBuffer buffer) throws IOException {
         int len = super.read(buffer);
-        mLog.i("Read from proxy: " + len);
+//        mLog.i("Read from proxy: " + len);
         return len;
     }
 
     @Override
     public void write(ByteBuffer buffer) throws IOException {
-        mLog.i("Write to proxy: " + buffer.remaining());
+//        mLog.i("Write to proxy: " + buffer.remaining());
         super.write(buffer);
     }
 
     @Override
     public void close() {
-        mLog.i("Proxy tunnel is closed.");
+//        mLog.i("Proxy tunnel is closed.");
         super.close();
     }
 

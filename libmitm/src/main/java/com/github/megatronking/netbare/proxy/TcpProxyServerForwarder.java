@@ -66,10 +66,10 @@ public final class TcpProxyServerForwarder implements ProxyServerForwarder {
         // TCP data size
         int tcpDataSize = ipHeader.getDataLength() - tcpHeader.getHeaderLength();
 
-        NetBareLog.v("ip: %s:%d -> %s:%d", NetBareUtils.convertIp(localIp),
-                NetBareUtils.convertPort(localPort), NetBareUtils.convertIp(remoteIp),
-                NetBareUtils.convertPort(remotePort));
-        NetBareLog.v("tcp: %s, size: %d", tcpHeader.toString(), tcpDataSize);
+//        NetBareLog.v("ip: %s:%d -> %s:%d", NetBareUtils.convertIp(localIp),
+//                NetBareUtils.convertPort(localPort), NetBareUtils.convertIp(remoteIp),
+//                NetBareUtils.convertPort(remotePort));
+//        NetBareLog.v("tcp: %s, size: %d", tcpHeader.toString(), tcpDataSize);
 
         // Tcp handshakes and proxy forward flow.
 

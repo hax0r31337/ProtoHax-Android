@@ -79,7 +79,7 @@ import java.util.Set;
         this.mPort = (short) mServerSocketChannel.socket().getLocalPort();
         this.mMtu = mtu;
 
-        NetBareLog.v("[TCP]proxy server: %s:%d", ip, NetBareUtils.convertPort(mPort));
+//        NetBareLog.v("[TCP]proxy server: %s:%d", ip, NetBareUtils.convertPort(mPort));
     }
 
     void setSessionProvider(SessionProvider sessionProvider) {
@@ -99,11 +99,11 @@ import java.util.Set;
 
     @Override
     public void run() {
-        NetBareLog.i("[TCP]Server starts running.");
+//        NetBareLog.i("[TCP]Server starts running.");
         super.run();
         NetBareUtils.closeQuietly(mSelector);
         NetBareUtils.closeQuietly(mServerSocketChannel);
-        NetBareLog.i("[TCP]Server stops running.");
+//        NetBareLog.i("[TCP]Server stops running.");
     }
 
     @Override
@@ -137,11 +137,6 @@ import java.util.Set;
                                 }
                             } catch (IOException e) {
                                 NioTunnel tunnel = callback.getTunnel();
-                                String ip = null;
-                                InetAddress address = ((Socket)tunnel.socket()).getInetAddress();
-                                if (address != null) {
-                                    ip = address.getHostAddress();
-                                }
                                 if (!tunnel.isClosed()) {
                                     NetBareLog.e(e.getMessage());
                                 }

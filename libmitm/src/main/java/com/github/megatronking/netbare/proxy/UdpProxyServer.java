@@ -90,6 +90,10 @@ import java.util.concurrent.ConcurrentHashMap;
     }
 
     void send(UdpHeader header, OutputStream output) throws IOException {
+        send(header, output, -1, (short) -1);
+    }
+
+    void send(UdpHeader header, OutputStream output, int originalIp, short originalPort) throws IOException {
         short localPort = header.getSourcePort();
         UdpVATunnel tunnel = mTunnels.get(localPort);
         try {
@@ -102,7 +106,7 @@ import java.util.concurrent.ConcurrentHashMap;
                 IpHeader ipHeader = header.getIpHeader();
                 NioTunnel remoteTunnel = new UdpRemoteTunnel(mVpnService, DatagramChannel.open(),
                         mSelector, NetBareUtils.convertIp(session.remoteIp), session.remotePort);
-                tunnel = new UdpVATunnel(session, remoteTunnel, output, mMtu);
+                tunnel = new UdpVATunnel(session, remoteTunnel, output, mMtu, originalIp, originalPort);
                 tunnel.connect(new InetSocketAddress(NetBareUtils.convertIp(ipHeader.getDestinationIp()),
                         NetBareUtils.convertPort(header.getDestinationPort())));
                 mTunnels.put(header.getSourcePort(), tunnel);
