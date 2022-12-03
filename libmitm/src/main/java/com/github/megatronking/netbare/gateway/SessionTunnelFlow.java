@@ -53,16 +53,6 @@ public abstract class SessionTunnelFlow implements TunnelFlow {
     }
 
     /**
-     * Returns the identifier of this session's process uid. This value is not guaranteed, it is up
-     * to {@link NetBareConfig#dumpUid}. And if dumps the uid failed, it will return 0.
-     *
-     * @return The session's process uid.
-     */
-    public int uid() {
-        return mSession.uid;
-    }
-
-    /**
      * Returns the remote server's IPV4 address.
      *
      * @return The remote server's IPV4 address.

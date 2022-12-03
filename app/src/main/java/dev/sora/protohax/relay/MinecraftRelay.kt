@@ -1,5 +1,7 @@
 package dev.sora.protohax.relay
 
+import android.util.Log
+import com.github.megatronking.netbare.NetBareUtils
 import com.github.megatronking.netbare.proxy.UdpProxyServerForwarder
 import com.nukkitx.network.raknet.RakNetServerSession
 import com.nukkitx.protocol.bedrock.BedrockPacket
@@ -29,8 +31,17 @@ object MinecraftRelay {
             override fun onQuery(address: InetSocketAddress) =
                 "MCPE;RakNet Relay;557;1.19.20;0;10;${relay.server.guid};Bedrock level;Survival;1;19132;19132;".toByteArray()
 
-            override fun onSessionCreation(serverSession: RakNetServerSession) =
-                InetSocketAddress("192.168.2.103", 19132)
+            override fun onSessionCreation(serverSession: RakNetServerSession): InetSocketAddress {
+                val originalAddr = UdpProxyServerForwarder.lastForwardAddr
+                return InetSocketAddress(NetBareUtils.convertIp(originalAddr.first), originalAddr.second.toInt()).also {
+                    Log.i("ProtoHax", "SessionCreation: $it")
+                }
+            }
+
+            override fun onPrepareClientConnection(address: InetSocketAddress) {
+                Log.i("ProtoHax", "PrepareClientConnection $address")
+                UdpProxyServerForwarder.addWhitelist(NetBareUtils.convertIp("10.1.10.1"), address.port.toShort())
+            }
 
             override fun onSession(session: RakNetRelaySession) {
                 var entityId = 0L
@@ -70,6 +81,7 @@ object MinecraftRelay {
     }
 
     fun close() {
+        UdpProxyServerForwarder.cleanupCaches()
         relay?.server?.close(true)
     }
 }

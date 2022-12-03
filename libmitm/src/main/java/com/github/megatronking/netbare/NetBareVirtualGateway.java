@@ -65,13 +65,13 @@ public final class NetBareVirtualGateway extends VirtualGateway {
         mSession = session;
         mLog = new NetBareXLog(session);
 
-        if (session.uid == Process.myUid()) {
-            // Exclude the app itself.
-            mLog.w("Exclude an app-self connection!");
-            mPolicy = POLICY_DISALLOWED;
-        } else {
+//        if (session.uid == Process.myUid()) {
+//            // Exclude the app itself.
+//            mLog.w("Exclude an app-self connection!");
+//            mPolicy = POLICY_DISALLOWED;
+//        } else {
             mPolicy = POLICY_INDETERMINATE;
-        }
+//        }
     }
 
     @Override

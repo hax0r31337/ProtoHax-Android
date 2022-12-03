@@ -187,7 +187,7 @@ public class UdpVATunnel extends VirtualGatewayTunnel implements NioCallback,
 
         mOutput.write(packet, 0, packet.length);
 
-        mSession.receiveDataSize += packet.length;
+//        mSession.receiveDataSize += packet.length;
     }
 
     public NioTunnel getRemoteChannel() {

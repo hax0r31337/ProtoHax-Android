@@ -89,7 +89,7 @@ public final class TcpProxyServerForwarder implements ProxyServerForwarder {
         if (localPort != mProxyServer.getPort()) {
             // Client requests to server
             Session session = mSessionProvider.ensureQuery(Protocol.TCP, localPort, remotePort, remoteIp);
-            session.packetIndex++;
+//            session.packetIndex++;
 
             // Forward client request to proxy server.
             ipHeader.setSourceIp(remoteIp);
@@ -99,7 +99,7 @@ public final class TcpProxyServerForwarder implements ProxyServerForwarder {
             ipHeader.updateChecksum();
             tcpHeader.updateChecksum();
 
-            session.sendDataSize += tcpDataSize;
+//            session.sendDataSize += tcpDataSize;
         } else {
             // Proxy server responses forward client request.
             Session session = mSessionProvider.query(remotePort);
@@ -115,7 +115,7 @@ public final class TcpProxyServerForwarder implements ProxyServerForwarder {
             ipHeader.updateChecksum();
             tcpHeader.updateChecksum();
 
-            session.receiveDataSize += tcpDataSize;
+//            session.receiveDataSize += tcpDataSize;
         }
 
         try {

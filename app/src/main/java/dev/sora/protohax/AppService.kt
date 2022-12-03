@@ -68,12 +68,12 @@ class AppService : NetBareService() {
         return builder.build()
     }
 
-    override fun startNetBare() {
+    override fun onServiceStart() {
         MinecraftRelay.listen()
         popupWindow()
     }
 
-    override fun stopNetBare() {
+    override fun onServiceStop() {
         layoutView?.let { windowManager.removeView(it) }
         layoutView1?.let { windowManager.removeView(it) }
         popupWindow.destroy(windowManager)

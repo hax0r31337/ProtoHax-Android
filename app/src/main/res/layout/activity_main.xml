@@ -62,6 +62,7 @@
             android:layout_gravity="bottom|end"
             android:layout_marginEnd="30dp"
             android:layout_marginBottom="30dp"
+            app:tint="@android:color/white"
             app:srcCompat="@drawable/notification_icon"
             />
 

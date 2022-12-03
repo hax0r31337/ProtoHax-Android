@@ -16,11 +16,11 @@
 package com.github.megatronking.netbare.proxy;
 
 import android.net.VpnService;
+import android.util.Log;
+import android.util.Pair;
 
-import com.github.megatronking.netbare.NetBare;
 import com.github.megatronking.netbare.NetBareLog;
 import com.github.megatronking.netbare.NetBareUtils;
-import com.github.megatronking.netbare.ip.IpAddress;
 import com.github.megatronking.netbare.ip.IpHeader;
 import com.github.megatronking.netbare.ip.Protocol;
 import com.github.megatronking.netbare.ip.UdpHeader;
@@ -30,6 +30,9 @@ import com.github.megatronking.netbare.net.SessionProvider;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.InetSocketAddress;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
 
 /**
  * Unlike TCP proxy server, UDP doesn't need handshake, we can forward packets to it directly.
@@ -39,13 +42,28 @@ import java.net.InetSocketAddress;
  */
 public final class UdpProxyServerForwarder implements ProxyServerForwarder {
 
-    private static final int TARGET_FORWARD_IP = NetBareUtils.convertIp("127.0.0.1");
+    private static final int TARGET_FORWARD_IP = NetBareUtils.convertIp("10.1.10.1");
     public static final short TARGET_FORWARD_PORT = 19132;
 
-    public static InetSocketAddress lastForwardAddr;
+    public static Pair<Integer, Short> lastForwardAddr;
 
     private final SessionProvider mSessionProvider;
     private final UdpProxyServer mProxyServer;
+
+    private static final Map<Integer, Short> whitelistMap = new HashMap<>();
+
+    public static void addWhitelist(int ip, short port) {
+        whitelistMap.put(ip, port);
+    }
+
+    public static boolean isWhitelisted(int ip, short port) {
+        return whitelistMap.containsKey(ip) && Objects.equals(whitelistMap.get(ip), port);
+    }
+
+    public static void cleanupCaches() {
+        whitelistMap.clear();
+        lastForwardAddr = null;
+    }
 
     public UdpProxyServerForwarder(VpnService vpnService, int mtu)
             throws IOException {
@@ -71,10 +89,13 @@ public final class UdpProxyServerForwarder implements ProxyServerForwarder {
         // Dest IP & Port
         int originalIp = ipHeader.getDestinationIp();
         short originalPort = udpHeader.getDestinationPort();
-        ipHeader.setDestinationIp(TARGET_FORWARD_IP);
-        udpHeader.setDestinationPort(TARGET_FORWARD_PORT);
-
-        lastForwardAddr = new InetSocketAddress(NetBareUtils.convertIp(originalIp), originalPort);
+        if (!isWhitelisted(localIp, localPort)) {
+            ipHeader.setDestinationIp(TARGET_FORWARD_IP);
+            udpHeader.setDestinationPort(TARGET_FORWARD_PORT);
+            lastForwardAddr = new Pair<>(originalIp, originalPort);
+        } else {
+            NetBareLog.v("WHITELIST BYPASS");
+        }
 
         // UDP data size
         int udpDataSize = ipHeader.getDataLength() - udpHeader.getHeaderLength();
@@ -85,11 +106,11 @@ public final class UdpProxyServerForwarder implements ProxyServerForwarder {
         NetBareLog.v("udp: %s, size: %d", udpHeader.toString(), udpDataSize);
 
         Session session = mSessionProvider.ensureQuery(Protocol.UDP, localPort, TARGET_FORWARD_PORT, TARGET_FORWARD_IP);
-        session.packetIndex++;
+//        session.packetIndex++;
 
         try {
             mProxyServer.send(udpHeader, output, originalIp, originalPort);
-            session.sendDataSize += udpDataSize;
+//            session.sendDataSize += udpDataSize;
         } catch (IOException e) {
             NetBareLog.e(e.getMessage());
         }

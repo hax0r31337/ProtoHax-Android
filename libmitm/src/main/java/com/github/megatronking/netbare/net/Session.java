@@ -62,25 +62,25 @@ public final class Session {
      */
     public String host;
 
-    /**
-     * The process id that the session belongs to.
-     */
-    public int uid;
-
-    /**
-     * Packet counts.
-     */
-    public int packetIndex;
-
-    /**
-     * The total size of the packets that sends to remote server.
-     */
-    public int sendDataSize;
-
-    /**
-     * The total size of the packets that received from remote server.
-     */
-    public int receiveDataSize;
+//    /**
+//     * The process id that the session belongs to.
+//     */
+//    public int uid;
+//
+//    /**
+//     * Packet counts.
+//     */
+//    public int packetIndex;
+//
+//    /**
+//     * The total size of the packets that sends to remote server.
+//     */
+//    public int sendDataSize;
+//
+//    /**
+//     * The total size of the packets that received from remote server.
+//     */
+//    public int receiveDataSize;
 
     /* package */ Session(Protocol protocol, short localPort, short remotePort, int remoteIp) {
         this.protocol = protocol;
