@@ -95,7 +95,7 @@ public abstract class NetBareService extends VpnService {
         stopForeground(true);
     }
 
-    private void startNetBare() {
+    protected void startNetBare() {
         // Terminate previous service.
         stopNetBare();
 
@@ -112,7 +112,7 @@ public abstract class NetBareService extends VpnService {
         onServiceStart();
     }
 
-    private void stopNetBare() {
+    protected void stopNetBare() {
         if (mNetBareThread == null) {
             return;
         }

@@ -14,6 +14,7 @@ import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import com.github.megatronking.netbare.NetBare
 import com.github.megatronking.netbare.NetBareService
+import dev.sora.protohax.relay.MinecraftRelay
 import dev.sora.protohax.ui.RainbowTextView
 
 
@@ -67,7 +68,19 @@ class AppService : NetBareService() {
         return builder.build()
     }
 
-    override fun onServiceStart() {
+    override fun startNetBare() {
+        MinecraftRelay.listen()
+        popupWindow()
+    }
+
+    override fun stopNetBare() {
+        layoutView?.let { windowManager.removeView(it) }
+        layoutView1?.let { windowManager.removeView(it) }
+        popupWindow.destroy(windowManager)
+        MinecraftRelay.close()
+    }
+
+    private fun popupWindow() {
         val params = WindowManager.LayoutParams(
             WindowManager.LayoutParams.WRAP_CONTENT,
             WindowManager.LayoutParams.WRAP_CONTENT,
@@ -152,12 +165,6 @@ class AppService : NetBareService() {
         })
         this.layoutView1 = layout1
         windowManager.addView(layout1, params)
-    }
-
-    override fun onServiceStop() {
-        layoutView?.let { windowManager.removeView(it) }
-        layoutView1?.let { windowManager.removeView(it) }
-        popupWindow.destroy(windowManager)
     }
 
     companion object {

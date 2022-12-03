@@ -107,7 +107,7 @@ public final class NetBareVirtualGateway extends VirtualGateway {
         if (mRequestFinished) {
             return;
         }
-        mLog.i("Gateway request finished!");
+//        mLog.i("Gateway request finished!");
         mRequestFinished = true;
         if (mPolicy == POLICY_ALLOWED) {
             mGateway.onRequestFinished();
@@ -121,7 +121,7 @@ public final class NetBareVirtualGateway extends VirtualGateway {
         if (mResponseFinished) {
             return;
         }
-        mLog.i("Gateway response finished!");
+//        mLog.i("Gateway response finished!");
         mResponseFinished = true;
         if (mPolicy == POLICY_ALLOWED) {
             mGateway.onResponseFinished();

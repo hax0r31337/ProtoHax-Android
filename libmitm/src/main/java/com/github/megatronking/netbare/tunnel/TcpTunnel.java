@@ -44,8 +44,8 @@ public abstract class TcpTunnel extends NioTunnel<SocketChannel, Socket> {
 
     @Override
     public void connect(InetSocketAddress address) throws IOException {
-        NetBareLog.i("TCP connects to: %s:%s",
-                address.getAddress().getHostAddress(), address.getPort());
+//        NetBareLog.i("TCP connects to: %s:%s",
+//                address.getAddress().getHostAddress(), address.getPort());
         if (mSocketChannel.isBlocking()) {
             mSocketChannel.configureBlocking(false);
         }

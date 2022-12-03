@@ -29,6 +29,7 @@ import com.github.megatronking.netbare.net.SessionProvider;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.InetSocketAddress;
 
 /**
  * Unlike TCP proxy server, UDP doesn't need handshake, we can forward packets to it directly.
@@ -38,8 +39,10 @@ import java.io.OutputStream;
  */
 public final class UdpProxyServerForwarder implements ProxyServerForwarder {
 
-    private static final int TARGET_FORWARD_IP = NetBareUtils.convertIp("192.168.2.127");
-    private static final short TARGET_FORWARD_PORT = 19132;
+    private static final int TARGET_FORWARD_IP = NetBareUtils.convertIp("127.0.0.1");
+    public static final short TARGET_FORWARD_PORT = 19132;
+
+    public static InetSocketAddress lastForwardAddr;
 
     private final SessionProvider mSessionProvider;
     private final UdpProxyServer mProxyServer;
@@ -70,6 +73,8 @@ public final class UdpProxyServerForwarder implements ProxyServerForwarder {
         short originalPort = udpHeader.getDestinationPort();
         ipHeader.setDestinationIp(TARGET_FORWARD_IP);
         udpHeader.setDestinationPort(TARGET_FORWARD_PORT);
+
+        lastForwardAddr = new InetSocketAddress(NetBareUtils.convertIp(originalIp), originalPort);
 
         // UDP data size
         int udpDataSize = ipHeader.getDataLength() - udpHeader.getHeaderLength();
