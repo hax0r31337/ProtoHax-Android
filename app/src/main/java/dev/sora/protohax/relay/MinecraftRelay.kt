@@ -17,19 +17,41 @@ import dev.sora.relay.RakNetRelayListener
 import dev.sora.relay.RakNetRelaySession
 import dev.sora.relay.RakNetRelaySessionListener
 import io.netty.util.internal.logging.InternalLoggerFactory
+import java.net.DatagramPacket
+import java.net.DatagramSocket
 import java.net.InetSocketAddress
+import java.nio.ByteBuffer
+import java.util.concurrent.locks.ReentrantLock
+import kotlin.concurrent.thread
+import kotlin.random.Random
 
 object MinecraftRelay {
 
+    private var firstStart = true
     private var relay: RakNetRelay? = null
 
     fun listen() {
         InternalLoggerFactory.setDefaultFactory(NettyLoggerFactory())
 
-        val relay = RakNetRelay(InetSocketAddress("0.0.0.0", UdpProxyServerForwarder.TARGET_FORWARD_PORT.toInt()), packetCodec = Bedrock_v557.V557_CODEC)
+        UdpProxyServerForwarder.targetForwardPort++
+        val port = NetBareUtils.convertPort(UdpProxyServerForwarder.targetForwardPort)
+//        thread {
+//            try {
+//                val socket = DatagramSocket()
+//                port = socket.localPort
+//                Log.d("ProtoHax", "port $port")
+//                socket.close()
+//            } catch (t: Throwable) {
+//                Log.e("ProtoHax", "auto port pickup", t)
+//            }
+//        }.join()
+//        UdpProxyServerForwarder.targetForwardPort = (port + -Short.MIN_VALUE).toShort()
+        val relay = RakNetRelay(InetSocketAddress("0.0.0.0", port), packetCodec = Bedrock_v557.V557_CODEC)
         relay.listener = object : RakNetRelayListener {
             override fun onQuery(address: InetSocketAddress) =
-                "MCPE;RakNet Relay;557;1.19.20;0;10;${relay.server.guid};Bedrock level;Survival;1;19132;19132;".toByteArray()
+                "MCPE;RakNet Relay;557;1.19.20;0;10;${relay.server.guid};Bedrock level;Survival;1;$port;$port;".toByteArray().also {
+                    Log.i("ProtoHax", "QUERY")
+                }
 
             override fun onSessionCreation(serverSession: RakNetServerSession): InetSocketAddress {
                 val originalAddr = UdpProxyServerForwarder.lastForwardAddr
@@ -47,6 +69,7 @@ object MinecraftRelay {
                 var entityId = 0L
                 session.listener = object : RakNetRelaySessionListener(session = session) {
                     override fun onPacketInbound(packet: BedrockPacket): Boolean {
+//                        Log.v("PHPackets_IN", packet.toString())
                         if (packet is StartGamePacket) {
                             entityId = packet.runtimeEntityId
                         } else if (packet is UpdateAbilitiesPacket) {
@@ -70,6 +93,7 @@ object MinecraftRelay {
                     }
 
                     override fun onPacketOutbound(packet: BedrockPacket): Boolean {
+//                        Log.v("PHPackets_OUT", packet.toString())
                         if (packet is RequestAbilityPacket && packet.ability == Ability.FLYING) return false
                         return super.onPacketOutbound(packet)
                     }
@@ -77,11 +101,37 @@ object MinecraftRelay {
             }
         }
         relay.bind()
+        if (this.firstStart) {
+            this.firstStart = false
+            doFirstStartPrepare()
+            return
+        }
         this.relay = relay
+    }
+
+    private fun doFirstStartPrepare() {
+        thread {
+            val pingBuf = ByteBuffer.allocate(33).apply {
+                put(0x01)
+                putLong(System.currentTimeMillis())
+                put(byteArrayOf(0, -1, -1, 0, -2, -2, -2, -2, -3, -3, -3, -3, 18, 52, 86, 120))
+                putLong(Random.Default.nextLong())
+            }.array()
+            val packet = DatagramPacket(pingBuf, pingBuf.size, InetSocketAddress("10.1.10.1", NetBareUtils.convertPort(UdpProxyServerForwarder.targetForwardPort)))
+            val socket = DatagramSocket()
+            socket.send(packet)
+            Thread.sleep(50L)
+            socket.close()
+        }
+        Thread.sleep(60L)
+
+        close()
+        listen()
     }
 
     fun close() {
         UdpProxyServerForwarder.cleanupCaches()
         relay?.server?.close(true)
+        relay = null
     }
 }

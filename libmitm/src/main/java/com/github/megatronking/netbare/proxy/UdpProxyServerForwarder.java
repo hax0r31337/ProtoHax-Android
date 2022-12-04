@@ -16,7 +16,6 @@
 package com.github.megatronking.netbare.proxy;
 
 import android.net.VpnService;
-import android.util.Log;
 import android.util.Pair;
 
 import com.github.megatronking.netbare.NetBareLog;
@@ -29,7 +28,6 @@ import com.github.megatronking.netbare.net.SessionProvider;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.net.InetSocketAddress;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -43,7 +41,7 @@ import java.util.Objects;
 public final class UdpProxyServerForwarder implements ProxyServerForwarder {
 
     private static final int TARGET_FORWARD_IP = NetBareUtils.convertIp("10.1.10.1");
-    public static final short TARGET_FORWARD_PORT = 19132;
+    public static short targetForwardPort = 19132;
 
     public static Pair<Integer, Short> lastForwardAddr;
 
@@ -91,7 +89,7 @@ public final class UdpProxyServerForwarder implements ProxyServerForwarder {
         short originalPort = udpHeader.getDestinationPort();
         if (!isWhitelisted(localIp, localPort)) {
             ipHeader.setDestinationIp(TARGET_FORWARD_IP);
-            udpHeader.setDestinationPort(TARGET_FORWARD_PORT);
+            udpHeader.setDestinationPort(targetForwardPort);
             lastForwardAddr = new Pair<>(originalIp, originalPort);
         } else {
             NetBareLog.v("WHITELIST BYPASS");
@@ -105,7 +103,7 @@ public final class UdpProxyServerForwarder implements ProxyServerForwarder {
                 NetBareUtils.convertPort(originalPort));
         NetBareLog.v("udp: %s, size: %d", udpHeader.toString(), udpDataSize);
 
-        Session session = mSessionProvider.ensureQuery(Protocol.UDP, localPort, TARGET_FORWARD_PORT, TARGET_FORWARD_IP);
+        Session session = mSessionProvider.ensureQuery(Protocol.UDP, localPort, targetForwardPort, TARGET_FORWARD_IP);
 //        session.packetIndex++;
 
         try {
