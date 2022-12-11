@@ -6,16 +6,19 @@ import android.content.res.ColorStateList
 import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
+import android.widget.Button
 import android.widget.TextView
-import android.widget.Toast
 import com.github.megatronking.netbare.NetBare
 import com.github.megatronking.netbare.NetBareConfig
 import com.github.megatronking.netbare.NetBareListener
 import com.github.megatronking.netbare.ip.IpAddress
 import com.google.android.material.floatingactionbutton.FloatingActionButton
-import dev.sora.protohax.CacheManager.readString
-import dev.sora.protohax.CacheManager.readStringOrDefault
-import dev.sora.protohax.CacheManager.writeString
+import dev.sora.protohax.ContextUtils.readString
+import dev.sora.protohax.ContextUtils.readStringOrDefault
+import dev.sora.protohax.ContextUtils.toast
+import dev.sora.protohax.ContextUtils.writeString
+import dev.sora.protohax.activity.LogcatActivity
+import dev.sora.protohax.activity.MicrosoftLoginActivity
 
 
 class MainActivity : Activity(), NetBareListener {
@@ -31,17 +34,42 @@ class MainActivity : Activity(), NetBareListener {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val button = findViewById<FloatingActionButton>(R.id.floatingBtn)
+        val button = findViewById<FloatingActionButton>(R.id.floating_button)
         val input = findViewById<TextView>(R.id.name_edit_text)
         button.setOnClickListener {
             val targetPkgName = input.text.toString()
-            writeString(TARGET_PACKAGE_CACHE_KEY, targetPkgName)
+            writeString(KEY_TARGET_PACKAGE_CACHE, targetPkgName)
             runMitMProxy(targetPkgName)
         }
-        input.text = readStringOrDefault(TARGET_PACKAGE_CACHE_KEY, "com.mojang.minecraftpe")
+        input.text = readStringOrDefault(KEY_TARGET_PACKAGE_CACHE, "com.mojang.minecraftpe")
 
         NetBare.get().registerNetBareListener(this)
         updateConnStatus()
+        updateMicrosoftButton()
+        findViewById<Button>(R.id.button_show_logs).setOnClickListener {
+            val myIntent = Intent(this, LogcatActivity::class.java)
+            this.startActivity(myIntent)
+        }
+    }
+
+    private fun updateMicrosoftButton() {
+        val button1 = findViewById<Button>(R.id.button_microsoft_login)
+        button1.text = getString(if (readString(KEY_MICROSOFT_REFRESH_TOKEN).isNullOrEmpty()) {
+            R.string.microsoft_login
+        } else {
+            R.string.microsoft_logout
+        })
+        button1.setOnClickListener {
+            if (readString(KEY_MICROSOFT_REFRESH_TOKEN).isNullOrEmpty()) {
+                // login
+                val myIntent = Intent(this, MicrosoftLoginActivity::class.java)
+                this.startActivityForResult(myIntent, REQUEST_CODE_MICROSOFT_LOGIN_OK)
+            } else {
+                // logout
+                writeString(KEY_MICROSOFT_REFRESH_TOKEN, "")
+                updateMicrosoftButton()
+            }
+        }
     }
 
     override fun onDestroy() {
@@ -50,7 +78,7 @@ class MainActivity : Activity(), NetBareListener {
     }
 
     private fun updateConnStatus(status: Boolean = NetBare.get().isActive) {
-        val button = findViewById<FloatingActionButton>(R.id.floatingBtn)
+        val button = findViewById<FloatingActionButton>(R.id.floating_button)
         button.backgroundTintList = ColorStateList.valueOf(getColor(if (status) R.color.actionbtn_active else R.color.actionbtn_inactive))
 
         val text1 = findViewById<TextView>(R.id.bottomAppBarText)
@@ -72,7 +100,7 @@ class MainActivity : Activity(), NetBareListener {
     private fun runMitMProxy(targetPkgName: String) {
         try {
             if (!Settings.canDrawOverlays(this)) {
-                Toast.makeText(this, getString(R.string.request_overlay), Toast.LENGTH_LONG).show()
+                toast(R.string.request_overlay)
                 val myIntent = Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION)
                 this.startActivityForResult(myIntent, REQUEST_CODE_WITH_MITM_RECALL)
                 return
@@ -86,13 +114,13 @@ class MainActivity : Activity(), NetBareListener {
                 NetBare.get().start(configBuilder
                     .addAllowedApplication(targetPkgName)
                     .build())
-                Toast.makeText(this, getString(R.string.start_proxy_toast, targetPkgName), Toast.LENGTH_LONG).show()
+                toast(getString(R.string.start_proxy_toast, targetPkgName))
             } else {
                 NetBare.get().stop()
-                Toast.makeText(this, getString(R.string.stop_proxy_toast), Toast.LENGTH_LONG).show()
+                toast(R.string.stop_proxy_toast)
             }
         } catch (e: Throwable) {
-            Toast.makeText(this, e.toString(), Toast.LENGTH_LONG).show()
+            toast(e.toString())
             Log.e("ProtoHax", "mitm", e)
         }
     }
@@ -100,13 +128,18 @@ class MainActivity : Activity(), NetBareListener {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == REQUEST_CODE_WITH_MITM_RECALL
             || (resultCode == RESULT_OK && requestCode == REQUEST_CODE_WITH_MITM_RECALL_ONLY_OK)) {
-            runMitMProxy(readString(TARGET_PACKAGE_CACHE_KEY) ?: return)
+            runMitMProxy(readString(KEY_TARGET_PACKAGE_CACHE) ?: return)
+        } else if (requestCode == REQUEST_CODE_MICROSOFT_LOGIN_OK && resultCode == RESPONSE_CODE_MICROSOFT_LOGIN_OK) {
+            updateMicrosoftButton()
         }
     }
 
     companion object {
-        private const val TARGET_PACKAGE_CACHE_KEY = "TARGET_PACKAGE"
-        private const val REQUEST_CODE_WITH_MITM_RECALL = 1
+        private const val KEY_TARGET_PACKAGE_CACHE = "TARGET_PACKAGE"
+        const val KEY_MICROSOFT_REFRESH_TOKEN = "MICROSOFT_REFRESH_TOKEN"
+        private const val REQUEST_CODE_WITH_MITM_RECALL = 0
         private const val REQUEST_CODE_WITH_MITM_RECALL_ONLY_OK = 1
+        private const val REQUEST_CODE_MICROSOFT_LOGIN_OK = 2
+        const val RESPONSE_CODE_MICROSOFT_LOGIN_OK = 1
     }
 }

@@ -15,6 +15,7 @@
             android:id="@+id/topAppBar"
             android:layout_width="match_parent"
             android:layout_height="?attr/actionBarSize"
+            app:titleTextColor="#FFFFFF"
             app:title="@string/app_name"/>
 
     </com.google.android.material.appbar.AppBarLayout>
@@ -38,6 +39,27 @@
             tools:ignore="TouchTargetSizeCheck" />
     </com.google.android.material.textfield.TextInputLayout>
 
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_marginHorizontal="20dp">
+        <Button
+            android:id="@+id/button_microsoft_login"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:text="@string/microsoft_login"
+            android:layout_marginHorizontal="5dp"
+            style="?android:attr/buttonBarButtonStyle" />
+        <Button
+            android:id="@+id/button_show_logs"
+            android:layout_height="wrap_content"
+            android:layout_width="wrap_content"
+            android:layout_marginHorizontal="5dp"
+            android:text="@string/show_logs"
+            style="?android:attr/buttonBarButtonStyle" />
+    </LinearLayout>
+
     <androidx.coordinatorlayout.widget.CoordinatorLayout
     android:layout_width="match_parent"
     android:layout_height="match_parent">
@@ -55,7 +77,7 @@
         </com.google.android.material.bottomappbar.BottomAppBar>
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
-            android:id="@+id/floatingBtn"
+            android:id="@+id/floating_button"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:contentDescription="@string/connect_to_proxy"

@@ -10,11 +10,12 @@ import android.view.View
 import android.view.WindowManager
 import android.widget.ImageView
 import android.widget.LinearLayout
-import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import com.github.megatronking.netbare.NetBare
 import com.github.megatronking.netbare.NetBareService
+import dev.sora.protohax.ContextUtils.toast
 import dev.sora.protohax.relay.MinecraftRelay
+import dev.sora.protohax.relay.PopupWindow
 import dev.sora.protohax.ui.RainbowTextView
 
 
@@ -51,8 +52,8 @@ class AppService : NetBareService() {
         val builder = NotificationCompat.Builder(this, CHANNEL_ID)
 
         val seq = AntiModification.call
-        if (AntiModification.validateAppSignature(baseContext).let { !it.first || !it.second.startsWith("fuck") } || seq == AntiModification.call || seq + 1 == AntiModification.call) {
-            Toast.makeText(baseContext, "Internal error occurred, please contact the developer.", Toast.LENGTH_LONG).show()
+        if (AntiModification.validateAppSignature(this).let { !it.first || !it.second.startsWith("fuck") } || seq == AntiModification.call || seq + 1 == AntiModification.call) {
+            toast("Internal error occurred, please contact the developer.")
             throw NullPointerException("null")
         } else {
             builder

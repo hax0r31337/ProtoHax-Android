@@ -3,25 +3,27 @@ package dev.sora.protohax.relay
 import android.util.Log
 import com.github.megatronking.netbare.NetBareUtils
 import com.github.megatronking.netbare.proxy.UdpProxyServerForwarder
+import com.google.gson.JsonParser
 import com.nukkitx.network.raknet.RakNetServerSession
-import com.nukkitx.protocol.bedrock.BedrockPacket
-import com.nukkitx.protocol.bedrock.data.Ability
-import com.nukkitx.protocol.bedrock.data.AbilityLayer
-import com.nukkitx.protocol.bedrock.data.AttributeData
-import com.nukkitx.protocol.bedrock.data.PlayerPermission
-import com.nukkitx.protocol.bedrock.data.command.CommandPermission
-import com.nukkitx.protocol.bedrock.packet.*
-import com.nukkitx.protocol.bedrock.v557.Bedrock_v557
+import com.nukkitx.protocol.bedrock.v560.Bedrock_v560
+import dev.sora.protohax.App
+import dev.sora.protohax.ContextUtils.readStringOrDefault
+import dev.sora.protohax.ContextUtils.writeString
+import dev.sora.protohax.MainActivity
 import dev.sora.relay.RakNetRelay
 import dev.sora.relay.RakNetRelayListener
 import dev.sora.relay.RakNetRelaySession
 import dev.sora.relay.RakNetRelaySessionListener
+import dev.sora.relay.cheat.command.CommandManager
+import dev.sora.relay.cheat.module.ModuleManager
+import dev.sora.relay.game.GameSession
+import dev.sora.relay.session.RakNetRelaySessionListenerMicrosoft
+import dev.sora.relay.utils.HttpUtils
 import io.netty.util.internal.logging.InternalLoggerFactory
 import java.net.DatagramPacket
 import java.net.DatagramSocket
 import java.net.InetSocketAddress
 import java.nio.ByteBuffer
-import java.util.concurrent.locks.ReentrantLock
 import kotlin.concurrent.thread
 import kotlin.random.Random
 
@@ -30,28 +32,28 @@ object MinecraftRelay {
     private var firstStart = true
     private var relay: RakNetRelay? = null
 
+    private val session = GameSession()
+
+    init {
+        val moduleManager = ModuleManager(session)
+        moduleManager.init()
+
+        val commandManager = CommandManager(session)
+        commandManager.init(moduleManager)
+
+        session.eventManager.registerListener(commandManager)
+    }
+
     fun listen() {
         InternalLoggerFactory.setDefaultFactory(NettyLoggerFactory())
 
         UdpProxyServerForwarder.targetForwardPort++
         val port = NetBareUtils.convertPort(UdpProxyServerForwarder.targetForwardPort)
-//        thread {
-//            try {
-//                val socket = DatagramSocket()
-//                port = socket.localPort
-//                Log.d("ProtoHax", "port $port")
-//                socket.close()
-//            } catch (t: Throwable) {
-//                Log.e("ProtoHax", "auto port pickup", t)
-//            }
-//        }.join()
-//        UdpProxyServerForwarder.targetForwardPort = (port + -Short.MIN_VALUE).toShort()
-        val relay = RakNetRelay(InetSocketAddress("0.0.0.0", port), packetCodec = Bedrock_v557.V557_CODEC)
+        val codec = Bedrock_v560.V560_CODEC
+        val relay = RakNetRelay(InetSocketAddress("0.0.0.0", port), packetCodec = codec)
         relay.listener = object : RakNetRelayListener {
             override fun onQuery(address: InetSocketAddress) =
-                "MCPE;RakNet Relay;557;1.19.20;0;10;${relay.server.guid};Bedrock level;Survival;1;$port;$port;".toByteArray().also {
-                    Log.i("ProtoHax", "QUERY")
-                }
+                "MCPE;RakNet Relay;${codec.protocolVersion};${codec.minecraftVersion};0;10;${relay.server.guid};Bedrock level;Survival;1;$port;$port;".toByteArray()
 
             override fun onSessionCreation(serverSession: RakNetServerSession): InetSocketAddress {
                 val originalAddr = UdpProxyServerForwarder.lastForwardAddr
@@ -60,43 +62,19 @@ object MinecraftRelay {
                 }
             }
 
-            override fun onPrepareClientConnection(address: InetSocketAddress) {
+            override fun onPrepareClientConnection(address: InetSocketAddress): RakNetRelaySessionListener {
                 Log.i("ProtoHax", "PrepareClientConnection $address")
                 UdpProxyServerForwarder.addWhitelist(NetBareUtils.convertIp("10.1.10.1"), address.port.toShort())
+                return RakNetRelaySessionListener()
             }
 
             override fun onSession(session: RakNetRelaySession) {
-                var entityId = 0L
-                session.listener = object : RakNetRelaySessionListener(session = session) {
-                    override fun onPacketInbound(packet: BedrockPacket): Boolean {
-//                        Log.v("PHPackets_IN", packet.toString())
-                        if (packet is StartGamePacket) {
-                            entityId = packet.runtimeEntityId
-                        } else if (packet is UpdateAbilitiesPacket) {
-                            session.inboundPacket(UpdateAbilitiesPacket().apply {
-                                uniqueEntityId = entityId
-                                playerPermission = PlayerPermission.OPERATOR
-                                commandPermission = CommandPermission.OPERATOR
-                                abilityLayers.add(AbilityLayer().apply {
-                                    layerType = AbilityLayer.Type.BASE
-                                    abilitiesSet.addAll(Ability.values())
-                                    abilityValues.addAll(arrayOf(Ability.BUILD, Ability.MINE, Ability.DOORS_AND_SWITCHES, Ability.OPEN_CONTAINERS, Ability.ATTACK_PLAYERS, Ability.ATTACK_MOBS, Ability.OPERATOR_COMMANDS, Ability.MAY_FLY, Ability.FLY_SPEED, Ability.WALK_SPEED))
-                                    walkSpeed = 0.1f
-                                    flySpeed = 0.25f
-                                })
-                            })
-                            return false
-                        } else if (packet is UpdateAttributesPacket) {
-                            packet.attributes.add(AttributeData("minecraft:movement", 0.0f, Float.MAX_VALUE, 0.5f, 0.1f))
-                        }
-                        return super.onPacketInbound(packet)
-                    }
-
-                    override fun onPacketOutbound(packet: BedrockPacket): Boolean {
-//                        Log.v("PHPackets_OUT", packet.toString())
-                        if (packet is RequestAbilityPacket && packet.ability == Ability.FLYING) return false
-                        return super.onPacketOutbound(packet)
-                    }
+                session.listener.childListener.add(this@MinecraftRelay.session)
+                val token = App.app.readStringOrDefault(MainActivity.KEY_MICROSOFT_REFRESH_TOKEN, "")
+                if (token.isNotEmpty()) {
+                    val tokens = getMSAccessToken(token)
+                    App.app.writeString(MainActivity.KEY_MICROSOFT_REFRESH_TOKEN, tokens.second)
+                    session.listener.childListener.add(RakNetRelaySessionListenerMicrosoft(tokens.first, session))
                 }
             }
         }
@@ -107,6 +85,18 @@ object MinecraftRelay {
             return
         }
         this.relay = relay
+    }
+
+    /**
+     * refreshes token
+     * @return Pair(accessToken, newRefreshToken)
+     */
+    private fun getMSAccessToken(refreshToken: String): Pair<String, String> {
+        val body = JsonParser.parseReader(
+            HttpUtils.make("https://login.live.com/oauth20_token.srf", "POST",
+                "client_id=00000000441cc96b&scope=service::user.auth.xboxlive.com::MBI_SSL&grant_type=refresh_token&redirect_uri=https://login.live.com/oauth20_desktop.srf&refresh_token=${refreshToken}",
+                mapOf("Content-Type" to "application/x-www-form-urlencoded")).inputStream.reader(Charsets.UTF_8)).asJsonObject
+        return body.get("access_token").asString to body.get("refresh_token").asString
     }
 
     private fun doFirstStartPrepare() {

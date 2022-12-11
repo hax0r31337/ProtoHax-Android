@@ -7,7 +7,7 @@ import io.netty.util.internal.logging.AbstractInternalLogger;
 
 public class NettyLogger extends AbstractInternalLogger {
 
-    private static final String TAG = "PHNetty";
+    private static final String TAG = "ProtoHax";
 
     protected NettyLogger(String name) {
         super(name);

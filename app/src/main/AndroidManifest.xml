@@ -18,7 +18,7 @@
         android:theme="@style/Theme.ProtoHax"
         tools:targetApi="31">
         <activity
-            android:name=".MainActivity"
+            android:name="dev.sora.protohax.MainActivity"
             android:exported="true"
             android:theme="@style/Theme.ProtoHax">
             <intent-filter>
@@ -26,14 +26,21 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-
-            <meta-data
-                android:name="android.app.lib_name"
-                android:value="" />
         </activity>
+        <activity
+            android:name="dev.sora.protohax.activity.MicrosoftLoginActivity"
+            android:exported="false"
+            android:theme="@style/Theme.ProtoHax">
+        </activity>
+        <activity
+            android:name="dev.sora.protohax.activity.LogcatActivity"
+            android:exported="false"
+            android:theme="@style/Theme.ProtoHax">
+        </activity>
+
         <service android:name="dev.sora.protohax.AppService"
             android:permission="android.permission.BIND_VPN_SERVICE"
-            android:exported="true">
+            android:exported="false">
             <intent-filter>
                 <action android:name="android.net.VpnService" />
                 <action android:name="dev.sora.libmitm.vpn.start"/>

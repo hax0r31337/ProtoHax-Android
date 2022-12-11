@@ -9,4 +9,11 @@
     <string name="proxy_notification">%s is processing packets for %s</string>
     <string name="request_overlay">We need overlay permission in order to display GUIs that you can interact in game</string>
     <string name="close_overlay_menu">Close</string>
+    <string name="microsoft_login">Microsoft Login</string>
+    <string name="microsoft_logout">Logout Microsoft</string>
+    <string name="show_logs">Show Logs</string>
+    <string name="logcat_title">Logs</string>
+    <string name="logcat_clear">Clear Logs</string>
+    <string name="logcat_copy">Copy Logs</string>
+    <string name="logcat_copied">Logs has beed copied to clipboard</string>
 </resources>
