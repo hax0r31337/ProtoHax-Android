@@ -8,4 +8,11 @@
     <string name="request_overlay">此應用程式需要浮動視窗權限以顯示設置GUI</string>
     <string name="close_overlay_menu">退出</string>
     <string name="connect_to_proxy">連結至MITM代理</string>
+    <string name="microsoft_login">微軟登入</string>
+    <string name="microsoft_logout">微軟登出</string>
+    <string name="show_logs">顯示紀錄檔</string>
+    <string name="logcat_title">紀錄檔</string>
+    <string name="logcat_clear">清除紀錄檔</string>
+    <string name="logcat_copy">複製紀錄檔</string>
+    <string name="logcat_copied">紀錄檔已經被複製到剪貼板</string>
 </resources>
