@@ -55,11 +55,15 @@ object MinecraftRelay {
 
             override fun onSessionCreation(serverSession: RakNetServerSession): InetSocketAddress {
                 Log.i("ProtoHax", "SessionCreation ${serverSession.address.port}")
-//                val originalAddr = UdpProxyServerForwarder.lastForwardAddr
-//                return InetSocketAddress(NetBareUtils.convertIp(originalAddr.first), originalAddr.second.toInt()).also {
-//                    Log.i("ProtoHax", "SessionCreation: $it")
-//                }
-                return InetSocketAddress("192.168.2.103", 19132)
+                try {
+                    val server = NetBareService.getInstance()!!.thread!!.udpProxyServer
+                    val pair = server.getOriginIP(serverSession.address.port)
+                    Log.i("ProtoHax", "EstablishConnection ${pair.first}:${pair.second}")
+                    return InetSocketAddress(pair.first, pair.second)
+                } catch (t: Throwable) {
+                    Log.e("ProtoHax", "estab", t)
+                    throw t
+                }
             }
 
             override fun onPrepareClientConnection(clientSocket: DatagramChannel): RakNetRelaySessionListener {

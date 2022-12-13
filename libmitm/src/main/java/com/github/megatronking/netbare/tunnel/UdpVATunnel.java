@@ -136,6 +136,10 @@ public class UdpVATunnel extends VirtualGatewayTunnel implements NioCallback,
         return null;
     }
 
+    public NioTunnel getRemoteTunnel() {
+        return mRemoteTunnel;
+    }
+
     @Override
     public void close() {
         NetBareUtils.closeQuietly(mRemoteTunnel);

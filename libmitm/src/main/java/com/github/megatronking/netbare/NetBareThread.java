@@ -25,6 +25,7 @@ import com.github.megatronking.netbare.ip.Protocol;
 import com.github.megatronking.netbare.proxy.IcmpProxyServerForwarder;
 import com.github.megatronking.netbare.proxy.ProxyServerForwarder;
 import com.github.megatronking.netbare.proxy.TcpProxyServerForwarder;
+import com.github.megatronking.netbare.proxy.UdpProxyServer;
 import com.github.megatronking.netbare.proxy.UdpProxyServerForwarder;
 
 import java.io.FileDescriptor;
@@ -44,7 +45,7 @@ import java.util.Map;
  * @author Megatron King
  * @since 2018-10-08 19:38
  */
-/* package */ final class NetBareThread extends Thread {
+public final class NetBareThread extends Thread {
 
 	private final NetBareConfig mConfig;
 	private final VpnService mVpnService;
@@ -153,6 +154,10 @@ import java.util.Map;
 		}
 	}
 
+	public UdpProxyServer getUdpProxyServer() {
+		return packetsTransfer.getUdpProxyServer();
+	}
+
 	private static class PacketsTransfer {
 
 		private final Map<Protocol, ProxyServerForwarder> mForwarderRegistry;
@@ -205,6 +210,11 @@ import java.util.Map;
 			} else {
 				NetBareLog.w("Unknown ip protocol: " + ipHeader.getProtocol());
 			}
+		}
+
+		public UdpProxyServer getUdpProxyServer() {
+			UdpProxyServerForwarder forwarder = (UdpProxyServerForwarder) mForwarderRegistry.get(Protocol.UDP);
+			return forwarder.getProxyServer();
 		}
 
 	}

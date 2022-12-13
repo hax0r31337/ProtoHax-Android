@@ -75,6 +75,10 @@ public abstract class NetBareService extends VpnService {
         return instance;
     }
 
+    public NetBareThread getThread() {
+        return mNetBareThread;
+    }
+
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent == null) {

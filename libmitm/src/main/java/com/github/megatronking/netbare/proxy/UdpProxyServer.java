@@ -17,6 +17,7 @@ package com.github.megatronking.netbare.proxy;
 
 import android.net.VpnService;
 import android.os.SystemClock;
+import android.util.Pair;
 
 import com.github.megatronking.netbare.NetBareLog;
 import com.github.megatronking.netbare.NetBareUtils;
@@ -53,16 +54,16 @@ import java.util.concurrent.ConcurrentHashMap;
  * @author Megatron King
  * @since 2018-10-11 17:35
  */
-/* package */ class UdpProxyServer extends BaseProxyServer {
+public final class UdpProxyServer extends BaseProxyServer {
 
     private static final int SELECTOR_WAIT_TIME = 50;
 
     private final VpnService mVpnService;
 
-    private int mMtu;
+    private final int mMtu;
 
     private final Selector mSelector;
-    private final Map<Short, UdpVATunnel> mTunnels;
+    private final Map<Short, UdpVATunnel> mTunnels = new ConcurrentHashMap<>();
 
     private SessionProvider mSessionProvider;
 
@@ -73,7 +74,7 @@ import java.util.concurrent.ConcurrentHashMap;
         this.mMtu = mtu;
 
         this.mSelector = Selector.open();
-        this.mTunnels = new ConcurrentHashMap<>();
+//        this.mTunnels = new ConcurrentHashMap<>();
     }
 
     @Override
@@ -94,7 +95,11 @@ import java.util.concurrent.ConcurrentHashMap;
         short localPort = header.getSourcePort();
         UdpVATunnel tunnel = mTunnels.get(localPort);
         try {
-            if (tunnel == null || (tunnel.getOriginalIp() != originalIp || tunnel.getOriginalPort() != originalPort)) {
+            if (tunnel != null && (tunnel.getOriginalIp() != originalIp || tunnel.getOriginalPort() != originalPort)) {
+                tunnel.close();
+                tunnel = null;
+            }
+            if (tunnel == null) {
                 Session session = mSessionProvider.query(localPort);
                 if (session == null) {
                     throw new IOException("No session saved with key: " + localPort);
@@ -179,4 +184,13 @@ import java.util.concurrent.ConcurrentHashMap;
         }
     }
 
+    public Pair<String, Integer> getOriginIP(int clientPort) {
+        for (UdpVATunnel tunnel : mTunnels.values()) {
+            if (((DatagramSocket)tunnel.getRemoteTunnel().socket()).getLocalPort() == clientPort) {
+                return new Pair<>(NetBareUtils.convertIp(tunnel.getOriginalIp()),
+                        NetBareUtils.convertPort(tunnel.getOriginalPort()));
+            }
+        }
+        return null;
+    }
 }

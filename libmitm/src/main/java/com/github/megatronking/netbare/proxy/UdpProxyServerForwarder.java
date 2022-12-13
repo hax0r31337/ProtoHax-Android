@@ -56,6 +56,10 @@ public final class UdpProxyServerForwarder implements ProxyServerForwarder {
         this.mProxyServer.setSessionProvider(mSessionProvider);
     }
 
+    public UdpProxyServer getProxyServer() {
+        return mProxyServer;
+    }
+
     @Override
     public void prepare() {
         this.mProxyServer.start();

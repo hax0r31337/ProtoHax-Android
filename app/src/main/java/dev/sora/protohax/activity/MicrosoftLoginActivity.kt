@@ -36,7 +36,7 @@ class MicrosoftLoginActivity : Activity() {
         setResult(0)
     }
 
-    fun setToLoadingPage(text: String) {
+    fun loadingPage(text: String) {
         val webview = findViewById<WebView>(R.id.webview)
         webview.loadData("<html><body>$text</body></html>",
             "text/html", "UTF-8");
@@ -47,8 +47,7 @@ class MicrosoftLoginActivity : Activity() {
         override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
             if (!request.url.toString().startsWith("https://login.live.com/oauth20_desktop.srf?", true)) {
                 Log.e("ProtoHax", "invalid url ${request.url}")
-                activity.finish()
-                return true
+                return false
             }
             val query = mutableMapOf<String, String>()
             (request.url.query ?: "").split("&").forEach {
@@ -64,7 +63,7 @@ class MicrosoftLoginActivity : Activity() {
             }
 
             // convert m.r3_bay token to refresh token
-            activity.setToLoadingPage("Wait a sec! We are still processing!")
+            activity.loadingPage("Still loading...")
             thread {
                 try {
                     val conn = HttpUtils.make("https://login.live.com/oauth20_token.srf", "POST",
