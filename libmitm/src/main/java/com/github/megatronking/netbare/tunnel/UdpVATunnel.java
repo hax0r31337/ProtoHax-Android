@@ -210,4 +210,11 @@ public class UdpVATunnel extends VirtualGatewayTunnel implements NioCallback,
         return templateUdp;
     }
 
+    public int getOriginalIp() {
+        return originalIp;
+    }
+
+    public short getOriginalPort() {
+        return originalPort;
+    }
 }

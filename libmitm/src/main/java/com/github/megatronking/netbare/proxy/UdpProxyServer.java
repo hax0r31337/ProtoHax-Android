@@ -33,6 +33,7 @@ import com.github.megatronking.netbare.tunnel.UdpVATunnel;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.net.DatagramSocket;
 import java.net.InetSocketAddress;
 import java.nio.channels.DatagramChannel;
 import java.nio.channels.SelectionKey;
@@ -89,23 +90,19 @@ import java.util.concurrent.ConcurrentHashMap;
         this.mSessionProvider = sessionProvider;
     }
 
-    void send(UdpHeader header, OutputStream output) throws IOException {
-        send(header, output, -1, (short) -1);
-    }
-
-    void send(UdpHeader header, OutputStream output, int originalIp, short originalPort) throws IOException {
+    void send(UdpHeader header, OutputStream output, int remoteIp, short remotePort, int originalIp, short originalPort, boolean needProtect) throws IOException {
         short localPort = header.getSourcePort();
         UdpVATunnel tunnel = mTunnels.get(localPort);
         try {
-            if (tunnel == null) {
+            if (tunnel == null || (tunnel.getOriginalIp() != originalIp || tunnel.getOriginalPort() != originalPort)) {
                 Session session = mSessionProvider.query(localPort);
                 if (session == null) {
                     throw new IOException("No session saved with key: " + localPort);
                 }
 
                 IpHeader ipHeader = header.getIpHeader();
-                NioTunnel remoteTunnel = new UdpRemoteTunnel(mVpnService, DatagramChannel.open(),
-                        mSelector, NetBareUtils.convertIp(session.remoteIp), session.remotePort);
+                NioTunnel<DatagramChannel, DatagramSocket> remoteTunnel = new UdpRemoteTunnel(mVpnService, DatagramChannel.open(),
+                        mSelector, NetBareUtils.convertIp(remoteIp), remotePort, needProtect, originalIp, originalPort);
                 tunnel = new UdpVATunnel(session, remoteTunnel, output, mMtu, originalIp, originalPort);
                 tunnel.connect(new InetSocketAddress(NetBareUtils.convertIp(ipHeader.getDestinationIp()),
                         NetBareUtils.convertPort(header.getDestinationPort())));
@@ -115,6 +112,7 @@ import java.util.concurrent.ConcurrentHashMap;
         } catch (IOException e) {
             mTunnels.remove(localPort);
             NetBareUtils.closeQuietly(tunnel);
+            NetBareLog.wtf(e);
             throw e;
         }
     }

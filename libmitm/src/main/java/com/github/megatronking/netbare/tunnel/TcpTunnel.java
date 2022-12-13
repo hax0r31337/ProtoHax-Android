@@ -15,8 +15,6 @@
  */
 package com.github.megatronking.netbare.tunnel;
 
-import com.github.megatronking.netbare.NetBareLog;
-
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;

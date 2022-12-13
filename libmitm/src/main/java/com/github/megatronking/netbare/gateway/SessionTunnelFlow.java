@@ -15,7 +15,6 @@
  */
 package com.github.megatronking.netbare.gateway;
 
-import com.github.megatronking.netbare.NetBareConfig;
 import com.github.megatronking.netbare.NetBareUtils;
 import com.github.megatronking.netbare.ip.Protocol;
 import com.github.megatronking.netbare.net.Session;

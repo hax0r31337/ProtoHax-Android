@@ -16,7 +16,9 @@
 package com.github.megatronking.netbare.tunnel;
 
 import android.net.VpnService;
+import android.util.Log;
 
+import com.github.megatronking.netbare.NetBareUtils;
 import com.github.megatronking.netbare.NetBareXLog;
 import com.github.megatronking.netbare.ip.Protocol;
 
@@ -35,22 +37,38 @@ import java.nio.channels.Selector;
 public class UdpRemoteTunnel extends UdpTunnel {
 
     private final VpnService mVpnService;
-    private NetBareXLog mLog;
+    private final NetBareXLog mLog;
+    private final boolean needProtect;
+
+    private final int originalIp;
+    private final short originalPort;
 
     public UdpRemoteTunnel(VpnService vpnService, DatagramChannel channel, Selector selector,
-                           String remoteIp, short remotePort) {
+                           String remoteIp, short remotePort, boolean needProtect, int originalIp, short originalPort) {
         super(channel, selector);
         this.mVpnService = vpnService;
+        this.needProtect = needProtect;
+
+        this.originalIp = originalIp;
+        this.originalPort = originalPort;
+
         this.mLog = new NetBareXLog(Protocol.UDP, remoteIp, remotePort);
     }
 
     @Override
     public void connect(InetSocketAddress address) throws IOException {
-        if (mVpnService.protect(socket())) {
+        if (!needProtect) {
+            socket();
             super.connect(address);
-            mLog.i("Connect to remote server %s", address);
+            Log.i("ProtoHax", socket().getLocalPort() + " " + NetBareUtils.convertIp(originalIp) + ":" + NetBareUtils.convertPort(originalPort));
+            mLog.i("Connect to remote server %s without protect", address);
         } else {
-            throw new IOException("[UDP]Can not protect remote tunnel socket.");
+            if (mVpnService.protect(socket())) {
+                super.connect(address);
+                mLog.i("Connect to remote server %s", address);
+            } else {
+                throw new IOException("[UDP]Can not protect remote tunnel socket.");
+            }
         }
     }
 

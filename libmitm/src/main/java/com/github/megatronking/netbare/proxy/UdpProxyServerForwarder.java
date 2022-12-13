@@ -23,14 +23,10 @@ import com.github.megatronking.netbare.NetBareUtils;
 import com.github.megatronking.netbare.ip.IpHeader;
 import com.github.megatronking.netbare.ip.Protocol;
 import com.github.megatronking.netbare.ip.UdpHeader;
-import com.github.megatronking.netbare.net.Session;
 import com.github.megatronking.netbare.net.SessionProvider;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Objects;
 
 /**
  * Unlike TCP proxy server, UDP doesn't need handshake, we can forward packets to it directly.
@@ -49,18 +45,7 @@ public final class UdpProxyServerForwarder implements ProxyServerForwarder {
     private final SessionProvider mSessionProvider;
     private final UdpProxyServer mProxyServer;
 
-    private static final Map<Integer, Short> whitelistMap = new HashMap<>();
-
-    public static void addWhitelist(int ip, short port) {
-        whitelistMap.put(ip, port);
-    }
-
-    public static boolean isWhitelisted(int ip, short port) {
-        return whitelistMap.containsKey(ip) && Objects.equals(whitelistMap.get(ip), port);
-    }
-
     public static void cleanupCaches() {
-        whitelistMap.clear();
         lastForwardAddr = null;
     }
 
@@ -88,28 +73,18 @@ public final class UdpProxyServerForwarder implements ProxyServerForwarder {
         // Dest IP & Port
         int originalIp = ipHeader.getDestinationIp();
         short originalPort = udpHeader.getDestinationPort();
-        if (!isWhitelisted(localIp, localPort)) {
-            ipHeader.setDestinationIp(TARGET_FORWARD_IP);
-            udpHeader.setDestinationPort(targetForwardPort);
-            lastForwardAddr = new Pair<>(originalIp, originalPort);
-        } else {
-            NetBareLog.v("WHITELIST BYPASS");
-        }
-
-        // UDP data size
-        int udpDataSize = ipHeader.getDataLength() - udpHeader.getHeaderLength();
+        ipHeader.setDestinationIp(TARGET_FORWARD_IP);
+        udpHeader.setDestinationPort(targetForwardPort);
+        lastForwardAddr = new Pair<>(originalIp, originalPort);
 
         NetBareLog.v("ip: %s:%d -> %s:%d", NetBareUtils.convertIp(localIp),
                 NetBareUtils.convertPort(localPort), NetBareUtils.convertIp(originalIp),
                 NetBareUtils.convertPort(originalPort));
-        NetBareLog.v("udp: %s, size: %d", udpHeader.toString(), udpDataSize);
 
-        Session session = mSessionProvider.ensureQuery(Protocol.UDP, localPort, targetForwardPort, TARGET_FORWARD_IP);
-//        session.packetIndex++;
+        mSessionProvider.ensureQuery(Protocol.UDP, localPort, originalPort, originalIp);
 
         try {
-            mProxyServer.send(udpHeader, output, originalIp, originalPort);
-//            session.sendDataSize += udpDataSize;
+            mProxyServer.send(udpHeader, output, TARGET_FORWARD_IP, targetForwardPort, originalIp, originalPort, false);
         } catch (IOException e) {
             NetBareLog.e(e.getMessage());
         }

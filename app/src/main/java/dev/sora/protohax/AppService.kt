@@ -16,14 +16,12 @@ import com.github.megatronking.netbare.NetBareService
 import dev.sora.protohax.ContextUtils.toast
 import dev.sora.protohax.relay.MinecraftRelay
 import dev.sora.protohax.relay.PopupWindow
-import dev.sora.protohax.ui.RainbowTextView
 
 
 class AppService : NetBareService() {
 
     private lateinit var windowManager: WindowManager
     private var layoutView: View? = null
-    private var layoutView1: View? = null
     private val popupWindow = PopupWindow()
 
     override fun onCreate() {
@@ -76,7 +74,6 @@ class AppService : NetBareService() {
 
     override fun onServiceStop() {
         layoutView?.let { windowManager.removeView(it) }
-        layoutView1?.let { windowManager.removeView(it) }
         popupWindow.destroy(windowManager)
         MinecraftRelay.close()
     }
@@ -144,28 +141,6 @@ class AppService : NetBareService() {
 
         this.layoutView = layout
         windowManager.addView(layout, params)
-
-        displayWatermark()
-    }
-
-    private fun displayWatermark() {
-        val params = WindowManager.LayoutParams(
-            WindowManager.LayoutParams.WRAP_CONTENT,
-            WindowManager.LayoutParams.WRAP_CONTENT,
-            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
-            PixelFormat.TRANSLUCENT
-        )
-        params.gravity = Gravity.BOTTOM or Gravity.END
-        params.x = 0   // Initial Position of window
-        params.y = 0 // Initial Position of window
-
-        val layout1 = LinearLayout(this)
-        layout1.addView(RainbowTextView(this).apply {
-            text = "${getString(R.string.app_name)} ${BuildConfig.VERSION_NAME} by Liulihaocai, DO NOT LEAK"
-        })
-        this.layoutView1 = layout1
-        windowManager.addView(layout1, params)
     }
 
     companion object {

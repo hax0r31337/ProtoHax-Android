@@ -19,7 +19,6 @@ import android.app.Activity;
 import android.app.Application;
 import android.content.Intent;
 import android.net.VpnService;
-import android.os.Build;
 
 import androidx.annotation.NonNull;
 

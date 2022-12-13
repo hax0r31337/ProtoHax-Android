@@ -157,7 +157,7 @@ import java.util.Map;
 
 		private final Map<Protocol, ProxyServerForwarder> mForwarderRegistry;
 
-		private byte[] buffer;
+		private final byte[] buffer;
 
 		private PacketsTransfer(VpnService service, NetBareConfig config) throws IOException {
 			int mtu = config.mtu;

@@ -15,8 +15,6 @@
  */
 package com.github.megatronking.netbare;
 
-import android.os.Process;
-
 import com.github.megatronking.netbare.gateway.Request;
 import com.github.megatronking.netbare.gateway.Response;
 import com.github.megatronking.netbare.gateway.VirtualGateway;

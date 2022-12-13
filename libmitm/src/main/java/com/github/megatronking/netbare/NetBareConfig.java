@@ -21,7 +21,6 @@ import androidx.annotation.NonNull;
 
 import com.github.megatronking.netbare.gateway.VirtualGatewayFactory;
 import com.github.megatronking.netbare.ip.IpAddress;
-import com.github.megatronking.netbare.net.Session;
 
 import java.net.InetAddress;
 import java.util.HashSet;

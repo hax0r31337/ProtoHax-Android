@@ -69,6 +69,12 @@ public abstract class NetBareService extends VpnService {
 
     private NetBareThread mNetBareThread;
 
+    private static NetBareService instance;
+
+    public static NetBareService getInstance() {
+        return instance;
+    }
+
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (intent == null) {
@@ -98,6 +104,7 @@ public abstract class NetBareService extends VpnService {
     protected void startNetBare() {
         // Terminate previous service.
         stopNetBare();
+        instance = this;
 
         NetBareConfig config = NetBare.get().getConfig();
         if (config == null) {
@@ -119,6 +126,7 @@ public abstract class NetBareService extends VpnService {
         NetBareLog.i("Stop NetBare service!");
         mNetBareThread.interrupt();
         mNetBareThread = null;
+        instance = null;
     }
 
     protected void onServiceStart() {}

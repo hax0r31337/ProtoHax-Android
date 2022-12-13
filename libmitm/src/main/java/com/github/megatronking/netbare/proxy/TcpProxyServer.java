@@ -30,7 +30,6 @@ import com.github.megatronking.netbare.tunnel.TcpTunnel;
 import com.github.megatronking.netbare.tunnel.TcpVATunnel;
 
 import java.io.IOException;
-import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.nio.channels.SelectionKey;

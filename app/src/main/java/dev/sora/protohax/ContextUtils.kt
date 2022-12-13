@@ -21,7 +21,7 @@ object ContextUtils {
     }
 
     fun Context.readStringOrDefault(key: String, default: String): String {
-        return this.getSharedPreferences(SHARED_PREFERENCES_KEY, Context. MODE_PRIVATE)
+        return this.getSharedPreferences(SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE)
             .getString(key, null) ?: default
     }
 

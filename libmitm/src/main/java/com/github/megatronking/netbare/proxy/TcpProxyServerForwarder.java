@@ -18,7 +18,6 @@ package com.github.megatronking.netbare.proxy;
 import android.net.VpnService;
 
 import com.github.megatronking.netbare.NetBareLog;
-import com.github.megatronking.netbare.NetBareUtils;
 import com.github.megatronking.netbare.ip.IpHeader;
 import com.github.megatronking.netbare.ip.Protocol;
 import com.github.megatronking.netbare.ip.TcpHeader;
