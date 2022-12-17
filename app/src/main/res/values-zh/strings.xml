@@ -15,4 +15,6 @@
     <string name="logcat_clear">清除紀錄檔</string>
     <string name="logcat_copy">複製紀錄檔</string>
     <string name="logcat_copied">紀錄檔已經被複製到剪貼板</string>
+    <string name="clickgui_modules">模組</string>
+    <string name="clickgui_configs">設定檔</string>
 </resources>

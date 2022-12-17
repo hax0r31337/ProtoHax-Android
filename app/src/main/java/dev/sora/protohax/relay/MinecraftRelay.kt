@@ -11,16 +11,20 @@ import dev.sora.protohax.App
 import dev.sora.protohax.ContextUtils.readStringOrDefault
 import dev.sora.protohax.ContextUtils.writeString
 import dev.sora.protohax.MainActivity
+import dev.sora.protohax.relay.log.NettyLoggerFactory
 import dev.sora.relay.RakNetRelay
 import dev.sora.relay.RakNetRelayListener
 import dev.sora.relay.RakNetRelaySession
 import dev.sora.relay.RakNetRelaySessionListener
 import dev.sora.relay.cheat.command.CommandManager
+import dev.sora.relay.cheat.config.AbstractConfigManager
+import dev.sora.relay.cheat.config.ConfigManagerFileSystem
 import dev.sora.relay.cheat.module.ModuleManager
 import dev.sora.relay.game.GameSession
 import dev.sora.relay.session.RakNetRelaySessionListenerMicrosoft
 import dev.sora.relay.utils.HttpUtils
 import io.netty.util.internal.logging.InternalLoggerFactory
+import java.io.File
 import java.net.InetSocketAddress
 import java.nio.channels.DatagramChannel
 
@@ -30,8 +34,9 @@ object MinecraftRelay {
     private var relay: RakNetRelay? = null
 
     private val session = GameSession()
-    private val moduleManager: ModuleManager
-    private val commandManager: CommandManager
+    val moduleManager: ModuleManager
+    val commandManager: CommandManager
+    val configManager: AbstractConfigManager
 
     init {
         moduleManager = ModuleManager(session)
@@ -40,10 +45,13 @@ object MinecraftRelay {
         commandManager = CommandManager(session)
         commandManager.init(moduleManager)
 
+        configManager = ConfigManagerFileSystem(App.app.getExternalFilesDir("configs")!!, ".json", moduleManager)
+
         session.eventManager.registerListener(commandManager)
     }
 
     fun listen() {
+        System.setProperty("io.netty.noUnsafe", "true")
         InternalLoggerFactory.setDefaultFactory(NettyLoggerFactory())
 
         val port = NetBareUtils.convertPort(UdpProxyServerForwarder.targetForwardPort)

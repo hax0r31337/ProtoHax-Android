@@ -15,7 +15,8 @@ import com.github.megatronking.netbare.NetBare
 import com.github.megatronking.netbare.NetBareService
 import dev.sora.protohax.ContextUtils.toast
 import dev.sora.protohax.relay.MinecraftRelay
-import dev.sora.protohax.relay.PopupWindow
+import dev.sora.protohax.relay.gui.PopupWindow
+import kotlin.random.Random
 
 
 class AppService : NetBareService() {
@@ -33,7 +34,7 @@ class AppService : NetBareService() {
         windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
     }
 
-    override fun notificationId() = 100
+    override fun notificationId() = Random.Default.nextInt()
 
     override fun createNotification(): Notification {
         val flag = PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT

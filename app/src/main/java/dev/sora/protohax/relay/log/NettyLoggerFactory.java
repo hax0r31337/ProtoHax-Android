@@ -1,4 +1,4 @@
-package dev.sora.protohax.relay;
+package dev.sora.protohax.relay.log;
 
 import io.netty.util.internal.logging.InternalLogger;
 import io.netty.util.internal.logging.InternalLoggerFactory;

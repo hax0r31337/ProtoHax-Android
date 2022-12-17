@@ -13,7 +13,7 @@ dependencyResolutionManagement {
         mavenCentral()
     }
 }
-rootProject.name = "ProtoHax"
+rootProject.name = "ProtoHax-Android"
 include ':app'
 include ':libmitm'
 
