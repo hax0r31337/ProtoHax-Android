@@ -84,7 +84,7 @@ class AppService : NetBareService() {
             WindowManager.LayoutParams.WRAP_CONTENT,
             WindowManager.LayoutParams.WRAP_CONTENT,
             WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
             PixelFormat.TRANSLUCENT
         )
         params.gravity = Gravity.TOP or Gravity.END
@@ -93,8 +93,6 @@ class AppService : NetBareService() {
 
         val layout = LinearLayout(this)
 
-//        val imageView = Button(this)
-//        imageView.text = "BTN"
         val imageView = ImageView(this)
         imageView.setImageResource(R.mipmap.ic_launcher_round)
         imageView.layoutParams = LinearLayout.LayoutParams(

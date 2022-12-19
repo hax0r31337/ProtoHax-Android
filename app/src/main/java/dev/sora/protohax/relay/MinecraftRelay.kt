@@ -24,7 +24,6 @@ import dev.sora.relay.game.GameSession
 import dev.sora.relay.session.RakNetRelaySessionListenerMicrosoft
 import dev.sora.relay.utils.HttpUtils
 import io.netty.util.internal.logging.InternalLoggerFactory
-import java.io.File
 import java.net.InetSocketAddress
 import java.nio.channels.DatagramChannel
 

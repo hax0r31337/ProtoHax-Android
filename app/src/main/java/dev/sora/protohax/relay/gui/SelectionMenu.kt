@@ -3,21 +3,20 @@ package dev.sora.protohax.relay.gui
 import android.content.Context
 import android.content.res.ColorStateList
 import android.graphics.Color
-import android.graphics.drawable.*
-import android.graphics.drawable.shapes.RoundRectShape
+import android.graphics.drawable.ColorDrawable
+import android.graphics.drawable.RippleDrawable
 import android.view.WindowManager
 import android.widget.Button
-import android.widget.EditText
 import android.widget.LinearLayout
 import android.widget.ScrollView
 import dev.sora.protohax.R
 import dev.sora.protohax.relay.MinecraftRelay
-import dev.sora.relay.cheat.module.CheatModule
-import java.util.*
+import dev.sora.protohax.util.Gpw
 
 
 class SelectionMenu(private val window: PopupWindow) {
 
+    private var currentConfig: String = "default"
     /**
      * a list liked layout who contains the features of selected menus
      */
@@ -28,7 +27,8 @@ class SelectionMenu(private val window: PopupWindow) {
         return Button(this).apply {
             background = ColorDrawable(backgroundColor)
             if (ripples) {
-                background = RippleDrawable(getStateListDrawable(textColor, RIPPLE_COLOR), background, getRippleMask(textColor))
+                background = RippleDrawable(getStateListDrawable(textColor, RIPPLE_COLOR), background,
+                    ColorDrawable(RIPPLE_COLOR))
             }
             setTextColor(textColor)
             isAllCaps = false
@@ -49,17 +49,6 @@ class SelectionMenu(private val window: PopupWindow) {
                 normalColor
             )
         )
-    }
-
-    private fun getRippleMask(color: Int): Drawable {
-        val outerRadii = FloatArray(8)
-        // 3 is radius of final ripple,
-        // instead of 3 you can give required final radius
-        Arrays.fill(outerRadii, 3f)
-        val r = RoundRectShape(outerRadii, null, null)
-        val shapeDrawable = ShapeDrawable(r)
-        shapeDrawable.paint.color = color
-        return shapeDrawable
     }
 
     fun apply(ctx: Context, layout: LinearLayout, wm: WindowManager) {
@@ -112,16 +101,47 @@ class SelectionMenu(private val window: PopupWindow) {
             }
             menuTabs.addView(this)
         }
-        ctx.themedButton(backgroundColor = BACKGROUND_COLOR_PRIMARY).apply {
-            text = ctx.getString(R.string.clickgui_configs)
-            width = advisedWidth / 2
-            normalOnClickListener {
+        ctx.themedButton(backgroundColor = BACKGROUND_COLOR_PRIMARY).also { btn ->
+            btn.text = ctx.getString(R.string.clickgui_configs)
+            btn.width = advisedWidth / 2
+            btn.normalOnClickListener {
+                it.addView(ctx.themedButton().apply {
+                    text = "create"
+                    width = advisedWidth
+                    setOnClickListener {
+                        currentConfig = Gpw.generate(kotlin.random.Random.nextInt(5) + 5)
+                        MinecraftRelay.configManager.saveConfig(currentConfig)
+                        btn.performClick() // refresh
+                    }
+                })
                 it.addView(ctx.themedButton().apply {
                     text = ctx.getString(R.string.clickgui_configs_save)
                     width = advisedWidth
+                    setOnClickListener {
+                        MinecraftRelay.configManager.saveConfig(currentConfig)
+                        btn.performClick() // refresh
+                    }
                 })
+                MinecraftRelay.configManager.listConfig().forEach { config ->
+                    it.addView(ctx.themedButton().apply {
+                        text = config
+                        width = advisedWidth
+                        setOnClickListener {
+                            if (currentConfig == config) {
+                                MinecraftRelay.configManager.saveConfig(currentConfig)
+                            } else {
+                                currentConfig = config
+                                MinecraftRelay.configManager.loadConfig(config)
+                            }
+                        }
+                        setOnLongClickListener {
+                            MinecraftRelay.configManager.deleteConfig(config)
+                            btn.performClick()
+                        }
+                    })
+                }
             }
-            menuTabs.addView(this)
+            menuTabs.addView(btn)
         }
     }
 
@@ -139,7 +159,7 @@ class SelectionMenu(private val window: PopupWindow) {
         private val TEXT_COLOR = Color.parseColor("#c1c1c1")
         private val BACKGROUND_COLOR_PRIMARY = Color.parseColor("#3c3c3c")
         private val BACKGROUND_COLOR = Color.parseColor("#1b1b1b")
-        private val RIPPLE_COLOR = TEXT_COLOR
+        private val RIPPLE_COLOR = Color.parseColor("#888888")
         private val THEME_COLOR = Color.parseColor("#3d9adc")
     }
 }
