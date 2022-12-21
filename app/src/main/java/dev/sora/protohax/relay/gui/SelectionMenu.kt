@@ -5,6 +5,7 @@ import android.content.res.ColorStateList
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.RippleDrawable
+import android.util.Log
 import android.view.WindowManager
 import android.widget.Button
 import android.widget.LinearLayout
@@ -16,7 +17,7 @@ import dev.sora.protohax.util.Gpw
 
 class SelectionMenu(private val window: PopupWindow) {
 
-    private var currentConfig: String = "default"
+    private var currentConfig: String = Gpw.generate(7)
     /**
      * a list liked layout who contains the features of selected menus
      */
@@ -127,12 +128,8 @@ class SelectionMenu(private val window: PopupWindow) {
                         text = config
                         width = advisedWidth
                         setOnClickListener {
-                            if (currentConfig == config) {
-                                MinecraftRelay.configManager.saveConfig(currentConfig)
-                            } else {
-                                currentConfig = config
-                                MinecraftRelay.configManager.loadConfig(config)
-                            }
+                            currentConfig = config
+                            MinecraftRelay.configManager.loadConfig(config)
                         }
                         setOnLongClickListener {
                             MinecraftRelay.configManager.deleteConfig(config)

@@ -2,6 +2,7 @@ package dev.sora.protohax.activity
 
 import android.app.Activity
 import android.os.Bundle
+import android.util.Base64
 import android.util.Log
 import android.webkit.CookieManager
 import android.webkit.WebResourceRequest
@@ -32,14 +33,41 @@ class MicrosoftLoginActivity : Activity() {
         webview.webViewClient = CustomWebViewClient(this)
 
         webview.loadUrl("https://login.live.com/oauth20_authorize.srf?client_id=00000000441cc96b&redirect_uri=https://login.live.com/oauth20_desktop.srf&response_type=code&scope=service::user.auth.xboxlive.com::MBI_SSL")
-
         setResult(0)
     }
 
     fun loadingPage(text: String) {
         val webview = findViewById<WebView>(R.id.webview)
-        webview.loadData("<html><body>$text</body></html>",
-            "text/html", "UTF-8");
+        // we need convert the body to base64 to make sure it loading properly
+        // https://stackoverflow.com/questions/3961589/android-webview-and-loaddata
+        val data = Base64.encodeToString("""
+<h1>$text</h1>
+<style>
+body { margin-top: 100px; background-color: #4b4b4b; color: #fff; text-align:center; }
+h1 {
+ font: 2em sans-serif;
+ margin-bottom: 40px;
+}
+#loading {
+ display: inline-block;
+ width: 50px;
+ height: 50px;
+ border: 3px solid rgba(255,255,255,.3);
+ border-radius: 50%;
+ border-top-color: #fff;
+ animation: spin 1s linear infinite;
+ -webkit-animation: spin 1s linear infinite;
+}
+@keyframes spin {
+ to { -webkit-transform: rotate(360deg); }
+}
+@-webkit-keyframes spin {
+ to { -webkit-transform: rotate(360deg); }
+}
+</style>
+<div id="loading"></div>
+        """.toByteArray(Charsets.UTF_8), Base64.DEFAULT)
+        webview.loadData(data, "text/html; charset=UTF-8", "base64")
     }
 
     class CustomWebViewClient(private val activity: MicrosoftLoginActivity) : WebViewClient() {
