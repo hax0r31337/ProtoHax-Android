@@ -1,6 +1,9 @@
 package dev.sora.protohax
 
+import android.Manifest
 import android.content.Context
+import android.content.pm.PackageInfo
+import android.content.pm.PackageManager
 import android.widget.Toast
 
 
@@ -31,5 +34,20 @@ object ContextUtils {
 
     fun Context.toast(resId: Int) {
         toast(getString(resId))
+    }
+
+    val PackageInfo.hasInternetPermission: Boolean
+        get() {
+            val permissions = requestedPermissions
+            return permissions?.any { it == Manifest.permission.INTERNET } ?: false
+        }
+
+    fun PackageManager.isAppExists(packageName: String): Boolean {
+        return try {
+            getApplicationInfo(packageName, 0)
+            true
+        } catch (e: PackageManager.NameNotFoundException) {
+            false
+        }
     }
 }

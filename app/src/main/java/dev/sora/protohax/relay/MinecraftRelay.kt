@@ -6,7 +6,6 @@ import com.github.megatronking.netbare.NetBareUtils
 import com.github.megatronking.netbare.proxy.UdpProxyServerForwarder
 import com.google.gson.JsonParser
 import com.nukkitx.network.raknet.RakNetServerSession
-import com.nukkitx.protocol.bedrock.v560.Bedrock_v560
 import dev.sora.protohax.App
 import dev.sora.protohax.ContextUtils.readStringOrDefault
 import dev.sora.protohax.ContextUtils.writeString
@@ -21,6 +20,7 @@ import dev.sora.relay.cheat.config.AbstractConfigManager
 import dev.sora.relay.cheat.config.ConfigManagerFileSystem
 import dev.sora.relay.cheat.module.ModuleManager
 import dev.sora.relay.game.GameSession
+import dev.sora.relay.session.RakNetRelaySessionListenerAutoCodec
 import dev.sora.relay.session.RakNetRelaySessionListenerMicrosoft
 import dev.sora.relay.utils.HttpUtils
 import io.netty.util.internal.logging.InternalLoggerFactory
@@ -54,11 +54,10 @@ object MinecraftRelay {
         InternalLoggerFactory.setDefaultFactory(NettyLoggerFactory())
 
         val port = NetBareUtils.convertPort(UdpProxyServerForwarder.targetForwardPort)
-        val codec = Bedrock_v560.V560_CODEC
-        val relay = RakNetRelay(InetSocketAddress("0.0.0.0", port), packetCodec = codec)
+        val relay = RakNetRelay(InetSocketAddress("0.0.0.0", port))
         relay.listener = object : RakNetRelayListener {
             override fun onQuery(address: InetSocketAddress) =
-                "MCPE;RakNet Relay;${codec.protocolVersion};${codec.minecraftVersion};0;10;${relay.server.guid};Bedrock level;Survival;1;$port;$port;".toByteArray()
+                "MCPE;RakNet Relay;560;1.19.50;0;10;${relay.server.guid};Bedrock level;Survival;1;$port;$port;".toByteArray()
 
             override fun onSessionCreation(serverSession: RakNetServerSession): InetSocketAddress {
                 Log.i("ProtoHax", "SessionCreation ${serverSession.address.port}")
@@ -83,6 +82,7 @@ object MinecraftRelay {
                 Log.i("ProtoHax", "PreRelaySessionCreation")
                 this@MinecraftRelay.session.netSession = session
                 session.listener.childListener.add(this@MinecraftRelay.session)
+                session.listener.childListener.add(RakNetRelaySessionListenerAutoCodec(session))
                 val token = App.app.readStringOrDefault(MainActivity.KEY_MICROSOFT_REFRESH_TOKEN, "")
                 if (token.isNotEmpty()) {
                     val tokens = getMSAccessToken(token)

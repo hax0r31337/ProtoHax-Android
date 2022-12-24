@@ -1,9 +1,11 @@
 <resources>
     <string name="app_name" translatable="false">ProtoHax</string>
     <string name="connect_to_proxy">Connect to MITM proxy</string>
-    <string name="connected">Connected</string>
+    <string name="connected">Connected, click here to launch app</string>
     <string name="not_connected">Not connected</string>
     <string name="package_name">Package name</string>
+    <string name="target_app_not_exists">App with package name %s not exists</string>
+    <string name="select_apps">Select a application</string>
     <string name="start_proxy_toast">Launching MITM proxy for %s</string>
     <string name="stop_proxy_toast">MITM proxy stopped</string>
     <string name="proxy_notification">%s is processing packets for %s</string>

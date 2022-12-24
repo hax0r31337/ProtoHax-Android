@@ -1,7 +1,10 @@
 package dev.sora.protohax
 
 import android.app.Activity
+import android.app.AlertDialog
 import android.content.Intent
+import android.content.pm.ApplicationInfo
+import android.content.pm.PackageManager
 import android.content.res.ColorStateList
 import android.os.Bundle
 import android.provider.Settings
@@ -13,6 +16,8 @@ import com.github.megatronking.netbare.NetBareConfig
 import com.github.megatronking.netbare.NetBareListener
 import com.github.megatronking.netbare.ip.IpAddress
 import com.google.android.material.floatingactionbutton.FloatingActionButton
+import dev.sora.protohax.ContextUtils.hasInternetPermission
+import dev.sora.protohax.ContextUtils.isAppExists
 import dev.sora.protohax.ContextUtils.readString
 import dev.sora.protohax.ContextUtils.readStringOrDefault
 import dev.sora.protohax.ContextUtils.toast
@@ -38,10 +43,18 @@ class MainActivity : Activity(), NetBareListener {
         val input = findViewById<TextView>(R.id.name_edit_text)
         button.setOnClickListener {
             val targetPkgName = input.text.toString()
+            if (!packageManager.isAppExists(targetPkgName)) {
+                toast(getString(R.string.target_app_not_exists, targetPkgName))
+                return@setOnClickListener
+            }
             writeString(KEY_TARGET_PACKAGE_CACHE, targetPkgName)
             runMitMProxy(targetPkgName)
         }
         input.text = readStringOrDefault(KEY_TARGET_PACKAGE_CACHE, "com.mojang.minecraftpe")
+        input.setOnLongClickListener {
+            appChooser()
+            true
+        }
 
         NetBare.get().registerNetBareListener(this)
         updateConnStatus()
@@ -50,6 +63,26 @@ class MainActivity : Activity(), NetBareListener {
             val myIntent = Intent(this, LogcatActivity::class.java)
             this.startActivity(myIntent)
         }
+    }
+
+    private fun appChooser() {
+        val dialog = AlertDialog.Builder(this)
+        dialog.setTitle(R.string.select_apps)
+        val listItems = packageManager.getInstalledPackages(PackageManager.GET_PERMISSIONS)
+            .filter { it.hasInternetPermission && it.applicationInfo.flags and ApplicationInfo.FLAG_SYSTEM == 0 && it.packageName != "dev.sora.protohax" }
+            .map {
+                packageManager.getApplicationLabel(it.applicationInfo).toString() + " - " + it.packageName
+            }.sortedBy { it }.toTypedArray()
+        dialog.setItems(listItems) { dialog, which ->
+            val item = listItems[which].split(" - ").last()
+            writeString(KEY_TARGET_PACKAGE_CACHE, item)
+            findViewById<TextView>(R.id.name_edit_text).text = item
+            dialog.dismiss()
+        }
+        dialog.setNegativeButton("Cancel") { dialog, which ->
+            dialog.dismiss()
+        }
+        dialog.show()
     }
 
     private fun updateMicrosoftButton() {
@@ -83,6 +116,10 @@ class MainActivity : Activity(), NetBareListener {
 
         val text1 = findViewById<TextView>(R.id.bottomAppBarText)
         text1.setText(if (status) R.string.connected else R.string.not_connected)
+        text1.setOnClickListener {
+            val intent = packageManager.getLaunchIntentForPackage(findViewById<TextView>(R.id.name_edit_text).text.toString())
+            startActivity(intent)
+        }
     }
 
     override fun onServiceStarted() {
