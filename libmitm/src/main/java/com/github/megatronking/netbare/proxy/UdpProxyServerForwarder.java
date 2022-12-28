@@ -16,7 +16,6 @@
 package com.github.megatronking.netbare.proxy;
 
 import android.net.VpnService;
-import android.util.Pair;
 
 import com.github.megatronking.netbare.NetBareLog;
 import com.github.megatronking.netbare.NetBareUtils;
@@ -40,14 +39,8 @@ public final class UdpProxyServerForwarder implements ProxyServerForwarder {
 //    private static final int TARGET_FORWARD_IP = NetBareUtils.convertIp("192.168.2.103");
     public static short targetForwardPort = 19132;
 
-    public static Pair<Integer, Short> lastForwardAddr;
-
     private final SessionProvider mSessionProvider;
     private final UdpProxyServer mProxyServer;
-
-    public static void cleanupCaches() {
-        lastForwardAddr = null;
-    }
 
     public UdpProxyServerForwarder(VpnService vpnService, int mtu)
             throws IOException {
@@ -79,7 +72,6 @@ public final class UdpProxyServerForwarder implements ProxyServerForwarder {
         short originalPort = udpHeader.getDestinationPort();
         ipHeader.setDestinationIp(TARGET_FORWARD_IP);
         udpHeader.setDestinationPort(targetForwardPort);
-        lastForwardAddr = new Pair<>(originalIp, originalPort);
 
         NetBareLog.v("ip: %s:%d -> %s:%d", NetBareUtils.convertIp(localIp),
                 NetBareUtils.convertPort(localPort), NetBareUtils.convertIp(originalIp),

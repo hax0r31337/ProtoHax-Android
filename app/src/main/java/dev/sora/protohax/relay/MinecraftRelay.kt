@@ -109,7 +109,6 @@ object MinecraftRelay {
     }
 
     fun close() {
-        UdpProxyServerForwarder.cleanupCaches()
         relay?.server?.close(true)
         relay = null
         Log.i("ProtoHax", "relay closed")
