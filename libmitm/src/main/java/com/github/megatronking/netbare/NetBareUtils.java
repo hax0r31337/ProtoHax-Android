@@ -19,6 +19,7 @@ import android.text.TextUtils;
 
 import java.io.Closeable;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 
 /**
  * A collection of assorted utility classes.
@@ -86,6 +87,15 @@ public final class NetBareUtils {
      */
     public static int convertPort(short port) {
         return port & 0xFFFF;
+    }
+
+    public static short convertPort(int port) {
+        if (port < 0 || port > 0xffff)
+            throw new IllegalArgumentException("Invalid port: "+port);
+        ByteBuffer shortBuffer = ByteBuffer.allocate(2)
+                .put((byte) (port >> 8)).put((byte) port);
+        shortBuffer.flip();
+        return shortBuffer.getShort();
     }
 
     /**

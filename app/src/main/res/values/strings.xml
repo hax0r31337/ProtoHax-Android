@@ -1,24 +1,19 @@
 <resources>
-    <string name="app_name" translatable="false">ProtoHax</string>
+    <string name="app_name" translatable="false">ProtoHax (Forward Only)</string>
     <string name="connect_to_proxy">Connect to MITM proxy</string>
     <string name="connected">Connected, click here to launch app</string>
     <string name="not_connected">Not connected</string>
     <string name="package_name">Package name</string>
+    <string name="target_forward">Forward Target</string>
     <string name="target_app_not_exists">App with package name %s not exists</string>
     <string name="select_apps">Select a application</string>
     <string name="start_proxy_toast">Launching MITM proxy for %s</string>
     <string name="stop_proxy_toast">MITM proxy stopped</string>
     <string name="proxy_notification">%s is processing packets for %s</string>
     <string name="request_overlay">We need overlay permission in order to display GUIs that you can interact in game</string>
-    <string name="close_overlay_menu">Close</string>
-    <string name="microsoft_login">Microsoft Login</string>
-    <string name="microsoft_logout">Logout Microsoft</string>
     <string name="show_logs">Show Logs</string>
     <string name="logcat_title">Logs</string>
     <string name="logcat_clear">Clear Logs</string>
     <string name="logcat_copy">Copy Logs</string>
     <string name="logcat_copied">Logs has beed copied to clipboard</string>
-    <string name="clickgui_modules">Module</string>
-    <string name="clickgui_configs">Config</string>
-    <string name="clickgui_configs_save">save</string>
 </resources>

@@ -43,13 +43,13 @@ public abstract class NetBareService extends VpnService {
      * Start capturing target app's net packets.
      */
     public static final String ACTION_START =
-            "dev.sora.libmitm.vpn.start";
+            "dev.sora.libmitm1.vpn.start";
 
     /**
      * Stop capturing target app's net packets.
      */
     public static final String ACTION_STOP =
-            "dev.sora.libmitm.vpn.stop";
+            "dev.sora.libmitm1.vpn.stop";
 
     /**
      * The identifier for this notification as per

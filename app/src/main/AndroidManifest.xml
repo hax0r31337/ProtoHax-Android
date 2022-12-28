@@ -4,7 +4,6 @@
 
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE"/>
-    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"
         tools:ignore="QueryAllPackagesPermission" />
 
@@ -30,11 +29,6 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="dev.sora.protohax.activity.MicrosoftLoginActivity"
-            android:exported="false"
-            android:theme="@style/Theme.ProtoHax">
-        </activity>
-        <activity
             android:name="dev.sora.protohax.activity.LogcatActivity"
             android:exported="false"
             android:theme="@style/Theme.ProtoHax">
@@ -45,8 +39,8 @@
             android:exported="false">
             <intent-filter>
                 <action android:name="android.net.VpnService" />
-                <action android:name="dev.sora.libmitm.vpn.start"/>
-                <action android:name="dev.sora.libmitm.vpn.stop"/>
+                <action android:name="dev.sora.libmitm1.vpn.start"/>
+                <action android:name="dev.sora.libmitm1.vpn.stop"/>
             </intent-filter>
         </service>
 

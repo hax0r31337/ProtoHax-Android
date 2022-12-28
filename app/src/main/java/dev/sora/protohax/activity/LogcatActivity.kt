@@ -14,7 +14,7 @@ import android.widget.ProgressBar
 import android.widget.ScrollView
 import android.widget.TextView
 import dev.sora.protohax.ContextUtils.toast
-import dev.sora.protohax.R
+import dev.sora.protohax.forwarder.R
 import java.io.IOException
 import kotlin.concurrent.thread
 
@@ -45,7 +45,7 @@ class LogcatActivity : Activity() {
                 lst.add("-v")
                 lst.add("time")
                 lst.add("-s")
-                lst.add("ProtoHax")
+                lst.add("ProtoHax,NetBare")
                 val process = Runtime.getRuntime().exec(lst.toTypedArray())
                 val allText = process.inputStream.bufferedReader().use { it.readText() }
                 runOnUiThread {

@@ -39,18 +39,30 @@
             tools:ignore="TouchTargetSizeCheck" />
     </com.google.android.material.textfield.TextInputLayout>
 
+    <com.google.android.material.textfield.TextInputLayout
+        android:id="@+id/forward_text_input"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="10dp"
+        android:layout_marginHorizontal="20dp"
+        >
+
+        <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/forward_edit_text"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="@string/target_forward"
+            android:maxLines="1"
+            android:textColorHint="#757575"
+            tools:ignore="TouchTargetSizeCheck" />
+    </com.google.android.material.textfield.TextInputLayout>
+
     <LinearLayout
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="10dp"
         android:layout_marginHorizontal="20dp">
-        <Button
-            android:id="@+id/button_microsoft_login"
-            android:layout_height="wrap_content"
-            android:layout_width="wrap_content"
-            android:text="@string/microsoft_login"
-            android:layout_marginHorizontal="5dp"
-            style="?android:attr/buttonBarButtonStyle" />
         <Button
             android:id="@+id/button_show_logs"
             android:layout_height="wrap_content"

@@ -14,7 +14,7 @@ class App : Application() {
             it.mkdirs()
         }
 
-        NetBare.get().attachApplication(this, BuildConfig.DEBUG)
+        NetBare.get().attachApplication(this, true)
     }
 
     companion object {

@@ -36,18 +36,11 @@ import java.io.OutputStream;
  */
 public final class UdpProxyServerForwarder implements ProxyServerForwarder {
 
-    private static final int TARGET_FORWARD_IP = NetBareUtils.convertIp("10.1.10.1");
-//    private static final int TARGET_FORWARD_IP = NetBareUtils.convertIp("192.168.2.103");
+    public static int targetForwardIp = NetBareUtils.convertIp("10.1.10.1");
     public static short targetForwardPort = 19132;
-
-    public static Pair<Integer, Short> lastForwardAddr;
 
     private final SessionProvider mSessionProvider;
     private final UdpProxyServer mProxyServer;
-
-    public static void cleanupCaches() {
-        lastForwardAddr = null;
-    }
 
     public UdpProxyServerForwarder(VpnService vpnService, int mtu)
             throws IOException {
@@ -77,9 +70,8 @@ public final class UdpProxyServerForwarder implements ProxyServerForwarder {
         // Dest IP & Port
         int originalIp = ipHeader.getDestinationIp();
         short originalPort = udpHeader.getDestinationPort();
-        ipHeader.setDestinationIp(TARGET_FORWARD_IP);
+        ipHeader.setDestinationIp(targetForwardIp);
         udpHeader.setDestinationPort(targetForwardPort);
-        lastForwardAddr = new Pair<>(originalIp, originalPort);
 
         NetBareLog.v("ip: %s:%d -> %s:%d", NetBareUtils.convertIp(localIp),
                 NetBareUtils.convertPort(localPort), NetBareUtils.convertIp(originalIp),
@@ -88,7 +80,7 @@ public final class UdpProxyServerForwarder implements ProxyServerForwarder {
         mSessionProvider.ensureQuery(Protocol.UDP, localPort, originalPort, originalIp);
 
         try {
-            mProxyServer.send(udpHeader, output, TARGET_FORWARD_IP, targetForwardPort, originalIp, originalPort, false);
+            mProxyServer.send(udpHeader, output, targetForwardIp, targetForwardPort, originalIp, originalPort, true);
         } catch (IOException e) {
             NetBareLog.e(e.getMessage());
         }
