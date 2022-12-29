@@ -7,7 +7,7 @@ import com.github.megatronking.netbare.proxy.UdpProxyServerForwarder
 import com.google.gson.JsonParser
 import com.nukkitx.network.raknet.RakNetServerSession
 import dev.sora.protohax.App
-import dev.sora.protohax.ContextUtils.readStringOrDefault
+import dev.sora.protohax.ContextUtils.readString
 import dev.sora.protohax.ContextUtils.writeString
 import dev.sora.protohax.MainActivity
 import dev.sora.protohax.relay.log.NettyLoggerFactory
@@ -23,9 +23,11 @@ import dev.sora.relay.game.GameSession
 import dev.sora.relay.session.RakNetRelaySessionListenerAutoCodec
 import dev.sora.relay.session.RakNetRelaySessionListenerMicrosoft
 import dev.sora.relay.utils.HttpUtils
+import dev.sora.relay.utils.logInfo
 import io.netty.util.internal.logging.InternalLoggerFactory
 import java.net.InetSocketAddress
 import java.nio.channels.DatagramChannel
+import kotlin.concurrent.thread
 
 
 object MinecraftRelay {
@@ -55,6 +57,15 @@ object MinecraftRelay {
 
         val port = NetBareUtils.convertPort(UdpProxyServerForwarder.targetForwardPort)
         val relay = RakNetRelay(InetSocketAddress("0.0.0.0", port))
+        var msLoginSession: RakNetRelaySessionListenerMicrosoft? = null
+        thread {
+            msLoginSession = App.app.readString(MainActivity.KEY_MICROSOFT_REFRESH_TOKEN)?.let {
+                val tokens = getMSAccessToken(it)
+                App.app.writeString(MainActivity.KEY_MICROSOFT_REFRESH_TOKEN, tokens.second)
+                logInfo("microsoft access token successfully fetched")
+                RakNetRelaySessionListenerMicrosoft(tokens.first)
+            }
+        }
         relay.listener = object : RakNetRelayListener {
             override fun onQuery(address: InetSocketAddress) =
                 "MCPE;RakNet Relay;560;1.19.50;0;10;${relay.server.guid};Bedrock level;Survival;1;$port;$port;".toByteArray()
@@ -82,13 +93,11 @@ object MinecraftRelay {
                 Log.i("ProtoHax", "PreRelaySessionCreation")
                 this@MinecraftRelay.session.netSession = session
                 session.listener.childListener.add(this@MinecraftRelay.session)
-                session.listener.childListener.add(RakNetRelaySessionListenerAutoCodec(session))
-                val token = App.app.readStringOrDefault(MainActivity.KEY_MICROSOFT_REFRESH_TOKEN, "")
-                if (token.isNotEmpty()) {
-                    val tokens = getMSAccessToken(token)
-                    App.app.writeString(MainActivity.KEY_MICROSOFT_REFRESH_TOKEN, tokens.second)
-                    session.listener.childListener.add(RakNetRelaySessionListenerMicrosoft(tokens.first, session))
+                msLoginSession?.let {
+                    it.session = session
+                    session.listener.childListener.add(it)
                 }
+                session.listener.childListener.add(RakNetRelaySessionListenerAutoCodec(session))
             }
         }
         relay.bind()
