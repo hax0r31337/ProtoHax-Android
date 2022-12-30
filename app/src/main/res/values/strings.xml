@@ -19,6 +19,8 @@
     <string name="logcat_copy">Copy Logs</string>
     <string name="logcat_copied">Logs has beed copied to clipboard</string>
     <string name="clickgui_modules">Module</string>
+    <string name="clickgui_modules_back">Back</string>
     <string name="clickgui_configs">Config</string>
+    <string name="clickgui_configs_create">create</string>
     <string name="clickgui_configs_save">save</string>
 </resources>

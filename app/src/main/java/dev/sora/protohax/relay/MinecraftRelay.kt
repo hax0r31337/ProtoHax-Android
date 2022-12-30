@@ -58,14 +58,6 @@ object MinecraftRelay {
         val port = NetBareUtils.convertPort(UdpProxyServerForwarder.targetForwardPort)
         val relay = RakNetRelay(InetSocketAddress("0.0.0.0", port))
         var msLoginSession: RakNetRelaySessionListenerMicrosoft? = null
-        thread {
-            msLoginSession = App.app.readString(MainActivity.KEY_MICROSOFT_REFRESH_TOKEN)?.let {
-                val tokens = getMSAccessToken(it)
-                App.app.writeString(MainActivity.KEY_MICROSOFT_REFRESH_TOKEN, tokens.second)
-                logInfo("microsoft access token successfully fetched")
-                RakNetRelaySessionListenerMicrosoft(tokens.first)
-            }
-        }
         relay.listener = object : RakNetRelayListener {
             override fun onQuery(address: InetSocketAddress) =
                 "MCPE;RakNet Relay;560;1.19.50;0;10;${relay.server.guid};Bedrock level;Survival;1;$port;$port;".toByteArray()
@@ -93,6 +85,14 @@ object MinecraftRelay {
                 Log.i("ProtoHax", "PreRelaySessionCreation")
                 this@MinecraftRelay.session.netSession = session
                 session.listener.childListener.add(this@MinecraftRelay.session)
+                if (msLoginSession == null) {
+                    msLoginSession = App.app.readString(MainActivity.KEY_MICROSOFT_REFRESH_TOKEN)?.let {
+                        val tokens = getMSAccessToken(it)
+                        App.app.writeString(MainActivity.KEY_MICROSOFT_REFRESH_TOKEN, tokens.second)
+                        logInfo("microsoft access token successfully fetched")
+                        RakNetRelaySessionListenerMicrosoft(tokens.first)
+                    }
+                }
                 msLoginSession?.let {
                     it.session = session
                     session.listener.childListener.add(it)

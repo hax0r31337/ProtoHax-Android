@@ -117,8 +117,10 @@ class MainActivity : Activity(), NetBareListener {
         val text1 = findViewById<TextView>(R.id.bottomAppBarText)
         text1.setText(if (status) R.string.connected else R.string.not_connected)
         text1.setOnClickListener {
-            val intent = packageManager.getLaunchIntentForPackage(findViewById<TextView>(R.id.name_edit_text).text.toString())
-            startActivity(intent)
+            if (status) {
+                val intent = packageManager.getLaunchIntentForPackage(findViewById<TextView>(R.id.name_edit_text).text.toString())
+                startActivity(intent)
+            }
         }
     }
 

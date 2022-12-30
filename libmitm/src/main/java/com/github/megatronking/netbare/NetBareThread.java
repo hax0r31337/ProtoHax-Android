@@ -22,7 +22,6 @@ import android.os.ParcelFileDescriptor;
 import com.github.megatronking.netbare.ip.IpAddress;
 import com.github.megatronking.netbare.ip.IpHeader;
 import com.github.megatronking.netbare.ip.Protocol;
-import com.github.megatronking.netbare.proxy.IcmpProxyServerForwarder;
 import com.github.megatronking.netbare.proxy.ProxyServerForwarder;
 import com.github.megatronking.netbare.proxy.TcpProxyServerForwarder;
 import com.github.megatronking.netbare.proxy.UdpProxyServer;
@@ -173,8 +172,6 @@ public final class NetBareThread extends Thread {
 			this.mForwarderRegistry.put(Protocol.TCP, new TcpProxyServerForwarder(service, localIp, mtu));
 			// UDP
 			this.mForwarderRegistry.put(Protocol.UDP, new UdpProxyServerForwarder(service, mtu));
-			// ICMP
-			this.mForwarderRegistry.put(Protocol.ICMP, new IcmpProxyServerForwarder());
 
 			buffer = new byte[mtu];
 		}
