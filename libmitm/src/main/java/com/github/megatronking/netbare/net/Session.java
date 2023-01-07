@@ -47,21 +47,6 @@ public final class Session {
      */
     public final int remoteIp;
 
-    /**
-     * An unique id uses to identify this session.
-     */
-    public String id;
-
-    /**
-     * Session started time.
-     */
-    public long time;
-
-    /**
-     * Remote server host.
-     */
-    public String host;
-
 //    /**
 //     * The process id that the session belongs to.
 //     */
@@ -87,8 +72,6 @@ public final class Session {
         this.localPort = localPort;
         this.remotePort = remotePort;
         this.remoteIp = remoteIp;
-        this.id = UUID.randomUUID().toString();
-        this.time = System.currentTimeMillis();
     }
 
 }

@@ -34,39 +34,12 @@ public abstract class SessionTunnelFlow implements TunnelFlow {
     }
 
     /**
-     * Returns the session's unique id.
-     *
-     * @return The session id.
-     */
-    public String id() {
-        return mSession.id;
-    }
-
-    /**
-     * Returns the session created time, you can think of it as the start time of the request.
-     *
-     * @return Session created time.
-     */
-    public long time() {
-        return mSession.time;
-    }
-
-    /**
      * Returns the remote server's IPV4 address.
      *
      * @return The remote server's IPV4 address.
      */
     public String ip() {
         return NetBareUtils.convertIp(mSession.remoteIp);
-    }
-
-    /**
-     * Returns the remote server's host name.
-     *
-     * @return The remote server's host name.
-     */
-    public String host() {
-        return mSession.host;
     }
 
     /**
