@@ -203,6 +203,7 @@ class SelectionMenu(private val window: PopupWindow) {
                     buttonList.addView(SeekBar(ctx).apply {
                         min = value.minimum
                         max = value.maximum
+                        progress = value.get().coerceIn(value.minimum, value.maximum)
                         onProgressChanged { _, progress, _ ->
                             value.set(progress)
                             button.setText()
@@ -215,6 +216,7 @@ class SelectionMenu(private val window: PopupWindow) {
                     buttonList.addView(SeekBar(ctx).apply {
                         min = 0
                         max = advisedWidth
+                        progress = (((value.get() - value.minimum) / (value.maximum - value.minimum) ) * advisedWidth).toInt().coerceIn(0, advisedWidth)
                         onProgressChanged { _, progress, _ ->
                             value.set(value.minimum + (value.maximum - value.minimum) * (progress.toFloat() / advisedWidth))
                             button.setText()
