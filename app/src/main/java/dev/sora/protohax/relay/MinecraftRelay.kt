@@ -27,7 +27,6 @@ import dev.sora.relay.utils.logInfo
 import io.netty.util.internal.logging.InternalLoggerFactory
 import java.net.InetSocketAddress
 import java.nio.channels.DatagramChannel
-import kotlin.concurrent.thread
 
 
 object MinecraftRelay {
@@ -78,11 +77,12 @@ object MinecraftRelay {
             override fun onPrepareClientConnection(clientSocket: DatagramChannel): RakNetRelaySessionListener {
                 Log.i("ProtoHax", "PrepareClientConnection")
                 NetBareService.getInstance()?.protect(clientSocket.socket())
-                return RakNetRelaySessionListener()
+                return super.onPrepareClientConnection(clientSocket)
             }
 
             override fun onSession(session: RakNetRelaySession) {
                 Log.i("ProtoHax", "PreRelaySessionCreation")
+                session.listener.childListener.add(RakNetRelaySessionListenerAutoCodec(session))
                 this@MinecraftRelay.session.netSession = session
                 session.listener.childListener.add(this@MinecraftRelay.session)
                 if (msLoginSession == null) {
@@ -90,14 +90,13 @@ object MinecraftRelay {
                         val tokens = getMSAccessToken(it)
                         App.app.writeString(MainActivity.KEY_MICROSOFT_REFRESH_TOKEN, tokens.second)
                         logInfo("microsoft access token successfully fetched")
-                        RakNetRelaySessionListenerMicrosoft(tokens.first)
+                        RakNetRelaySessionListenerMicrosoft(tokens.first, RakNetRelaySessionListenerMicrosoft.DEVICE_NINTENDO)
                     }
                 }
                 msLoginSession?.let {
                     it.session = session
                     session.listener.childListener.add(it)
                 }
-                session.listener.childListener.add(RakNetRelaySessionListenerAutoCodec(session))
             }
         }
         relay.bind()
