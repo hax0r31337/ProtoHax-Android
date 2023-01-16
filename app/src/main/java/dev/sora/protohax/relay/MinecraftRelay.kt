@@ -19,6 +19,7 @@ import dev.sora.relay.cheat.command.CommandManager
 import dev.sora.relay.cheat.config.AbstractConfigManager
 import dev.sora.relay.cheat.config.ConfigManagerFileSystem
 import dev.sora.relay.cheat.module.ModuleManager
+import dev.sora.relay.cheat.module.impl.ModuleResourcePackSpoof
 import dev.sora.relay.game.GameSession
 import dev.sora.relay.session.RakNetRelaySessionListenerAutoCodec
 import dev.sora.relay.session.RakNetRelaySessionListenerMicrosoft
@@ -101,6 +102,11 @@ object MinecraftRelay {
         }
         relay.bind()
         this.relay = relay
+        Log.d("ProtoHax", "${App.app.getExternalFilesDir("resource_packs")}")
+        App.app.getExternalFilesDir("resource_packs")?.also {
+            if (!it.exists()) it.mkdirs()
+            ModuleResourcePackSpoof.resourcePackProvider = ModuleResourcePackSpoof.FileSystemResourcePackProvider(it)
+        }
         Log.i("ProtoHax", "relay started")
     }
 
