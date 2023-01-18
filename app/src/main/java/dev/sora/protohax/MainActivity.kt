@@ -6,15 +6,12 @@ import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.content.res.ColorStateList
+import android.net.VpnService
 import android.os.Bundle
 import android.provider.Settings
 import android.util.Log
 import android.widget.Button
 import android.widget.TextView
-import com.github.megatronking.netbare.NetBare
-import com.github.megatronking.netbare.NetBareConfig
-import com.github.megatronking.netbare.NetBareListener
-import com.github.megatronking.netbare.ip.IpAddress
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import dev.sora.protohax.ContextUtils.hasInternetPermission
 import dev.sora.protohax.ContextUtils.isAppExists
@@ -26,14 +23,7 @@ import dev.sora.protohax.activity.LogcatActivity
 import dev.sora.protohax.activity.MicrosoftLoginActivity
 
 
-class MainActivity : Activity(), NetBareListener {
-
-    private val configBuilder: NetBareConfig.Builder
-        get() = NetBareConfig.Builder()
-        .setMtu(4096)
-        .setAddress(IpAddress("10.1.10.1", 32))
-        .setSession("ProtoHax")
-        .addRoute(IpAddress("0.0.0.0", 0))
+class MainActivity : Activity(), ServiceListener {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -48,7 +38,7 @@ class MainActivity : Activity(), NetBareListener {
                 return@setOnClickListener
             }
             writeString(KEY_TARGET_PACKAGE_CACHE, targetPkgName)
-            runMitMProxy(targetPkgName)
+            runMitMProxy()
         }
         input.text = readStringOrDefault(KEY_TARGET_PACKAGE_CACHE, "com.mojang.minecraftpe")
         input.setOnLongClickListener {
@@ -56,7 +46,7 @@ class MainActivity : Activity(), NetBareListener {
             true
         }
 
-        NetBare.get().registerNetBareListener(this)
+        AppService.addListener(this)
         updateConnStatus()
         updateMicrosoftButton()
         findViewById<Button>(R.id.button_show_logs).setOnClickListener {
@@ -107,10 +97,10 @@ class MainActivity : Activity(), NetBareListener {
 
     override fun onDestroy() {
         super.onDestroy()
-        NetBare.get().unregisterNetBareListener(this)
+        AppService.removeListener(this)
     }
 
-    private fun updateConnStatus(status: Boolean = NetBare.get().isActive) {
+    private fun updateConnStatus(status: Boolean = AppService.isActive) {
         val button = findViewById<FloatingActionButton>(R.id.floating_button)
         button.backgroundTintList = ColorStateList.valueOf(getColor(if (status) R.color.actionbtn_active else R.color.actionbtn_inactive))
 
@@ -136,7 +126,7 @@ class MainActivity : Activity(), NetBareListener {
         }
     }
 
-    private fun runMitMProxy(targetPkgName: String) {
+    private fun runMitMProxy() {
         try {
             if (!Settings.canDrawOverlays(this)) {
                 toast(R.string.request_overlay)
@@ -144,18 +134,16 @@ class MainActivity : Activity(), NetBareListener {
                 this.startActivityForResult(myIntent, REQUEST_CODE_WITH_MITM_RECALL)
                 return
             }
-            if (!NetBare.get().isActive) {
-                val intent = NetBare.get().prepare()
+            if (!AppService.isActive) {
+                val intent = VpnService.prepare(this)
                 if (intent != null) {
                     this.startActivityForResult(intent, REQUEST_CODE_WITH_MITM_RECALL_ONLY_OK)
                     return
                 }
-                NetBare.get().start(configBuilder
-                    .addAllowedApplication(targetPkgName)
-                    .build())
-                toast(getString(R.string.start_proxy_toast, targetPkgName))
+                emitMessage(AppService.ACTION_START)
+                toast(getString(R.string.start_proxy_toast, readString(KEY_TARGET_PACKAGE_CACHE)))
             } else {
-                NetBare.get().stop()
+                emitMessage(AppService.ACTION_STOP)
                 toast(R.string.stop_proxy_toast)
             }
         } catch (e: Throwable) {
@@ -164,17 +152,23 @@ class MainActivity : Activity(), NetBareListener {
         }
     }
 
+    private fun emitMessage(msg: String) {
+        val intent = Intent(msg)
+        intent.setPackage(App.app.packageName)
+        startForegroundService(intent)
+    }
+
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         if (requestCode == REQUEST_CODE_WITH_MITM_RECALL
             || (resultCode == RESULT_OK && requestCode == REQUEST_CODE_WITH_MITM_RECALL_ONLY_OK)) {
-            runMitMProxy(readString(KEY_TARGET_PACKAGE_CACHE) ?: return)
+            runMitMProxy()
         } else if (requestCode == REQUEST_CODE_MICROSOFT_LOGIN_OK && resultCode == RESPONSE_CODE_MICROSOFT_LOGIN_OK) {
             updateMicrosoftButton()
         }
     }
 
     companion object {
-        private const val KEY_TARGET_PACKAGE_CACHE = "TARGET_PACKAGE"
+        const val KEY_TARGET_PACKAGE_CACHE = "TARGET_PACKAGE"
         const val KEY_MICROSOFT_REFRESH_TOKEN = "MICROSOFT_REFRESH_TOKEN"
         private const val REQUEST_CODE_WITH_MITM_RECALL = 0
         private const val REQUEST_CODE_WITH_MITM_RECALL_ONLY_OK = 1

@@ -1,7 +1,6 @@
 package dev.sora.protohax
 
 import android.app.Application
-import com.github.megatronking.netbare.NetBare
 import java.io.File
 
 
@@ -13,8 +12,6 @@ class App : Application() {
         configDir = File(filesDir, "config").also {
             it.mkdirs()
         }
-
-        NetBare.get().attachApplication(this, BuildConfig.DEBUG)
     }
 
     companion object {

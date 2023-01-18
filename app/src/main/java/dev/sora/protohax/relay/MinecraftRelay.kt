@@ -1,12 +1,10 @@
 package dev.sora.protohax.relay
 
 import android.util.Log
-import com.github.megatronking.netbare.NetBareService
-import com.github.megatronking.netbare.NetBareUtils
-import com.github.megatronking.netbare.proxy.UdpProxyServerForwarder
 import com.google.gson.JsonParser
 import com.nukkitx.network.raknet.RakNetServerSession
 import dev.sora.protohax.App
+import dev.sora.protohax.AppService
 import dev.sora.protohax.ContextUtils.readString
 import dev.sora.protohax.ContextUtils.writeString
 import dev.sora.protohax.MainActivity
@@ -28,6 +26,7 @@ import dev.sora.relay.utils.logInfo
 import io.netty.util.internal.logging.InternalLoggerFactory
 import java.net.InetSocketAddress
 import java.nio.channels.DatagramChannel
+import kotlin.random.Random
 
 
 object MinecraftRelay {
@@ -38,6 +37,8 @@ object MinecraftRelay {
     val moduleManager: ModuleManager
     val commandManager: CommandManager
     val configManager: AbstractConfigManager
+
+    var listenPort: Int = 10000+Random.nextInt(55534)
 
     init {
         moduleManager = ModuleManager(session)
@@ -55,18 +56,17 @@ object MinecraftRelay {
         System.setProperty("io.netty.noUnsafe", "true")
         InternalLoggerFactory.setDefaultFactory(NettyLoggerFactory())
 
-        val port = NetBareUtils.convertPort(UdpProxyServerForwarder.targetForwardPort)
-        val relay = RakNetRelay(InetSocketAddress("0.0.0.0", port))
+        listenPort = 10000+Random.nextInt(55534)
+        val relay = RakNetRelay(InetSocketAddress("0.0.0.0", listenPort))
         var msLoginSession: RakNetRelaySessionListenerMicrosoft? = null
         relay.listener = object : RakNetRelayListener {
             override fun onQuery(address: InetSocketAddress) =
-                "MCPE;RakNet Relay;560;1.19.50;0;10;${relay.server.guid};Bedrock level;Survival;1;$port;$port;".toByteArray()
+                "MCPE;RakNet Relay;560;1.19.50;0;10;${relay.server.guid};Bedrock level;Survival;1;$listenPort;$listenPort;".toByteArray()
 
             override fun onSessionCreation(serverSession: RakNetServerSession): InetSocketAddress {
                 Log.i("ProtoHax", "SessionCreation ${serverSession.address.port}")
                 try {
-                    val server = NetBareService.getInstance()!!.thread!!.udpProxyServer
-                    val pair = server.getOriginIP(serverSession.address.port)
+                    val pair = UdpForwarderHandler.originalIpMap.get(serverSession.address.port)!!
                     Log.i("ProtoHax", "EstablishConnection ${pair.first}:${pair.second}")
                     return InetSocketAddress(pair.first, pair.second)
                 } catch (t: Throwable) {
@@ -77,7 +77,7 @@ object MinecraftRelay {
 
             override fun onPrepareClientConnection(clientSocket: DatagramChannel): RakNetRelaySessionListener {
                 Log.i("ProtoHax", "PrepareClientConnection")
-                NetBareService.getInstance()?.protect(clientSocket.socket())
+                AppService.instance.protect(clientSocket.socket())
                 return super.onPrepareClientConnection(clientSocket)
             }
 
