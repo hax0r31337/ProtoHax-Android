@@ -169,7 +169,7 @@ class SelectionMenu(private val window: PopupWindow) {
             if (value is BoolValue) {
                 buttonList.addView(ctx.themedButton().also { b ->
                     fun Button.setText() {
-                        text = Html.fromHtml("${value.name}: <font color=\"${if(value.get()) "$TOGGLE_ON_COLOR\">ON" else "$TOGGLE_OFF_COLOR>OFF"}</font>", Html.FROM_HTML_MODE_LEGACY)
+                        text = Html.fromHtml("${value.name}: <font color=\"${if(value.get()) "$TOGGLE_ON_COLOR\">ON" else "$TOGGLE_OFF_COLOR\">OFF"}</font>", Html.FROM_HTML_MODE_LEGACY)
                     }
                     b.setText()
                     b.width = advisedWidth
