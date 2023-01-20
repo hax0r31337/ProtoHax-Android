@@ -154,7 +154,7 @@ class MainActivity : Activity(), ServiceListener {
 
     private fun emitMessage(msg: String) {
         val intent = Intent(msg)
-        intent.setPackage(App.app.packageName)
+        intent.setPackage(packageName)
         startForegroundService(intent)
     }
 

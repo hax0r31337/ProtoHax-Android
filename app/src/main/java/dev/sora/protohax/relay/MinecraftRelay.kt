@@ -3,7 +3,6 @@ package dev.sora.protohax.relay
 import android.util.Log
 import com.google.gson.JsonParser
 import com.nukkitx.network.raknet.RakNetServerSession
-import dev.sora.protohax.App
 import dev.sora.protohax.AppService
 import dev.sora.protohax.ContextUtils.readString
 import dev.sora.protohax.ContextUtils.writeString
@@ -47,7 +46,7 @@ object MinecraftRelay {
         commandManager = CommandManager(session)
         commandManager.init(moduleManager)
 
-        configManager = ConfigManagerFileSystem(App.app.getExternalFilesDir("configs")!!, ".json", moduleManager)
+        configManager = ConfigManagerFileSystem(AppService.instance.getExternalFilesDir("configs")!!, ".json", moduleManager)
 
         session.eventManager.registerListener(commandManager)
     }
@@ -87,9 +86,9 @@ object MinecraftRelay {
                 this@MinecraftRelay.session.netSession = session
                 session.listener.childListener.add(this@MinecraftRelay.session)
                 if (msLoginSession == null) {
-                    msLoginSession = App.app.readString(MainActivity.KEY_MICROSOFT_REFRESH_TOKEN)?.let {
+                    msLoginSession = AppService.instance.readString(MainActivity.KEY_MICROSOFT_REFRESH_TOKEN)?.let {
                         val tokens = getMSAccessToken(it)
-                        App.app.writeString(MainActivity.KEY_MICROSOFT_REFRESH_TOKEN, tokens.second)
+                        AppService.instance.writeString(MainActivity.KEY_MICROSOFT_REFRESH_TOKEN, tokens.second)
                         logInfo("microsoft access token successfully fetched")
                         RakNetRelaySessionListenerMicrosoft(tokens.first, RakNetRelaySessionListenerMicrosoft.DEVICE_NINTENDO)
                     }
@@ -102,8 +101,7 @@ object MinecraftRelay {
         }
         relay.bind()
         this.relay = relay
-        Log.d("ProtoHax", "${App.app.getExternalFilesDir("resource_packs")}")
-        App.app.getExternalFilesDir("resource_packs")?.also {
+        AppService.instance.getExternalFilesDir("resource_packs")?.also {
             if (!it.exists()) it.mkdirs()
             ModuleResourcePackSpoof.resourcePackProvider = ModuleResourcePackSpoof.FileSystemResourcePackProvider(it)
         }

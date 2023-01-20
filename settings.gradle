@@ -16,5 +16,4 @@ dependencyResolutionManagement {
 }
 rootProject.name = 'ProtoHax-Android'
 include ':app'
-include ':libmitm'
 
