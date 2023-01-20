@@ -11,9 +11,9 @@ dependencyResolutionManagement {
         mavenLocal()
         google()
         mavenCentral()
+        maven { url = 'https://mccheatz.github.io/maven_repo/' }
     }
 }
-rootProject.name = "ProtoHax-Android"
+rootProject.name = 'ProtoHax-Android'
 include ':app'
-include ':libmitm'
 

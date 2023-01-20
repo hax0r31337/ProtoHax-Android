@@ -13,7 +13,6 @@
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:name="dev.sora.protohax.App"
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.ProtoHax"
@@ -27,11 +26,6 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
-        </activity>
-        <activity
-            android:name="dev.sora.protohax.activity.LogcatActivity"
-            android:exported="false"
-            android:theme="@style/Theme.ProtoHax">
         </activity>
 
         <service android:name="dev.sora.protohax.AppService"
