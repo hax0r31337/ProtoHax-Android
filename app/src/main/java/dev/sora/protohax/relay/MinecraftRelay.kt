@@ -23,8 +23,10 @@ import dev.sora.relay.session.RakNetRelaySessionListenerMicrosoft
 import dev.sora.relay.utils.HttpUtils
 import dev.sora.relay.utils.logInfo
 import io.netty.util.internal.logging.InternalLoggerFactory
+import java.net.DatagramSocket
 import java.net.InetSocketAddress
 import java.nio.channels.DatagramChannel
+import kotlin.concurrent.thread
 import kotlin.random.Random
 
 
@@ -32,7 +34,7 @@ object MinecraftRelay {
 
     private var relay: RakNetRelay? = null
 
-    private val session = GameSession()
+    val session = GameSession()
     val moduleManager: ModuleManager
     val commandManager: CommandManager
     val configManager: AbstractConfigManager
@@ -42,6 +44,7 @@ object MinecraftRelay {
     init {
         moduleManager = ModuleManager(session)
         moduleManager.init()
+        registerAdditionalModules(moduleManager)
 
         commandManager = CommandManager(session)
         commandManager.init(moduleManager)
@@ -51,11 +54,26 @@ object MinecraftRelay {
         session.eventManager.registerListener(commandManager)
     }
 
+    private fun registerAdditionalModules(moduleManager: ModuleManager) {
+//        moduleManager.registerModule(ModuleESP())
+    }
+
+    private fun searchForUsablePort(): Int {
+        var port = 10000+Random.nextInt(55534)
+        thread {
+            // android do not allow network operation on main thread
+            val socket = DatagramSocket()
+            port = socket.localPort
+            socket.close()
+        }.join()
+        return port
+    }
+
     fun listen() {
         System.setProperty("io.netty.noUnsafe", "true")
         InternalLoggerFactory.setDefaultFactory(NettyLoggerFactory())
 
-        listenPort = 10000+Random.nextInt(55534)
+        listenPort = searchForUsablePort()
         val relay = RakNetRelay(InetSocketAddress("0.0.0.0", listenPort))
         var msLoginSession: RakNetRelaySessionListenerMicrosoft? = null
         relay.listener = object : RakNetRelayListener {

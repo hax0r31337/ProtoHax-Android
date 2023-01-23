@@ -6,14 +6,12 @@ import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.RippleDrawable
 import android.text.Html
-import android.util.Log
 import android.view.WindowManager
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.ScrollView
 import android.widget.SeekBar
 import android.widget.SeekBar.OnSeekBarChangeListener
-import com.google.android.material.slider.Slider
 import dev.sora.protohax.R
 import dev.sora.protohax.relay.MinecraftRelay
 import dev.sora.protohax.util.Gpw

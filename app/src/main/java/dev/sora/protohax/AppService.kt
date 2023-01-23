@@ -18,6 +18,7 @@ import dev.sora.protohax.ContextUtils.readString
 import dev.sora.protohax.relay.MinecraftRelay
 import dev.sora.protohax.relay.UdpForwarderHandler
 import dev.sora.protohax.relay.gui.PopupWindow
+import dev.sora.protohax.relay.gui.RenderLayerView
 import libmitm.Libmitm
 import libmitm.Protector
 import libmitm.TUN
@@ -30,6 +31,7 @@ class AppService : VpnService(), Protector {
 
     private lateinit var windowManager: WindowManager
     private var layoutView: View? = null
+    private var renderLayerView: View? = null
     private val popupWindow = PopupWindow()
 
     private var vpnDescriptor: ParcelFileDescriptor? = null
@@ -181,12 +183,15 @@ class AppService : VpnService(), Protector {
 
     private fun onServiceStop() {
         layoutView?.let { windowManager.removeView(it) }
+        layoutView = null
+        renderLayerView?.let { windowManager.removeView(it) }
+        renderLayerView = null
         popupWindow.destroy(windowManager)
         MinecraftRelay.close()
     }
 
     private fun popupWindow() {
-        val params = WindowManager.LayoutParams(
+        var params = WindowManager.LayoutParams(
             WindowManager.LayoutParams.WRAP_CONTENT,
             WindowManager.LayoutParams.WRAP_CONTENT,
             WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
@@ -246,6 +251,17 @@ class AppService : VpnService(), Protector {
 
         this.layoutView = layout
         windowManager.addView(layout, params)
+
+        params = WindowManager.LayoutParams(
+            WindowManager.LayoutParams.MATCH_PARENT,
+            WindowManager.LayoutParams.MATCH_PARENT,
+            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
+            PixelFormat.TRANSLUCENT
+        )
+        params.gravity = Gravity.TOP or Gravity.END
+        renderLayerView = RenderLayerView(this, MinecraftRelay.session)
+        windowManager.addView(renderLayerView, params)
     }
 
     companion object {
