@@ -8,6 +8,7 @@ import dev.sora.protohax.ContextUtils.readString
 import dev.sora.protohax.ContextUtils.writeString
 import dev.sora.protohax.MainActivity
 import dev.sora.protohax.relay.log.NettyLoggerFactory
+import dev.sora.protohax.relay.modules.ModuleESP
 import dev.sora.relay.RakNetRelay
 import dev.sora.relay.RakNetRelayListener
 import dev.sora.relay.RakNetRelaySession
@@ -55,7 +56,7 @@ object MinecraftRelay {
     }
 
     private fun registerAdditionalModules(moduleManager: ModuleManager) {
-//        moduleManager.registerModule(ModuleESP())
+        moduleManager.registerModule(ModuleESP())
     }
 
     private fun searchForUsablePort(): Int {
