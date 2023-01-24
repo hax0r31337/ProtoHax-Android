@@ -7,6 +7,7 @@ import com.nukkitx.math.matrix.Matrix4f
 import com.nukkitx.math.vector.Vector2d
 import dev.sora.protohax.relay.gui.RenderLayerView
 import dev.sora.relay.cheat.module.CheatModule
+import dev.sora.relay.cheat.module.impl.ModuleAntiBot.isBot
 import dev.sora.relay.cheat.value.BoolValue
 import dev.sora.relay.cheat.value.IntValue
 import dev.sora.relay.game.entity.Entity
@@ -20,6 +21,7 @@ class ModuleESP : CheatModule("ESP") {
 
     private val fovValue = IntValue("Fov", 110, 40, 110)
     private val allObjectsValue = BoolValue("AllObjects", false)
+    private val botsValue = BoolValue("Bots", false)
     private val avoidScreenValue = BoolValue("AvoidScreen", true)
     private val strokeWidthValue = IntValue("StrokeWidth", 2, 1, 10)
     private val colorRedValue = IntValue("ColorRed", 61, 0, 255)
@@ -36,7 +38,7 @@ class ModuleESP : CheatModule("ESP") {
         event.needRefresh = true
         if (avoidScreenValue.get() && event.session.thePlayer.openContainer != null) return
         val map = event.session.theWorld.entityMap.values
-            .let { if (allObjectsValue.get()) it else it.filterIsInstance<EntityPlayer>() }
+            .let { if (allObjectsValue.get()) it else it.filter { e -> e is EntityPlayer && (botsValue.get() || !e.isBot(event.session))} }
         if (map.isEmpty()) return
 
         val player = event.session.thePlayer
