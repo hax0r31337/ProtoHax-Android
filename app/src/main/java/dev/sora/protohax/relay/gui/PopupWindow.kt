@@ -31,7 +31,7 @@ class PopupWindow {
     }
 
     private fun getScreenSize(wm: WindowManager): Point {
-        return if (Build.VERSION.SDK_INT >= 30) {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             wm.maximumWindowMetrics.bounds.let {
                 Point(it.width(), it.height())
             }

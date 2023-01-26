@@ -29,12 +29,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="dev.sora.protohax.activity.MicrosoftLoginActivity"
-            android:exported="false"
-            android:theme="@style/Theme.ProtoHax">
-        </activity>
-        <activity
-            android:name="dev.sora.protohax.activity.LogcatActivity"
+            android:name="dev.sora.protohax.ui.activity.MicrosoftLoginActivity"
             android:exported="false"
             android:theme="@style/Theme.ProtoHax">
         </activity>

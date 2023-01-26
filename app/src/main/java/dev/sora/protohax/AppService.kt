@@ -56,7 +56,7 @@ class AppService : VpnService(), Protector {
                 startForeground(1, createNotification())
             } else if (ACTION_STOP == action) {
                 stopVPN()
-                stopForeground(true)
+                stopForeground(STOP_FOREGROUND_REMOVE)
                 stopSelf()
             } else {
                 stopSelf()

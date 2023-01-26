@@ -1,4 +1,4 @@
-package dev.sora.protohax.activity
+package dev.sora.protohax.ui.activity
 
 import android.app.Activity
 import android.os.Bundle
