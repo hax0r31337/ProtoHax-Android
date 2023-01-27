@@ -1,8 +1,8 @@
 package dev.sora.protohax.relay
 
 import android.util.Log
-import dev.sora.protohax.AppService
-import dev.sora.protohax.ServiceListener
+import dev.sora.protohax.relay.service.AppService
+import dev.sora.protohax.relay.service.ServiceListener
 import libmitm.EstablishHandler
 import libmitm.Redirector
 

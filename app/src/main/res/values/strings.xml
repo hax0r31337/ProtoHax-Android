@@ -13,11 +13,8 @@
     <string name="close_overlay_menu">Close</string>
     <string name="microsoft_login">Microsoft Login</string>
     <string name="microsoft_logout">Logout Microsoft</string>
-    <string name="show_logs">Show Logs</string>
-    <string name="logcat_title">Logs</string>
     <string name="logcat_clear">Clear Logs</string>
-    <string name="logcat_copy">Copy Logs</string>
-    <string name="logcat_copied">Logs has beed copied to clipboard</string>
+    <string name="logcat_share">Share Logs</string>
     <string name="clickgui_modules">Module</string>
     <string name="clickgui_modules_back">Back</string>
     <string name="clickgui_configs">Config</string>

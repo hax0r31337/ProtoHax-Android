@@ -32,7 +32,6 @@ class ModuleESP : CheatModule("ESP") {
         session.eventManager.emit(RenderLayerView.EventRefreshRender(session))
     }
 
-
     @Listen
     fun onRender(event: RenderLayerView.EventRender) {
         event.needRefresh = true
@@ -51,10 +50,10 @@ class ModuleESP : CheatModule("ESP") {
                 .mul(rotY(-player.rotationYaw-180))
                 .mul(rotX(-player.rotationPitch))
                 .invert())
-//
+
         val paint = Paint()
         paint.strokeWidth = strokeWidthValue.get().toFloat()
-        paint.color = Color.rgb( colorRedValue.get(), colorGreenValue.get(), colorBlueValue.get())
+        paint.color = Color.rgb(colorRedValue.get(), colorGreenValue.get(), colorBlueValue.get())
 
         map.forEach {
             drawEntityBox(it, viewProjMatrix, screenWidth, screenHeight, canvas, paint)

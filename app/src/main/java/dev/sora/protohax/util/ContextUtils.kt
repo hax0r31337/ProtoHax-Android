@@ -2,6 +2,7 @@ package dev.sora.protohax.util
 
 import android.Manifest
 import android.content.Context
+import android.content.Intent
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.os.Build
@@ -35,6 +36,16 @@ object ContextUtils {
 
     fun Context.toast(resId: Int) {
         toast(getString(resId))
+    }
+
+    fun Context.shareText(text: String, title: String? = null) {
+        val shareIntent = Intent().apply {
+            action = Intent.ACTION_SEND
+            putExtra(Intent.EXTRA_TEXT, text)
+            type = "text/x-log"
+            flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
+        }
+        startActivity(Intent.createChooser(shareIntent, title))
     }
 
     val PackageInfo.hasInternetPermission: Boolean

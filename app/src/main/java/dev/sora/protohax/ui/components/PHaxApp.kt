@@ -235,7 +235,7 @@ private fun PHaxNavHost(
             EmptyComingSoon()
         }
         composable(PHaxRoute.LOGS) {
-            EmptyComingSoon()
+            LogsScreen()
         }
     }
 }

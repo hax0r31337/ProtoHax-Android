@@ -1,4 +1,4 @@
-package dev.sora.protohax
+package dev.sora.protohax.ui.activities
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
@@ -31,9 +31,6 @@ class MainActivity : ComponentActivity() {
     companion object {
         const val KEY_TARGET_PACKAGE_CACHE = "TARGET_PACKAGE"
         const val KEY_MICROSOFT_REFRESH_TOKEN = "MICROSOFT_REFRESH_TOKEN"
-        private const val REQUEST_CODE_WITH_MITM_RECALL = 0
-        private const val REQUEST_CODE_WITH_MITM_RECALL_ONLY_OK = 1
-        private const val REQUEST_CODE_MICROSOFT_LOGIN_OK = 2
         const val RESPONSE_CODE_MICROSOFT_LOGIN_OK = 1
     }
 }

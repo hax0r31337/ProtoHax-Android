@@ -1,4 +1,4 @@
-package dev.sora.protohax
+package dev.sora.protohax.relay.service
 
 import android.app.*
 import android.content.Intent
@@ -14,10 +14,12 @@ import android.view.WindowManager
 import android.widget.ImageView
 import android.widget.LinearLayout
 import androidx.core.app.NotificationCompat
+import dev.sora.protohax.R
 import dev.sora.protohax.relay.MinecraftRelay
 import dev.sora.protohax.relay.UdpForwarderHandler
 import dev.sora.protohax.relay.gui.PopupWindow
 import dev.sora.protohax.relay.gui.RenderLayerView
+import dev.sora.protohax.ui.activities.MainActivity
 import dev.sora.protohax.util.ContextUtils.readString
 import libmitm.Libmitm
 import libmitm.Protector
@@ -40,7 +42,10 @@ class AppService : VpnService(), Protector {
     override fun onCreate() {
         val notificationManager = getSystemService(Service.NOTIFICATION_SERVICE) as NotificationManager
         if (notificationManager.getNotificationChannel(CHANNEL_ID) == null) {
-            notificationManager.createNotificationChannel(NotificationChannel(CHANNEL_ID, getString(R.string.app_name), NotificationManager.IMPORTANCE_LOW))
+            notificationManager.createNotificationChannel(NotificationChannel(
+                CHANNEL_ID, getString(
+                    R.string.app_name
+                ), NotificationManager.IMPORTANCE_LOW))
         }
 
         windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
@@ -167,7 +172,9 @@ class AppService : VpnService(), Protector {
 
         val builder = NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle(getString(R.string.app_name))
-            .setContentText(getString(R.string.proxy_notification, getString(R.string.app_name), readString(MainActivity.KEY_TARGET_PACKAGE_CACHE) ?: "unknown"))
+            .setContentText(getString(
+                R.string.proxy_notification, getString(R.string.app_name), readString(
+                MainActivity.KEY_TARGET_PACKAGE_CACHE) ?: "unknown"))
             .setSmallIcon(R.drawable.notification_icon)
             .setLargeIcon(BitmapFactory.decodeResource(resources, R.mipmap.ic_launcher))
             .setOngoing(true)

@@ -1,4 +1,4 @@
-package dev.sora.protohax.ui.activity
+package dev.sora.protohax.ui.activities
 
 import android.app.Activity
 import android.os.Bundle
@@ -9,7 +9,6 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import com.google.gson.JsonParser
-import dev.sora.protohax.MainActivity
 import dev.sora.protohax.R
 import dev.sora.protohax.util.ContextUtils.writeString
 import dev.sora.relay.utils.HttpUtils

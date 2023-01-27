@@ -33,13 +33,12 @@ android {
         kotlinCompilerExtensionVersion compose_version
     }
     buildTypes {
-//        release {
-//            shrinkResources false
-//            minifyEnabled false
-////            shrinkResources true
-////            minifyEnabled true
-//            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
-//        }
+        release {
+            shrinkResources true
+            minifyEnabled true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            signingConfig signingConfigs.getByName('debug')
+        }
     }
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
@@ -55,6 +54,7 @@ android {
             excludes += '/DebugProbesKt.bin'
             excludes += '/kotlin-tooling-metadata.json'
         }
+        jniLibs.useLegacyPackaging true
     }
 }
 
@@ -74,6 +74,7 @@ dependencies {
 
     implementation "com.google.accompanist:accompanist-navigation-animation:$accompanist_version"
     implementation "com.google.accompanist:accompanist-adaptive:$accompanist_version"
+    implementation "com.google.accompanist:accompanist-systemuicontroller:$accompanist_version"
 
     implementation 'dev.sora.networking:libmitm:1.1.0'
 }

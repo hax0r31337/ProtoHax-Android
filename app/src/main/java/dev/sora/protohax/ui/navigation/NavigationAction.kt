@@ -1,11 +1,11 @@
 package dev.sora.protohax.ui.navigation
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Feed
+import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.People
 import androidx.compose.material.icons.filled.SpeakerNotes
-import androidx.compose.material.icons.outlined.Feed
+import androidx.compose.material.icons.outlined.BugReport
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.People
 import androidx.compose.material.icons.outlined.SpeakerNotes
@@ -63,8 +63,8 @@ val TOP_LEVEL_DESTINATIONS = listOf(
     ),
     PHaxTopLevelDestination(
         route = PHaxRoute.CONFIG,
-        selectedIcon = Icons.Filled.Feed,
-        unselectedIcon = Icons.Outlined.Feed,
+        selectedIcon = Icons.Filled.BugReport,
+        unselectedIcon = Icons.Outlined.BugReport,
         iconTextId = R.string.tab_configs
     ),
     PHaxTopLevelDestination(
@@ -73,5 +73,4 @@ val TOP_LEVEL_DESTINATIONS = listOf(
         unselectedIcon = Icons.Outlined.SpeakerNotes,
         iconTextId = R.string.tab_logs
     )
-
 )

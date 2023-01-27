@@ -19,7 +19,7 @@
         android:theme="@style/Theme.ProtoHax"
         tools:targetApi="33">
         <activity
-            android:name="dev.sora.protohax.MainActivity"
+            android:name="dev.sora.protohax.ui.activities.MainActivity"
             android:exported="true"
             android:theme="@style/Theme.ProtoHax">
             <intent-filter>
@@ -29,12 +29,12 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="dev.sora.protohax.ui.activity.MicrosoftLoginActivity"
+            android:name="dev.sora.protohax.ui.activities.MicrosoftLoginActivity"
             android:exported="false"
             android:theme="@style/Theme.ProtoHax">
         </activity>
 
-        <service android:name="dev.sora.protohax.AppService"
+        <service android:name="dev.sora.protohax.relay.service.AppService"
             android:permission="android.permission.BIND_VPN_SERVICE"
             android:exported="false">
             <intent-filter>

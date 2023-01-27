@@ -85,7 +85,11 @@ fun PHaxNavigationRail(
                                         id = destination.iconTextId
                                     )
                                 )
-                            }
+                            },
+                            label = {
+                                Text(text = stringResource(destination.iconTextId))
+                            },
+                            alwaysShowLabel = false
                         )
                     }
                 }

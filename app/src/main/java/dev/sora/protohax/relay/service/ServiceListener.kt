@@ -1,4 +1,4 @@
-package dev.sora.protohax
+package dev.sora.protohax.relay.service
 
 interface ServiceListener {
 
