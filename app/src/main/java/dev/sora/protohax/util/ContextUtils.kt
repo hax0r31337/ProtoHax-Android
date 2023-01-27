@@ -1,4 +1,4 @@
-package dev.sora.protohax
+package dev.sora.protohax.util
 
 import android.Manifest
 import android.content.Context

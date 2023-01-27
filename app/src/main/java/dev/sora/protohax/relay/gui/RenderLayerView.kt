@@ -3,7 +3,6 @@ package dev.sora.protohax.relay.gui
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.*
-import android.util.Log
 import android.view.View
 import dev.sora.relay.game.GameSession
 import dev.sora.relay.game.event.GameEvent

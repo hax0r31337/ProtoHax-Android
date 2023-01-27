@@ -23,4 +23,10 @@
     <string name="clickgui_configs">Config</string>
     <string name="clickgui_configs_create">create</string>
     <string name="clickgui_configs_save">save</string>
+    <string name="tab_dashboard">Dashboard</string>
+    <string name="tab_accounts">Accounts</string>
+    <string name="tab_configs">Configs</string>
+    <string name="tab_logs">Logs</string>
+    <string name="tab_btn_connect">Connect</string>
+    <string name="tab_btn_navigation_drawer">Navigation Drawer</string>
 </resources>

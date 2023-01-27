@@ -3,27 +3,27 @@ package dev.sora.protohax
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
-import androidx.compose.material3.Text
-import androidx.compose.ui.Modifier
-import dev.sora.protohax.ui.MyApplicationTheme
+import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
+import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
+import com.google.accompanist.adaptive.calculateDisplayFeatures
+import dev.sora.protohax.ui.components.PHaxApp
+import dev.sora.protohax.ui.theme.MyApplicationTheme
 
 
 class MainActivity : ComponentActivity() {
 
+    @OptIn(ExperimentalMaterial3WindowSizeClassApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
             MyApplicationTheme {
-                // A surface container using the 'background' color from the theme
-                Surface(
-                    modifier = Modifier.fillMaxSize(),
-                    color = MaterialTheme.colorScheme.background
-                ) {
-                    Text(text = "Hello, World!")
-                }
+                val windowSize = calculateWindowSizeClass(this)
+                val displayFeatures = calculateDisplayFeatures(this)
+
+                PHaxApp(
+                    windowSize = windowSize,
+                    displayFeatures = displayFeatures,
+                )
             }
         }
     }

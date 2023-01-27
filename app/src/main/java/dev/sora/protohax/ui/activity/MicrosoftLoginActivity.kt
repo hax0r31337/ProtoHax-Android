@@ -9,9 +9,9 @@ import android.webkit.WebResourceRequest
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import com.google.gson.JsonParser
-import dev.sora.protohax.ContextUtils.writeString
 import dev.sora.protohax.MainActivity
 import dev.sora.protohax.R
+import dev.sora.protohax.util.ContextUtils.writeString
 import dev.sora.relay.utils.HttpUtils
 import java.io.IOException
 import kotlin.concurrent.thread
