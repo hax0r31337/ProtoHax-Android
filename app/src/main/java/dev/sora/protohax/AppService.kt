@@ -1,23 +1,32 @@
 package dev.sora.protohax
 
+import android.annotation.SuppressLint
 import android.app.*
 import android.content.Intent
 import android.graphics.BitmapFactory
+import android.graphics.Color
 import android.graphics.PixelFormat
 import android.net.VpnService
+import android.net.http.SslError
 import android.os.ParcelFileDescriptor
 import android.util.Log
 import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
+import android.webkit.SslErrorHandler
+import android.webkit.WebSettings
+import android.webkit.WebView
+import android.webkit.WebViewClient
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.RelativeLayout
 import androidx.core.app.NotificationCompat
 import dev.sora.protohax.relay.MinecraftRelay
 import dev.sora.protohax.relay.UdpForwarderHandler
 import dev.sora.protohax.relay.gui.PopupWindow
 import dev.sora.protohax.relay.gui.RenderLayerView
+import dev.sora.protohax.relay.ui.`interface`.WebAppInterface
 import dev.sora.protohax.util.ContextUtils.readString
 import libmitm.Libmitm
 import libmitm.Protector
@@ -33,7 +42,7 @@ class AppService : VpnService(), Protector {
     private var layoutView: View? = null
     private var renderLayerView: View? = null
     private val popupWindow = PopupWindow()
-
+    private lateinit var webView : WebView
     private var vpnDescriptor: ParcelFileDescriptor? = null
     private var tun: TUN? = null
 
@@ -44,6 +53,29 @@ class AppService : VpnService(), Protector {
         }
 
         windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
+        webView = WebView(this).apply {
+            setBackgroundColor(Color.TRANSPARENT)
+            isHorizontalScrollBarEnabled = false
+            webViewClient = object : WebViewClient() {
+                @SuppressLint("WebViewClientOnReceivedSslError")
+                override fun onReceivedSslError(
+                    view: WebView,
+                    handler: SslErrorHandler,
+                    error: SslError
+                ) {
+                    handler.proceed()
+                }
+            }
+            settings.javaScriptEnabled = true
+            settings.javaScriptCanOpenWindowsAutomatically = true
+            settings.mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
+            settings.domStorageEnabled = true
+            settings.blockNetworkLoads = false
+            settings.blockNetworkImage = false
+            settings.loadWithOverviewMode = true
+            settings.mediaPlaybackRequiresUserGesture = false
+            addJavascriptInterface(WebAppInterface(context, this), "Android")
+        }
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -75,7 +107,7 @@ class AppService : VpnService(), Protector {
         builder.setMtu(VPN_MTU)
         builder.setSession("ProtoHax")
         builder.addAllowedApplication(readString(MainActivity.KEY_TARGET_PACKAGE_CACHE)!!)
-        builder.addAllowedApplication(this.packageName)
+        //builder.addAllowedApplication(this.packageName)
 //        builder.addDnsServer("8.8.8.8")
         // ipv4
         if (hasIPv4) {
@@ -252,17 +284,22 @@ class AppService : VpnService(), Protector {
         this.layoutView = layout
         windowManager.addView(layout, params)
 
-        params = WindowManager.LayoutParams(
+        val params2 = WindowManager.LayoutParams(
             WindowManager.LayoutParams.MATCH_PARENT,
             WindowManager.LayoutParams.MATCH_PARENT,
             WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE or WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
             PixelFormat.TRANSLUCENT
         )
-        params.gravity = Gravity.TOP or Gravity.END
+        params2.gravity = Gravity.TOP or Gravity.END
         renderLayerView = RenderLayerView(this, MinecraftRelay.session)
-        windowManager.addView(renderLayerView, params)
+        relativeLayout=RelativeLayout(this)
+        relativeLayout.addView(renderLayerView)
+        relativeLayout.addView(webView)
+        webView.loadUrl("http://192.168.50.147:8084/")
+        windowManager.addView(relativeLayout, params2)
     }
+    lateinit var relativeLayout : RelativeLayout
 
     companion object {
         const val ACTION_START = "dev.sora.libmitm.vpn.start"
