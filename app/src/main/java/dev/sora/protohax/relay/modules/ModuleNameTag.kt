@@ -1,58 +1,41 @@
 package dev.sora.protohax.relay.modules
 
-import android.content.Context
 import android.graphics.Canvas
-import android.graphics.Color
-import android.graphics.Paint
 import android.graphics.Point
 import com.nukkitx.math.matrix.Matrix4f
 import com.nukkitx.math.vector.Vector2d
 import dev.sora.protohax.relay.gui.RenderLayerView
 import dev.sora.protohax.relay.service.AppService
-import dev.sora.protohax.ui.render.EntityESP
-import dev.sora.protohax.util.ColorUtils
+import dev.sora.protohax.ui.render.EntityNameTag
 import dev.sora.relay.cheat.module.CheatModule
-import dev.sora.relay.cheat.module.impl.combat.ModuleAntiBot.isBot
 import dev.sora.relay.cheat.value.BoolValue
 import dev.sora.relay.cheat.value.IntValue
-import dev.sora.relay.cheat.value.ListValue
-import dev.sora.relay.game.entity.Entity
 import dev.sora.relay.game.entity.EntityPlayer
+import dev.sora.relay.game.entity.EntityPlayerSP
 import dev.sora.relay.game.event.Listen
 import kotlin.math.cos
 import kotlin.math.sin
 
 
-class ModuleESP : CheatModule("ESP") {
-
-    private val modeValue = ListValue("Mode", arrayOf("Box","RoundBox", "2D", "Glow"), "Box")
+class ModuleNameTag : CheatModule("NameTag") {
 
     private val fovValue = IntValue("Fov", 110, 40, 110)
-    private val allObjectsValue = BoolValue("AllObjects", false)
     private val botsValue = BoolValue("Bots", false)
-    private val movePredictionValue = BoolValue("MovePrediction", false)
     val leftStatusBarValue = BoolValue("LeftStatusBar", true)
     private val originalSizeValue = BoolValue("OriginalSize", true)
     private val avoidScreenValue = BoolValue("AvoidScreen", true)
-    private val strokeWidthValue = IntValue("StrokeWidth", 2, 1, 10)
-    private val rainbowValue = BoolValue("Rainbow", true)
-    private val colorRedValue = IntValue("ColorRed", 61, 0, 255)
-    private val colorGreenValue = IntValue("ColorGreen", 154, 0, 255)
-    private val colorBlueValue = IntValue("ColorBlue", 220, 0, 255)
 
     override fun onEnable() {
         session.eventManager.emit(RenderLayerView.EventRefreshRender(session))
         displayList.clear()
     }
-    var displayList = HashMap<Entity, EntityESP>()
+    var displayList = HashMap<EntityPlayer, EntityNameTag>()
     @Listen
     fun onRender(event: RenderLayerView.EventRender) {
         event.needRefresh = true
         if (avoidScreenValue.get() && event.session.thePlayer.openContainer != null) return
-        val map = event.session.theWorld.entityMap.values
-            .let { if (allObjectsValue.get()) it else it.filter { e -> e is EntityPlayer && (botsValue.get() || !e.isBot(event.session))} }
+        val map = event.session.theWorld.entityMap.values.filterIsInstance<EntityPlayer>()
         if (map.isEmpty()) return
-
         val player = event.session.thePlayer
         val canvas = event.canvas
         val realSize = Point()
@@ -66,21 +49,17 @@ class ModuleESP : CheatModule("ESP") {
                 .mul(rotX(-player.rotationPitch))
                 .invert())
 //
-        val paint = Paint()
-        paint.strokeWidth = strokeWidthValue.get().toFloat()
-        val colors = ColorUtils.getChromaRainbow(100.0, 10.0)
-        paint.color = if(rainbowValue.get()) Color.rgb(colors.r, colors.g, colors.b) else Color.rgb( colorRedValue.get(), colorGreenValue.get(), colorBlueValue.get())
-
         map.forEach {
-            drawEntityBox(it, viewProjMatrix, screenWidth, screenHeight, canvas, paint)
+            drawEntityBox(it, viewProjMatrix, screenWidth, screenHeight, canvas)
         }
     }
 
-    private fun drawEntityBox(entity: Entity, viewProjMatrix: Matrix4f, screenWidth: Int, screenHeight: Int, canvas: Canvas, paint: Paint) {
+    private fun drawEntityBox(entity: EntityPlayer, viewProjMatrix: Matrix4f, screenWidth: Int, screenHeight: Int, canvas: Canvas) {
         if(displayList[entity]==null){
-            displayList[entity]=EntityESP()
+            displayList[entity]= EntityNameTag()
         }
-        displayList[entity]!!.draw(entity,viewProjMatrix,screenWidth,screenHeight,canvas,paint,modeValue.get(),movePredictionValue.get(),this)
+        displayList[entity]!!.draw(entity,viewProjMatrix,screenWidth,screenHeight,canvas,this)
+
     }
 
     fun worldToScreen(posX: Double, posY: Double, posZ: Double, viewProjMatrix: Matrix4f, screenWidth: Int, screenHeight: Int): Vector2d? {
