@@ -7,6 +7,8 @@ import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.os.Build
 import android.widget.Toast
+import androidx.core.content.FileProvider
+import java.io.File
 
 
 object ContextUtils {
@@ -38,12 +40,17 @@ object ContextUtils {
         toast(getString(resId))
     }
 
-    fun Context.shareText(text: String, title: String? = null) {
+    fun Context.shareTextAsFile(text: String, title: String? = null) {
+        val file = File(File(cacheDir, "share").also {
+            if (!it.exists()) it.mkdirs()
+        }, "ProtoHax-${System.currentTimeMillis()}.log")
+        file.writeText(text)
+        file.deleteOnExit()
+
         val shareIntent = Intent().apply {
             action = Intent.ACTION_SEND
-            putExtra(Intent.EXTRA_TEXT, text)
+            putExtra(Intent.EXTRA_STREAM, FileProvider.getUriForFile(this@shareTextAsFile, packageName, file))
             type = "text/x-log"
-            flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
         }
         startActivity(Intent.createChooser(shareIntent, title))
     }

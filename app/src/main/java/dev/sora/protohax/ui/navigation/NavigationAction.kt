@@ -2,13 +2,13 @@ package dev.sora.protohax.ui.navigation
 
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.BugReport
+import androidx.compose.material.icons.filled.Feed
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.People
-import androidx.compose.material.icons.filled.SpeakerNotes
 import androidx.compose.material.icons.outlined.BugReport
+import androidx.compose.material.icons.outlined.Feed
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.People
-import androidx.compose.material.icons.outlined.SpeakerNotes
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
@@ -56,21 +56,21 @@ val TOP_LEVEL_DESTINATIONS = listOf(
         iconTextId = R.string.tab_dashboard
     ),
     PHaxTopLevelDestination(
+        route = PHaxRoute.CONFIG,
+        selectedIcon = Icons.Filled.Feed,
+        unselectedIcon = Icons.Outlined.Feed,
+        iconTextId = R.string.tab_configs
+    ),
+    PHaxTopLevelDestination(
         route = PHaxRoute.ACCOUNTS,
         selectedIcon = Icons.Filled.People,
         unselectedIcon = Icons.Outlined.People,
         iconTextId = R.string.tab_accounts
     ),
     PHaxTopLevelDestination(
-        route = PHaxRoute.CONFIG,
+        route = PHaxRoute.LOGS,
         selectedIcon = Icons.Filled.BugReport,
         unselectedIcon = Icons.Outlined.BugReport,
-        iconTextId = R.string.tab_configs
-    ),
-    PHaxTopLevelDestination(
-        route = PHaxRoute.LOGS,
-        selectedIcon = Icons.Filled.SpeakerNotes,
-        unselectedIcon = Icons.Outlined.SpeakerNotes,
         iconTextId = R.string.tab_logs
     )
 )

@@ -14,7 +14,6 @@ import dev.sora.relay.RakNetRelayListener
 import dev.sora.relay.RakNetRelaySession
 import dev.sora.relay.RakNetRelaySessionListener
 import dev.sora.relay.cheat.command.CommandManager
-import dev.sora.relay.cheat.config.AbstractConfigManager
 import dev.sora.relay.cheat.config.ConfigManagerFileSystem
 import dev.sora.relay.cheat.module.ModuleManager
 import dev.sora.relay.cheat.module.impl.ModuleResourcePackSpoof
@@ -38,7 +37,7 @@ object MinecraftRelay {
     val session = GameSession()
     val moduleManager: ModuleManager
     val commandManager: CommandManager
-    val configManager: AbstractConfigManager
+    val configManager: ConfigManagerFileSystem
 
     var listenPort: Int = 10000+Random.nextInt(55534)
 

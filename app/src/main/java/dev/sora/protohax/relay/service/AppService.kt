@@ -53,6 +53,7 @@ class AppService : VpnService(), Protector {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         intent ?: return START_NOT_STICKY
+        instance = this
 
         val action = intent.action
         try {
@@ -119,7 +120,6 @@ class AppService : VpnService(), Protector {
         tun.start()
         Log.i("ProtoHax", "netstack started")
         isActive = true
-        instance = this
         try {
             onServiceStart()
             serviceListeners.forEach { it.onServiceStarted() }
@@ -274,6 +274,10 @@ class AppService : VpnService(), Protector {
     companion object {
         const val ACTION_START = "dev.sora.libmitm.vpn.start"
         const val ACTION_STOP = "dev.sora.libmitm.vpn.stop"
+        /**
+         * this does nothing but initialize context
+         */
+        const val ACTION_INITIALIZE = "dev.sora.libmitm.vpn.initialize"
         const val CHANNEL_ID = "dev.sora.protohax.NOTIFICATION_CHANNEL_ID"
 
         const val VPN_MTU = 1500

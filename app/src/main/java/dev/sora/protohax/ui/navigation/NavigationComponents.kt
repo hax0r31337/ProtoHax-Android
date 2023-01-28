@@ -34,7 +34,6 @@ fun PHaxNavigationRail(
         modifier = Modifier.fillMaxHeight(),
         containerColor = MaterialTheme.colorScheme.inverseOnSurface
     ) {
-        // TODO remove custom nav rail positioning when NavRail component supports it. ticket : b/232495216
         Layout(
             modifier = Modifier.widthIn(max = 80.dp),
             content = {
@@ -165,7 +164,6 @@ fun PermanentNavigationDrawerContent(
     navigateToTopLevelDestination: (PHaxTopLevelDestination) -> Unit,
 ) {
     PermanentDrawerSheet(modifier = Modifier.sizeIn(minWidth = 200.dp, maxWidth = 300.dp)) {
-        // TODO remove custom nav drawer content positioning when NavDrawer component supports it. ticket : b/232495216
         Layout(
             modifier = Modifier
                 .background(MaterialTheme.colorScheme.inverseOnSurface)
@@ -282,7 +280,6 @@ fun ModalNavigationDrawerContent(
     onDrawerClicked: () -> Unit = {}
 ) {
     ModalDrawerSheet {
-        // TODO remove custom nav drawer content positioning when NavDrawer component supports it. ticket : b/232495216
         Layout(
             modifier = Modifier
                 .background(MaterialTheme.colorScheme.inverseOnSurface)

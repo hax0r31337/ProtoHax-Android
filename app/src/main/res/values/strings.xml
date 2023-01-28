@@ -20,10 +20,21 @@
     <string name="clickgui_configs">Config</string>
     <string name="clickgui_configs_create">create</string>
     <string name="clickgui_configs_save">save</string>
+    <string name="config_rename">Rename</string>
+    <string name="config_copy">Copy</string>
+    <string name="config_share">Share</string>
+    <string name="config_delete">Delete</string>
+    <string name="config_create">Create New Config</string>
+    <string name="config_delete_dialog_message">Are you sure about delete config %s</string>
+    <string name="config_rename_dialog_message">Rename</string>
+    <string name="config_copy_dialog_message">Copy</string>
     <string name="tab_dashboard">Dashboard</string>
     <string name="tab_accounts">Accounts</string>
     <string name="tab_configs">Configs</string>
     <string name="tab_logs">Logs</string>
     <string name="tab_btn_connect">Connect</string>
     <string name="tab_btn_navigation_drawer">Navigation Drawer</string>
+    <string name="dialog_title">Proceed?</string>
+    <string name="dialog_confirm">Confirm</string>
+    <string name="dialog_cancel">Cancel</string>
 </resources>

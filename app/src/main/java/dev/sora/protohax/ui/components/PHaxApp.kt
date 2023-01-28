@@ -22,6 +22,10 @@ import androidx.window.layout.FoldingFeature
 import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
+import dev.sora.protohax.ui.components.screen.AccountsScreen
+import dev.sora.protohax.ui.components.screen.ConfigScreen
+import dev.sora.protohax.ui.components.screen.DashboardScreen
+import dev.sora.protohax.ui.components.screen.LogsScreen
 import dev.sora.protohax.ui.navigation.*
 import dev.sora.protohax.util.*
 import kotlinx.coroutines.launch
@@ -114,7 +118,6 @@ private fun PHaxNavigationWrapper(
         navBackStackEntry?.destination?.route ?: PHaxRoute.DASHBOARD
 
     if (navigationType == NavigationType.PERMANENT_NAVIGATION_DRAWER) {
-        // TODO check on custom width of PermanentNavigationDrawer: b/232495216
         PermanentNavigationDrawer(drawerContent = {
             PermanentNavigationDrawerContent(
                 selectedDestination = selectedDestination,
@@ -226,16 +229,16 @@ private fun PHaxNavHost(
         // the translation was default fadeInOut
     ) {
         composable(PHaxRoute.DASHBOARD) {
-            EmptyComingSoon()
+            DashboardScreen(navigationType)
         }
         composable(PHaxRoute.CONFIG) {
-            EmptyComingSoon()
+            ConfigScreen(navigationType)
         }
         composable(PHaxRoute.ACCOUNTS) {
-            EmptyComingSoon()
+            AccountsScreen(navigationType)
         }
         composable(PHaxRoute.LOGS) {
-            LogsScreen()
+            LogsScreen(navigationType)
         }
     }
 }

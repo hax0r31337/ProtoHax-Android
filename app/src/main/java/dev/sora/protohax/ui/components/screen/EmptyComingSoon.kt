@@ -1,4 +1,4 @@
-package dev.sora.protohax.ui.components
+package dev.sora.protohax.ui.components.screen
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
