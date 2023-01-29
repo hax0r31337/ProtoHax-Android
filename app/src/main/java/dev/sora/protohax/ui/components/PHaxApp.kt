@@ -1,10 +1,10 @@
 package dev.sora.protohax.ui.components
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.*
 import androidx.compose.material3.windowsizeclass.WindowHeightSizeClass
@@ -203,7 +203,7 @@ fun PHaxAppContent(
             PHaxNavHost(
                 navController = navController,
                 navigationType = navigationType,
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.weight(1f).background(MaterialTheme.colorScheme.background),
             )
             AnimatedVisibility(visible = navigationType == NavigationType.BOTTOM_NAVIGATION) {
                 PHaxBottomNavigationBar(
@@ -226,7 +226,12 @@ private fun PHaxNavHost(
         modifier = modifier,
         navController = navController,
         startDestination = PHaxRoute.DASHBOARD,
-        // the translation was default fadeInOut
+        enterTransition = {
+            scaleIn(initialScale = 0.7f) + fadeIn()
+        },
+        exitTransition = {
+            scaleOut(targetScale = 0.7f) + fadeOut()
+        },
     ) {
         composable(PHaxRoute.DASHBOARD) {
             DashboardScreen(navigationType)

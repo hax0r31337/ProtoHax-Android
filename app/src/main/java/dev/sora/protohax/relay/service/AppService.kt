@@ -259,16 +259,16 @@ class AppService : VpnService(), Protector {
         this.layoutView = layout
         windowManager.addView(layout, params)
 
-        params = WindowManager.LayoutParams(
+        val params1 = WindowManager.LayoutParams(
             WindowManager.LayoutParams.MATCH_PARENT,
             WindowManager.LayoutParams.MATCH_PARENT,
             WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
             PixelFormat.TRANSLUCENT
         )
-        params.gravity = Gravity.TOP or Gravity.END
+        params1.gravity = Gravity.TOP or Gravity.END
         renderLayerView = RenderLayerView(this, MinecraftRelay.session)
-        windowManager.addView(renderLayerView, params)
+        windowManager.addView(renderLayerView, params1)
     }
 
     companion object {

@@ -9,8 +9,6 @@ import dev.sora.protohax.util.NavigationType
 
 @Composable
 fun DashboardScreen(navigationType: NavigationType) {
-    val scope = rememberCoroutineScope()
-
     PHaxAppBar(
         title = stringResource(id = R.string.tab_dashboard),
         navigationType = navigationType,

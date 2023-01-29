@@ -6,6 +6,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSizeClassApi
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
+import androidx.core.view.WindowCompat
 import com.google.accompanist.adaptive.calculateDisplayFeatures
 import dev.sora.protohax.relay.service.AppService
 import dev.sora.protohax.ui.components.PHaxApp
@@ -22,6 +23,8 @@ class MainActivity : ComponentActivity() {
         val intent = Intent(AppService.ACTION_INITIALIZE)
         intent.setPackage(packageName)
         startService(intent)
+
+        WindowCompat.setDecorFitsSystemWindows(window, false)
 
         setContent {
             MyApplicationTheme {
