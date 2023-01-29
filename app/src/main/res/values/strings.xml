@@ -1,5 +1,6 @@
 <resources>
     <string name="app_name" translatable="false">ProtoHax</string>
+
     <string name="connect_to_proxy">Connect to MITM proxy</string>
     <string name="connected">Connected, click here to launch app</string>
     <string name="not_connected">Not connected</string>
@@ -15,11 +16,13 @@
     <string name="microsoft_logout">Logout Microsoft</string>
     <string name="logcat_clear">Clear Logs</string>
     <string name="logcat_share">Share Logs</string>
+
     <string name="clickgui_modules">Module</string>
     <string name="clickgui_modules_back">Back</string>
     <string name="clickgui_configs">Config</string>
     <string name="clickgui_configs_create">create</string>
     <string name="clickgui_configs_save">save</string>
+
     <string name="config_rename">Rename</string>
     <string name="config_copy">Copy</string>
     <string name="config_share">Share</string>
@@ -28,6 +31,11 @@
     <string name="config_delete_dialog_message">Are you sure about delete config %s</string>
     <string name="config_rename_dialog_message">Rename</string>
     <string name="config_copy_dialog_message">Copy</string>
+    <string name="accounts_login">Login</string>
+    <string name="accounts_login_as">Login as %s</string>
+    <string name="account_select">Select</string>
+    <string name="account_selected">(Selected)</string>
+    <string name="account_delete_dialog_message">Are you sure about delete account %s</string>
     <string name="tab_dashboard">Dashboard</string>
     <string name="tab_accounts">Accounts</string>
     <string name="tab_configs">Configs</string>

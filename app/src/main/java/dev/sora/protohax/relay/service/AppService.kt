@@ -16,7 +16,6 @@ import android.widget.LinearLayout
 import androidx.core.app.NotificationCompat
 import dev.sora.protohax.R
 import dev.sora.protohax.relay.MinecraftRelay
-import dev.sora.protohax.relay.UdpForwarderHandler
 import dev.sora.protohax.relay.gui.PopupWindow
 import dev.sora.protohax.relay.gui.RenderLayerView
 import dev.sora.protohax.ui.activities.MainActivity

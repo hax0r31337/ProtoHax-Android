@@ -1,8 +1,7 @@
-package dev.sora.protohax.relay
+package dev.sora.protohax.relay.service
 
 import android.util.Log
-import dev.sora.protohax.relay.service.AppService
-import dev.sora.protohax.relay.service.ServiceListener
+import dev.sora.protohax.relay.MinecraftRelay
 import libmitm.EstablishHandler
 import libmitm.Redirector
 

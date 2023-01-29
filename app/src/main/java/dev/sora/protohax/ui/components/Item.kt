@@ -12,30 +12,31 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ListItem(
     title: String,
-    description: String = "",
+    description: @Composable () -> Unit = {},
     dropdownTitle: Boolean = true,
     expanded: MutableState<Boolean> = remember { mutableStateOf(false) },
+    onClick: () -> Unit = {},
     menuItems: @Composable (ColumnScope.() -> Unit)
 ) {
     Row(verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .combinedClickable(onLongClick = {
                 expanded.value = true
-            }, onClick = {})
+            }, onClick = onClick)
             .fillMaxWidth(),
     ) {
         Column(modifier = Modifier.padding(18.dp, 12.dp)) {
-            Text(text = title, color = MaterialTheme.colorScheme.onSurface, fontWeight = FontWeight.Bold)
-            if (description.isNotEmpty()) {
-                Text(text = description, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
+            Text(text = title, color = MaterialTheme.colorScheme.onSurface)
+            description()
+//            if (description.isNotEmpty()) {
+//                Text(text = description, color = MaterialTheme.colorScheme.onSurfaceVariant)
+//            }
         }
 
         Box(

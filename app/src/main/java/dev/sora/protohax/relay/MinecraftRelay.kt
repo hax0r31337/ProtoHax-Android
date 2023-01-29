@@ -1,14 +1,11 @@
 package dev.sora.protohax.relay
 
 import android.util.Log
-import com.google.gson.JsonParser
 import com.nukkitx.network.raknet.RakNetServerSession
 import dev.sora.protohax.relay.log.NettyLoggerFactory
 import dev.sora.protohax.relay.modules.ModuleESP
 import dev.sora.protohax.relay.service.AppService
-import dev.sora.protohax.ui.activities.MainActivity
-import dev.sora.protohax.util.ContextUtils.readString
-import dev.sora.protohax.util.ContextUtils.writeString
+import dev.sora.protohax.relay.service.UdpForwarderHandler
 import dev.sora.relay.RakNetRelay
 import dev.sora.relay.RakNetRelayListener
 import dev.sora.relay.RakNetRelaySession
@@ -20,7 +17,6 @@ import dev.sora.relay.cheat.module.impl.ModuleResourcePackSpoof
 import dev.sora.relay.game.GameSession
 import dev.sora.relay.session.RakNetRelaySessionListenerAutoCodec
 import dev.sora.relay.session.RakNetRelaySessionListenerMicrosoft
-import dev.sora.relay.utils.HttpUtils
 import dev.sora.relay.utils.logInfo
 import io.netty.util.internal.logging.InternalLoggerFactory
 import java.net.DatagramSocket
@@ -52,6 +48,9 @@ object MinecraftRelay {
         configManager = ConfigManagerFileSystem(AppService.instance.getExternalFilesDir("configs")!!, ".json", moduleManager)
 
         session.eventManager.registerListener(commandManager)
+
+        // initialize AccountManager
+        AccountManager
     }
 
     private fun registerAdditionalModules(moduleManager: ModuleManager) {
@@ -104,11 +103,10 @@ object MinecraftRelay {
                 this@MinecraftRelay.session.netSession = session
                 session.listener.childListener.add(this@MinecraftRelay.session)
                 if (msLoginSession == null) {
-                    msLoginSession = AppService.instance.readString(MainActivity.KEY_MICROSOFT_REFRESH_TOKEN)?.let {
-                        val tokens = getMSAccessToken(it)
-                        AppService.instance.writeString(MainActivity.KEY_MICROSOFT_REFRESH_TOKEN, tokens.second)
-                        logInfo("microsoft access token successfully fetched")
-                        RakNetRelaySessionListenerMicrosoft(tokens.first, RakNetRelaySessionListenerMicrosoft.DEVICE_NINTENDO)
+                    msLoginSession = AccountManager.currentAccount?.let {
+                        val accessToken = it.refresh()
+                        logInfo("logged in as ${it.remark}")
+                        RakNetRelaySessionListenerMicrosoft(accessToken, it.platform)
                     }
                 }
                 msLoginSession?.let {
@@ -124,18 +122,6 @@ object MinecraftRelay {
             ModuleResourcePackSpoof.resourcePackProvider = ModuleResourcePackSpoof.FileSystemResourcePackProvider(it)
         }
         Log.i("ProtoHax", "relay started")
-    }
-
-    /**
-     * refreshes token
-     * @return Pair(accessToken, newRefreshToken)
-     */
-    private fun getMSAccessToken(refreshToken: String): Pair<String, String> {
-        val body = JsonParser.parseReader(
-            HttpUtils.make("https://login.live.com/oauth20_token.srf", "POST",
-                "client_id=00000000441cc96b&scope=service::user.auth.xboxlive.com::MBI_SSL&grant_type=refresh_token&redirect_uri=https://login.live.com/oauth20_desktop.srf&refresh_token=${refreshToken}",
-                mapOf("Content-Type" to "application/x-www-form-urlencoded")).inputStream.reader(Charsets.UTF_8)).asJsonObject
-        return body.get("access_token").asString to body.get("refresh_token").asString
     }
 
     fun close() {

@@ -41,7 +41,5 @@ class MainActivity : ComponentActivity() {
 
     companion object {
         const val KEY_TARGET_PACKAGE_CACHE = "TARGET_PACKAGE"
-        const val KEY_MICROSOFT_REFRESH_TOKEN = "MICROSOFT_REFRESH_TOKEN"
-        const val RESPONSE_CODE_MICROSOFT_LOGIN_OK = 1
     }
 }

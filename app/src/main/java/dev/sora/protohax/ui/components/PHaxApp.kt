@@ -4,7 +4,6 @@ import androidx.compose.animation.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.*
 import androidx.compose.material3.windowsizeclass.WindowHeightSizeClass
@@ -227,10 +226,10 @@ private fun PHaxNavHost(
         navController = navController,
         startDestination = PHaxRoute.DASHBOARD,
         enterTransition = {
-            scaleIn(initialScale = 0.7f) + fadeIn()
+            scaleIn(initialScale = 0.8f) + fadeIn()
         },
         exitTransition = {
-            scaleOut(targetScale = 0.7f) + fadeOut()
+            scaleOut(targetScale = 0.8f) + fadeOut()
         },
     ) {
         composable(PHaxRoute.DASHBOARD) {

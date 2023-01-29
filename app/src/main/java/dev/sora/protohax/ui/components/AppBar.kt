@@ -11,10 +11,12 @@ import dev.sora.protohax.util.NavigationType
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun PHaxAppBar(title: String,
-               navigationType: NavigationType,
-               actions: @Composable (RowScope.() -> Unit) = {},
-               content:  @Composable (PaddingValues) -> Unit) {
+fun PHaxAppBar(
+    title: String,
+    navigationType: NavigationType,
+    actions: @Composable (RowScope.() -> Unit) = {},
+    content:  @Composable (PaddingValues) -> Unit
+) {
     val scrollBehavior = if (navigationType == NavigationType.PERMANENT_NAVIGATION_DRAWER) {
         TopAppBarDefaults.pinnedScrollBehavior()
     } else {
