@@ -18,7 +18,18 @@
 
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
-#-renamesourcefileattribute null
+-renamesourcefileattribute null
 
--keepclassmembers class dev.sora.** { *; }
 -keep class io.netty.** { *; }
+
+-keepclasseswithmembers class * {
+    @dev.sora.relay.game.event.Listen <methods>;
+}
+
+-keepclasseswithmembers class * {
+    @com.google.gson.annotations.SerializedName <fields>;
+}
+
+-keepclasseswithmembers class * {
+    <init>(...);
+}
