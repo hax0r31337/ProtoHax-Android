@@ -1,8 +1,10 @@
 package dev.sora.protohax.ui.components.screen
 
-import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ClearAll
 import androidx.compose.material.icons.filled.Share
@@ -11,6 +13,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -49,17 +52,17 @@ fun LogsScreen(navigationType: NavigationType) {
             }
         }
     ) { innerPadding ->
-        LazyColumn(
-            contentPadding = innerPadding,
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+        Spacer(modifier = Modifier.size(8.dp))
+        Column(
+            modifier = Modifier
+                .padding(innerPadding)
+                .verticalScroll(rememberScrollState())
         ) {
-            item {
-                // this method was triggered every time the view updated
-                scope.refreshLogs(text)
+            // this method was triggered every time the view updated
+            scope.refreshLogs(text)
 
-                SelectionContainer {
-                    Text(text = text.value, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                }
+            SelectionContainer {
+                Text(text = text.value, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
         }
     }

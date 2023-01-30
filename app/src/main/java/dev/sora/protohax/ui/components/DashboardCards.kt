@@ -39,7 +39,7 @@ fun CardLoginAlert() {
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(15.dp),
+                .padding(10.dp),
         ) {
             Row(
                 modifier = Modifier.padding(15.dp),
@@ -66,7 +66,7 @@ fun CardCurrentApplication(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(15.dp)
+            .padding(10.dp)
             .clickable {
                 pickAppActivityLauncher.launch(Intent(ctx, AppPickerActivity::class.java))
             },

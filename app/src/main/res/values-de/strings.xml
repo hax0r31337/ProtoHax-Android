@@ -53,4 +53,5 @@
     <string name="dialog_title">Fortfahren?</string>
     <string name="dialog_confirm">Bestätigen</string>
     <string name="dialog_cancel">Abbrechen</string>
+    <string name="dialog_loading">Beladung</string>
 </resources>

@@ -6,10 +6,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.outlined.CheckBox
-import androidx.compose.material.icons.outlined.Delete
-import androidx.compose.material.icons.outlined.Edit
-import androidx.compose.material.icons.outlined.Remove
+import androidx.compose.material.icons.outlined.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -81,28 +78,15 @@ fun AccountsScreen(navigationType: NavigationType) {
                         }
                     },
                     onClick = {
-                        AccountManager.currentAccount = it
+                        if (it == AccountManager.currentAccount) {
+                            AccountManager.currentAccount = null
+                        } else {
+                            AccountManager.currentAccount = it
+                        }
                         refreshList()
                     },
                     expanded = expanded
                 ) {
-                    DropdownMenuItem(
-                        text = { Text(stringResource(R.string.account_select)) },
-                        onClick = {
-                            AccountManager.currentAccount = it
-                            refreshList()
-                            expanded.value = false
-                        },
-                        leadingIcon = { Icon(Icons.Outlined.CheckBox, contentDescription = null) }
-                    )
-                    DropdownMenuItem(
-                        text = { Text(stringResource(R.string.config_rename)) },
-                        onClick = {
-                            dialogRename.value = it
-                            expanded.value = false
-                        },
-                        leadingIcon = { Icon(Icons.Outlined.Edit, contentDescription = null) }
-                    )
                     if (it == AccountManager.currentAccount) {
                         DropdownMenuItem(
                             text = { Text(stringResource(R.string.config_deselect)) },
@@ -111,9 +95,27 @@ fun AccountsScreen(navigationType: NavigationType) {
                                 refreshList()
                                 expanded.value = false
                             },
-                            leadingIcon = { Icon(Icons.Outlined.Remove, contentDescription = null) }
+                            leadingIcon = { Icon(Icons.Outlined.CheckBoxOutlineBlank, contentDescription = null) }
+                        )
+                    } else {
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.account_select)) },
+                            onClick = {
+                                AccountManager.currentAccount = it
+                                refreshList()
+                                expanded.value = false
+                            },
+                            leadingIcon = { Icon(Icons.Outlined.CheckBox, contentDescription = null) }
                         )
                     }
+                    DropdownMenuItem(
+                        text = { Text(stringResource(R.string.config_rename)) },
+                        onClick = {
+                            dialogRename.value = it
+                            expanded.value = false
+                        },
+                        leadingIcon = { Icon(Icons.Outlined.Edit, contentDescription = null) }
+                    )
                     DropdownMenuItem(
                         text = { Text(stringResource(R.string.config_delete)) },
                         onClick = {

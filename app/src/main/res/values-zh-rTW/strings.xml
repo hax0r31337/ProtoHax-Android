@@ -53,4 +53,5 @@
     <string name="dialog_title">繼續？</string>
     <string name="dialog_confirm">確認</string>
     <string name="dialog_cancel">取消</string>
+    <string name="dialog_loading">仍在加载</string>
 </resources>
