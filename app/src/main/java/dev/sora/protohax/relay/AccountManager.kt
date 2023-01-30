@@ -20,7 +20,7 @@ object AccountManager {
         set(value) = AppService.instance.writeString(KEY_CURRENT_MICROSOFT_REFRESH_TOKEN, value ?: "")
     var currentAccount: Account?
         get() = currentRefreshToken?.let { t -> accounts.find { it.refreshToken == t } }
-        set(value) { if (accounts.contains(value)) currentRefreshToken = value?.refreshToken }
+        set(value) { if (value == null) currentRefreshToken = null else if (accounts.contains(value)) currentRefreshToken = value?.refreshToken }
 
     private val storeFile = File(AppService.instance.filesDir, "credentials.json")
     private val gson = GsonBuilder()

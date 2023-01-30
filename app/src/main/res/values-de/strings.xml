@@ -30,6 +30,7 @@
     <string name="config_delete">Löschen</string>
     <string name="config_create">Neue Konfig erstellen</string>
     <string name="config_import">Konfig importieren</string>
+    <string name="config_deselect">Abwählen</string>
     <string name="config_delete_dialog_message">Sind Sie sicher, dass Sie die Konfig %s löschen möchten?</string>
     <string name="config_rename_dialog_message">Umbenennen</string>
     <string name="config_copy_dialog_message">Kopieren</string>

@@ -30,6 +30,7 @@
     <string name="config_delete">删除</string>
     <string name="config_create">新建设定</string>
     <string name="config_import">导入设定</string>
+    <string name="config_deselect">取消选择</string>
     <string name="config_delete_dialog_message">确定要删除设定 %s？</string>
     <string name="config_rename_dialog_message">重新命名</string>
     <string name="config_copy_dialog_message">複制</string>

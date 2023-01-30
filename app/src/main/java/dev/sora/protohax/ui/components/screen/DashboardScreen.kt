@@ -173,8 +173,8 @@ private fun BottomFloatingActionButton(
             modifier = Modifier
                 .align(Alignment.BottomEnd)
                 .padding(16.dp),
-            containerColor = if (connectionState.value) MaterialTheme.colorScheme.tertiaryContainer else MaterialTheme.colorScheme.secondaryContainer,
-            contentColor = if (connectionState.value) MaterialTheme.colorScheme.onTertiaryContainer else MaterialTheme.colorScheme.onSecondaryContainer
+            containerColor = if (connectionState.value) MaterialTheme.colorScheme.tertiaryContainer else MaterialTheme.colorScheme.primaryContainer,
+            contentColor = if (connectionState.value) MaterialTheme.colorScheme.onTertiaryContainer else MaterialTheme.colorScheme.onPrimaryContainer
         ) {
             Icon(
                 painter = painterResource(id = R.drawable.notification_icon),

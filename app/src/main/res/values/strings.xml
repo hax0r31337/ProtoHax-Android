@@ -32,6 +32,7 @@
     <string name="config_delete">Delete</string>
     <string name="config_create">Create New Config</string>
     <string name="config_import">Import Config</string>
+    <string name="config_deselect">Deselect</string>
     <string name="config_delete_dialog_message">Are you sure about delete config %s</string>
     <string name="config_rename_dialog_message">Rename</string>
     <string name="config_copy_dialog_message">Copy</string>

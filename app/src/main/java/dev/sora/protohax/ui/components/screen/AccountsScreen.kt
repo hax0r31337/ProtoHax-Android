@@ -9,6 +9,7 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.outlined.CheckBox
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
+import androidx.compose.material.icons.outlined.Remove
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -102,6 +103,17 @@ fun AccountsScreen(navigationType: NavigationType) {
                         },
                         leadingIcon = { Icon(Icons.Outlined.Edit, contentDescription = null) }
                     )
+                    if (it == AccountManager.currentAccount) {
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.config_deselect)) },
+                            onClick = {
+                                AccountManager.currentAccount = null
+                                refreshList()
+                                expanded.value = false
+                            },
+                            leadingIcon = { Icon(Icons.Outlined.Remove, contentDescription = null) }
+                        )
+                    }
                     DropdownMenuItem(
                         text = { Text(stringResource(R.string.config_delete)) },
                         onClick = {
