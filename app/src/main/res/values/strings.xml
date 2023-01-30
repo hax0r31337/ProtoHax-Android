@@ -15,6 +15,7 @@
 
     <string name="dashboard_more">More</string>
     <string name="dashboard_about">About</string>
+    <string name="dashboard_no_account_selected">Sign in a Microsoft account to connect Xbox authenticated servers</string>
     <string name="dashboard_about_info">Licensed under %s\nView our source code on %s\nJoin our %s</string>
     <string name="dashboard_select_application">Select an Application</string>
     <string name="dashboard_select_application_placeholder">Select applications</string>
@@ -30,6 +31,7 @@
     <string name="config_share">Share</string>
     <string name="config_delete">Delete</string>
     <string name="config_create">Create New Config</string>
+    <string name="config_import">Import Config</string>
     <string name="config_delete_dialog_message">Are you sure about delete config %s</string>
     <string name="config_rename_dialog_message">Rename</string>
     <string name="config_copy_dialog_message">Copy</string>

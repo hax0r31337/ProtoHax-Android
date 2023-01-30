@@ -1,11 +1,14 @@
 package dev.sora.protohax.ui.components.screen
 
 import android.content.Intent
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.FileOpen
 import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
@@ -21,6 +24,10 @@ import dev.sora.protohax.relay.MinecraftRelay
 import dev.sora.protohax.ui.components.ListItem
 import dev.sora.protohax.ui.components.PHaxAppBar
 import dev.sora.protohax.util.NavigationType
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.io.File
 
 @Composable
 fun ConfigScreen(navigationType: NavigationType) {
@@ -31,14 +38,34 @@ fun ConfigScreen(navigationType: NavigationType) {
         list.addAll(MinecraftRelay.configManager.listConfig())
         list.sort()
     }
+    val scope = rememberCoroutineScope()
 
     val dialogCreate = remember { mutableStateOf(false) }
     DialogCreate(dialogCreate, refreshList)
+
+    val fileSelectorLauncher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) {
+        it ?: return@rememberLauncherForActivityResult
+        scope.launch {
+            withContext(Dispatchers.IO) {
+                val fos = File(mContext.getExternalFilesDir("configs")!!, "imported-${System.currentTimeMillis()}.json")
+                val fis = mContext.contentResolver.openInputStream(it) ?: return@withContext
+                fis.copyTo(fos.outputStream())
+                fis.close()
+                refreshList()
+            }
+        }
+    }
 
     PHaxAppBar(
         title = stringResource(id = R.string.tab_configs),
         navigationType = navigationType,
         actions = {
+            IconButton(onClick = { fileSelectorLauncher.launch(arrayOf("application/json")) }) {
+                Icon(
+                    imageVector = Icons.Default.FileOpen,
+                    contentDescription = stringResource(id = R.string.config_import)
+                )
+            }
             IconButton(onClick = { dialogCreate.value = true }) {
                 Icon(
                     imageVector = Icons.Default.Add,
