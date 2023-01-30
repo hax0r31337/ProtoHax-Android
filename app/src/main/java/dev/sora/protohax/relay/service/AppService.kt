@@ -19,7 +19,7 @@ import dev.sora.protohax.relay.MinecraftRelay
 import dev.sora.protohax.relay.gui.PopupWindow
 import dev.sora.protohax.relay.gui.RenderLayerView
 import dev.sora.protohax.ui.activities.MainActivity
-import dev.sora.protohax.util.ContextUtils.readString
+import dev.sora.protohax.util.ContextUtils.getApplicationName
 import libmitm.Libmitm
 import libmitm.Protector
 import libmitm.TUN
@@ -79,7 +79,7 @@ class AppService : VpnService(), Protector {
         builder.setBlocking(true)
         builder.setMtu(VPN_MTU)
         builder.setSession("ProtoHax")
-        builder.addAllowedApplication(readString(MainActivity.KEY_TARGET_PACKAGE_CACHE)!!)
+        builder.addAllowedApplication(MainActivity.targetPackage)
         builder.addAllowedApplication(this.packageName)
 //        builder.addDnsServer("8.8.8.8")
         // ipv4
@@ -172,8 +172,7 @@ class AppService : VpnService(), Protector {
         val builder = NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle(getString(R.string.app_name))
             .setContentText(getString(
-                R.string.proxy_notification, getString(R.string.app_name), readString(
-                MainActivity.KEY_TARGET_PACKAGE_CACHE) ?: "unknown"))
+                R.string.proxy_notification, getString(R.string.app_name), packageManager.getApplicationName(MainActivity.targetPackage)))
             .setSmallIcon(R.drawable.notification_icon)
             .setLargeIcon(BitmapFactory.decodeResource(resources, R.mipmap.ic_launcher))
             .setOngoing(true)

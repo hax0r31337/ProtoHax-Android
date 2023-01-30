@@ -3,6 +3,7 @@ package dev.sora.protohax.util
 import android.Manifest
 import android.content.Context
 import android.content.Intent
+import android.content.pm.ApplicationInfo
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.os.Build
@@ -61,16 +62,33 @@ object ContextUtils {
             return permissions?.any { it == Manifest.permission.INTERNET } ?: false
         }
 
+    fun PackageManager.getApplicationInfo(packageName: String): ApplicationInfo {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            getApplicationInfo(packageName, PackageManager.ApplicationInfoFlags.of(0L))
+        } else {
+            getApplicationInfo(packageName, 0)
+        }
+    }
+
+    fun PackageManager.getPackageInfo(packageName: String): PackageInfo {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            getPackageInfo(packageName, PackageManager.PackageInfoFlags.of(0L))
+        } else {
+            getPackageInfo(packageName, 0)
+        }
+    }
+
     fun PackageManager.isAppExists(packageName: String): Boolean {
         return try {
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-                getApplicationInfo(packageName, PackageManager.ApplicationInfoFlags.of(0L))
-            } else {
-                getApplicationInfo(packageName, 0)
-            }
+            getApplicationInfo(packageName)
             true
         } catch (e: PackageManager.NameNotFoundException) {
             false
         }
+    }
+
+    fun PackageManager.getApplicationName(packageName: String): String {
+        val info = getApplicationInfo(packageName)
+        return getApplicationLabel(info).toString()
     }
 }

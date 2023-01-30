@@ -9,10 +9,7 @@ import androidx.compose.material3.*
 import androidx.compose.material3.windowsizeclass.WindowHeightSizeClass
 import androidx.compose.material3.windowsizeclass.WindowSizeClass
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
@@ -27,6 +24,7 @@ import dev.sora.protohax.ui.components.screen.DashboardScreen
 import dev.sora.protohax.ui.components.screen.LogsScreen
 import dev.sora.protohax.ui.navigation.*
 import dev.sora.protohax.util.*
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.launch
 
 @Composable
@@ -99,7 +97,8 @@ fun PHaxApp(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class,
+    ExperimentalCoroutinesApi::class)
 @Composable
 private fun PHaxNavigationWrapper(
     navigationType: NavigationType,
@@ -115,13 +114,14 @@ private fun PHaxNavigationWrapper(
     val navBackStackEntry by navController.currentBackStackEntryAsState()
     val selectedDestination =
         navBackStackEntry?.destination?.route ?: PHaxRoute.DASHBOARD
+    val connectionState = connectionState()
 
     if (navigationType == NavigationType.PERMANENT_NAVIGATION_DRAWER) {
         PermanentNavigationDrawer(drawerContent = {
             PermanentNavigationDrawerContent(
                 selectedDestination = selectedDestination,
                 navigationContentPosition = navigationContentPosition,
-                navigateToTopLevelDestination = navigationActions::navigateTo,
+                navigateToTopLevelDestination = navigationActions::navigateTo
             )
         }) {
             PHaxAppContent(
@@ -129,7 +129,8 @@ private fun PHaxNavigationWrapper(
                 navigationContentPosition = navigationContentPosition,
                 navController = navController,
                 selectedDestination = selectedDestination,
-                navigateToTopLevelDestination = navigationActions::navigateTo
+                navigateToTopLevelDestination = navigationActions::navigateTo,
+                connectionState = connectionState
             )
         }
     } else if (navigationType != NavigationType.BOTTOM_NAVIGATION) {
@@ -153,7 +154,8 @@ private fun PHaxNavigationWrapper(
                 navigationContentPosition = navigationContentPosition,
                 navController = navController,
                 selectedDestination = selectedDestination,
-                navigateToTopLevelDestination = navigationActions::navigateTo
+                navigateToTopLevelDestination = navigationActions::navigateTo,
+                connectionState = connectionState
             ) {
                 scope.launch {
                     drawerState.open()
@@ -166,7 +168,8 @@ private fun PHaxNavigationWrapper(
             navigationContentPosition = navigationContentPosition,
             navController = navController,
             selectedDestination = selectedDestination,
-            navigateToTopLevelDestination = navigationActions::navigateTo
+            navigateToTopLevelDestination = navigationActions::navigateTo,
+            connectionState = connectionState
         ) {
             scope.launch {
                 drawerState.open()
@@ -183,6 +186,7 @@ fun PHaxAppContent(
     navController: NavHostController,
     selectedDestination: String,
     navigateToTopLevelDestination: (PHaxTopLevelDestination) -> Unit,
+    connectionState: State<Boolean>,
     onDrawerClicked: () -> Unit = {}
 ) {
     Row(modifier = modifier.fillMaxSize()) {
@@ -191,7 +195,7 @@ fun PHaxAppContent(
                 selectedDestination = selectedDestination,
                 navigationContentPosition = navigationContentPosition,
                 navigateToTopLevelDestination = navigateToTopLevelDestination,
-                onDrawerClicked = onDrawerClicked,
+                onDrawerClicked = onDrawerClicked
             )
         }
         Column(
@@ -202,7 +206,10 @@ fun PHaxAppContent(
             PHaxNavHost(
                 navController = navController,
                 navigationType = navigationType,
-                modifier = Modifier.weight(1f).background(MaterialTheme.colorScheme.background),
+                modifier = Modifier
+                    .weight(1f)
+                    .background(MaterialTheme.colorScheme.background),
+                connectionState = connectionState
             )
             AnimatedVisibility(visible = navigationType == NavigationType.BOTTOM_NAVIGATION) {
                 PHaxBottomNavigationBar(
@@ -220,6 +227,7 @@ private fun PHaxNavHost(
     navController: NavHostController,
     navigationType: NavigationType,
     modifier: Modifier = Modifier,
+    connectionState: State<Boolean>
 ) {
     AnimatedNavHost(
         modifier = modifier,
@@ -229,11 +237,11 @@ private fun PHaxNavHost(
             scaleIn(initialScale = 0.8f) + fadeIn()
         },
         exitTransition = {
-            scaleOut(targetScale = 0.8f) + fadeOut()
+            fadeOut()
         },
     ) {
         composable(PHaxRoute.DASHBOARD) {
-            DashboardScreen(navigationType)
+            DashboardScreen(navigationType, connectionState)
         }
         composable(PHaxRoute.CONFIG) {
             ConfigScreen(navigationType)

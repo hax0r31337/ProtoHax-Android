@@ -15,9 +15,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.Layout
 import androidx.compose.ui.layout.Measurable
 import androidx.compose.ui.layout.layoutId
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.offset
 import dev.sora.protohax.R
@@ -28,7 +26,7 @@ fun PHaxNavigationRail(
     selectedDestination: String,
     navigationContentPosition: NavigationContentPosition,
     navigateToTopLevelDestination: (PHaxTopLevelDestination) -> Unit,
-    onDrawerClicked: () -> Unit = {},
+    onDrawerClicked: () -> Unit = {}
 ) {
     NavigationRail(
         modifier = Modifier.fillMaxHeight(),
@@ -52,18 +50,6 @@ fun PHaxNavigationRail(
                             )
                         }
                     )
-                    FloatingActionButton(
-                        onClick = { /*TODO*/ },
-                        modifier = Modifier.padding(top = 8.dp, bottom = 32.dp),
-                        containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-                        contentColor = MaterialTheme.colorScheme.onTertiaryContainer
-                    ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.notification_icon),
-                            contentDescription = stringResource(id = R.string.tab_btn_connect),
-                            modifier = Modifier.size(18.dp)
-                        )
-                    }
                     Spacer(Modifier.height(8.dp)) // NavigationRailHeaderPadding
                     Spacer(Modifier.height(4.dp)) // NavigationRailVerticalPadding
                 }
@@ -161,7 +147,7 @@ fun PHaxBottomNavigationBar(
 fun PermanentNavigationDrawerContent(
     selectedDestination: String,
     navigationContentPosition: NavigationContentPosition,
-    navigateToTopLevelDestination: (PHaxTopLevelDestination) -> Unit,
+    navigateToTopLevelDestination: (PHaxTopLevelDestination) -> Unit
 ) {
     PermanentDrawerSheet(modifier = Modifier.sizeIn(minWidth = 200.dp, maxWidth = 300.dp)) {
         Layout(
@@ -177,29 +163,10 @@ fun PermanentNavigationDrawerContent(
                     Text(
                         modifier = Modifier
                             .padding(16.dp),
-                        text = stringResource(id = R.string.app_name).uppercase(),
+                        text = stringResource(id = R.string.app_name),
                         style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.primary
                     )
-                    ExtendedFloatingActionButton(
-                        onClick = { /*TODO*/ },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 8.dp, bottom = 40.dp),
-                        containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-                        contentColor = MaterialTheme.colorScheme.onTertiaryContainer
-                    ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.notification_icon),
-                            contentDescription = stringResource(id = R.string.tab_btn_connect),
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Text(
-                            text = stringResource(id = R.string.tab_btn_connect),
-                            modifier = Modifier.weight(1f),
-                            textAlign = TextAlign.Center
-                        )
-                    }
                 }
 
                 Column(
@@ -298,7 +265,7 @@ fun ModalNavigationDrawerContent(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = stringResource(id = R.string.app_name).uppercase(),
+                            text = stringResource(id = R.string.app_name),
                             style = MaterialTheme.typography.titleMedium,
                             color = MaterialTheme.colorScheme.primary
                         )
@@ -308,26 +275,6 @@ fun ModalNavigationDrawerContent(
                                 contentDescription = stringResource(id = R.string.tab_btn_navigation_drawer)
                             )
                         }
-                    }
-
-                    ExtendedFloatingActionButton(
-                        onClick = { /*TODO*/ },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = 8.dp, bottom = 40.dp),
-                        containerColor = MaterialTheme.colorScheme.tertiaryContainer,
-                        contentColor = MaterialTheme.colorScheme.onTertiaryContainer
-                    ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.notification_icon),
-                            contentDescription = stringResource(id = R.string.tab_btn_connect),
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Text(
-                            text = stringResource(id = R.string.tab_btn_connect),
-                            modifier = Modifier.weight(1f),
-                            textAlign = TextAlign.Center
-                        )
                     }
                 }
 

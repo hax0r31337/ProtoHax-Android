@@ -1,6 +1,11 @@
 <resources>
     <string name="app_name" translatable="false">ProtoHax</string>
 
+    <string name="mitm_connected">Connected to MITM proxy</string>
+    <string name="mitm_connected_launch">Launch App</string>
+    <string name="mitm_disconnected">Disconnected from MITM proxy</string>
+    <string name="request_overlay">We need overlay permission in order to display GUIs that you can interact in game</string>
+
     <string name="connect_to_proxy">Connect to MITM proxy</string>
     <string name="connected">Connected, click here to launch app</string>
     <string name="not_connected">Not connected</string>
@@ -10,12 +15,6 @@
     <string name="start_proxy_toast">Launching MITM proxy for %s</string>
     <string name="stop_proxy_toast">MITM proxy stopped</string>
     <string name="proxy_notification">%s is processing packets for %s</string>
-    <string name="request_overlay">We need overlay permission in order to display GUIs that you can interact in game</string>
-    <string name="close_overlay_menu">Close</string>
-    <string name="microsoft_login">Microsoft Login</string>
-    <string name="microsoft_logout">Logout Microsoft</string>
-    <string name="logcat_clear">Clear Logs</string>
-    <string name="logcat_share">Share Logs</string>
 
     <string name="clickgui_modules">Module</string>
     <string name="clickgui_modules_back">Back</string>
@@ -23,6 +22,14 @@
     <string name="clickgui_configs_create">create</string>
     <string name="clickgui_configs_save">save</string>
 
+    <string name="dashboard_more">More</string>
+    <string name="dashboard_about">About</string>
+    <string name="dashboard_about_info">Licensed under %s\nView our source code on %s\nJoin our %s</string>
+    <string name="dashboard_select_application">Select an Application</string>
+    <string name="dashboard_selected_application">Selected Application</string>
+    <string name="dashboard_no_application">No application selected</string>
+    <string name="dashboard_current_version">Current: v%s</string>
+    <string name="dashboard_recommended_version">Recommended: v%s</string>
     <string name="config_rename">Rename</string>
     <string name="config_copy">Copy</string>
     <string name="config_share">Share</string>
@@ -36,11 +43,14 @@
     <string name="account_select">Select</string>
     <string name="account_selected">(Selected)</string>
     <string name="account_delete_dialog_message">Are you sure about delete account %s</string>
+    <string name="logcat_clear">Clear Logs</string>
+    <string name="logcat_share">Share Logs</string>
     <string name="tab_dashboard">Dashboard</string>
     <string name="tab_accounts">Accounts</string>
     <string name="tab_configs">Configs</string>
     <string name="tab_logs">Logs</string>
     <string name="tab_btn_connect">Connect</string>
+    <string name="tab_btn_disconnect">Disconnect</string>
     <string name="tab_btn_navigation_drawer">Navigation Drawer</string>
     <string name="dialog_title">Proceed?</string>
     <string name="dialog_confirm">Confirm</string>

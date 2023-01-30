@@ -15,7 +15,8 @@ fun PHaxAppBar(
     title: String,
     navigationType: NavigationType,
     actions: @Composable (RowScope.() -> Unit) = {},
-    content:  @Composable (PaddingValues) -> Unit
+    snackbarHost: @Composable () -> Unit = {},
+    content:  @Composable (PaddingValues) -> Unit,
 ) {
     val scrollBehavior = if (navigationType == NavigationType.PERMANENT_NAVIGATION_DRAWER) {
         TopAppBarDefaults.pinnedScrollBehavior()
@@ -58,6 +59,7 @@ fun PHaxAppBar(
                 )
             }
         },
+        snackbarHost = snackbarHost,
         content = content
     )
 }

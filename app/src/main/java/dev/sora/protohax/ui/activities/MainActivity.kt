@@ -11,6 +11,8 @@ import com.google.accompanist.adaptive.calculateDisplayFeatures
 import dev.sora.protohax.relay.service.AppService
 import dev.sora.protohax.ui.components.PHaxApp
 import dev.sora.protohax.ui.theme.MyApplicationTheme
+import dev.sora.protohax.util.ContextUtils.readStringOrDefault
+import dev.sora.protohax.util.ContextUtils.writeString
 
 
 class MainActivity : ComponentActivity() {
@@ -33,13 +35,17 @@ class MainActivity : ComponentActivity() {
 
                 PHaxApp(
                     windowSize = windowSize,
-                    displayFeatures = displayFeatures,
+                    displayFeatures = displayFeatures
                 )
             }
         }
     }
 
     companion object {
-        const val KEY_TARGET_PACKAGE_CACHE = "TARGET_PACKAGE"
+        private const val KEY_TARGET_PACKAGE_CACHE = "TARGET_PACKAGE"
+
+        var targetPackage: String
+            get() = AppService.instance.readStringOrDefault(KEY_TARGET_PACKAGE_CACHE, "")
+            set(value) = AppService.instance.writeString(KEY_TARGET_PACKAGE_CACHE, value)
     }
 }

@@ -29,7 +29,7 @@ class MicrosoftLoginActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_microsoft_login)
-        setResult(RESPONSE_CODE_MICROSOFT_LOGIN_ABNORMAL)
+        setResult(RESULT_CANCELED)
 
         // clear cookies to make sure its a fresh login
         val cookieManager = CookieManager.getInstance()
@@ -42,7 +42,7 @@ class MicrosoftLoginActivity : Activity() {
         webview.webViewClient = CustomWebViewClient(this)
 
         device = intent.extras?.getString(EXTRAS_KEY_DEVICE_TYPE)?.let { RakNetRelaySessionListenerMicrosoft.devices[it] } ?: kotlin.run {
-            setResult(RESPONSE_CODE_MICROSOFT_LOGIN_ERROR_EXTRAS)
+            setResult(RESULT_CANCELED)
             finish()
             return
         }
@@ -135,7 +135,7 @@ h1 {
                         AccountManager.accounts.add(Account(username, activity.device, json.get("refresh_token").asString))
                         AccountManager.save()
 
-                        activity.setResult(RESPONSE_CODE_MICROSOFT_LOGIN_OK)
+                        activity.setResult(RESULT_OK)
                         activity.finish()
                         return@thread
                     } else if(json.has("error")) {
@@ -163,22 +163,19 @@ h1 {
         }
     }
 
-    class LauncherContract : ActivityResultContract<RakNetRelaySessionListenerMicrosoft.DeviceInfo, Int>() {
+    class LauncherContract : ActivityResultContract<RakNetRelaySessionListenerMicrosoft.DeviceInfo, Boolean>() {
         override fun createIntent(context: Context, device: RakNetRelaySessionListenerMicrosoft.DeviceInfo): Intent {
             return Intent(context, MicrosoftLoginActivity::class.java).apply {
                 putExtra(EXTRAS_KEY_DEVICE_TYPE, device.deviceType)
             }
         }
 
-        override fun parseResult(resultCode: Int, intent: Intent?): Int {
-            return resultCode
+        override fun parseResult(resultCode: Int, intent: Intent?): Boolean {
+            return resultCode == RESULT_OK
         }
     }
 
     companion object {
-        const val RESPONSE_CODE_MICROSOFT_LOGIN_ABNORMAL = 0
-        const val RESPONSE_CODE_MICROSOFT_LOGIN_OK = 1
-        const val RESPONSE_CODE_MICROSOFT_LOGIN_ERROR_EXTRAS = 2
         const val EXTRAS_KEY_DEVICE_TYPE = "device"
     }
 }
