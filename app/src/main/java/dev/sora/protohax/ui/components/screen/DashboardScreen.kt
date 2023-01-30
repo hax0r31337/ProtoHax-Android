@@ -104,7 +104,8 @@ private fun BottomFloatingActionButton(
             if (start) {
                 val result = snackbarHostState.showSnackbar(
                     message = mContext.getString(R.string.mitm_connected),
-                    actionLabel = mContext.getString(R.string.mitm_connected_launch)
+                    actionLabel = mContext.getString(R.string.mitm_connected_launch),
+                    duration = SnackbarDuration.Short
                 )
                 if (result == SnackbarResult.ActionPerformed) {
                     val intent1 = mContext.packageManager.getLaunchIntentForPackage(applicationSelected.value)
@@ -112,7 +113,8 @@ private fun BottomFloatingActionButton(
                 }
             } else {
                 snackbarHostState.showSnackbar(
-                    message = mContext.getString(R.string.mitm_disconnected)
+                    message = mContext.getString(R.string.mitm_disconnected),
+                    duration = SnackbarDuration.Short
                 )
             }
         }
@@ -152,7 +154,8 @@ private fun BottomFloatingActionButton(
                     scope.launch {
                         val result = snackbarHostState.showSnackbar(
                             message = mContext.getString(R.string.dashboard_no_application),
-                            actionLabel = mContext.getString(R.string.dashboard_select_application)
+                            actionLabel = mContext.getString(R.string.dashboard_select_application),
+                            duration = SnackbarDuration.Short
                         )
                         if (result == SnackbarResult.ActionPerformed) {
                             pickAppActivityLauncher.launch(Intent(mContext, AppPickerActivity::class.java))
