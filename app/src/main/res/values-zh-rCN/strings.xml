@@ -1,0 +1,55 @@
+<resources>
+    <string name="mitm_connected">已连接到 MITM 代理</string>
+    <string name="mitm_connected_launch">启动应用程式</string>
+    <string name="mitm_disconnected">已从 MITM 代理断开连接</string>
+    <string name="request_overlay">我们需要遮罩权限，以便在游戏中显示可以与其互动的 GUI</string>
+    <string name="proxy_notification">%s 正在处理 %s 的封包</string>
+
+    <string name="clickgui_modules">模块</string>
+    <string name="clickgui_modules_back">返回</string>
+    <string name="clickgui_configs">设置</string>
+    <string name="clickgui_configs_create">创建</string>
+    <string name="clickgui_configs_save">保存</string>
+
+    <string name="dashboard_more">更多</string>
+    <string name="dashboard_about">关于</string>
+    <string name="dashboard_no_account_selected">请登录 Microsoft 帐户以连接 Xbox 认证伺服器</string>
+    <string name="dashboard_about_info">根据 %s 的许可证\n在 %s 上查看我们的原始码\n加入我们的 %s</string>
+    <string name="dashboard_select_application">选择应用程式</string>
+    <string name="dashboard_select_application_placeholder">选择应用程式</string>
+    <string name="dashboard_selected_application">已选择的应用程式</string>
+    <string name="dashboard_no_application">未选择应用程式</string>
+    <string name="dashboard_current_version">当前：v%s</string>
+    <string name="dashboard_recommended_version">推荐：v%s</string>
+    <string name="dashboard_fab_connect">连接</string>
+    <string name="dashboard_fab_disconnect">断开连接</string>
+
+    <string name="config_rename">重命名</string>
+    <string name="config_copy">複制</string>
+    <string name="config_share">共享</string>
+    <string name="config_delete">删除</string>
+    <string name="config_create">新建设定</string>
+    <string name="config_import">导入设定</string>
+    <string name="config_delete_dialog_message">确定要删除设定 %s？</string>
+    <string name="config_rename_dialog_message">重新命名</string>
+    <string name="config_copy_dialog_message">複制</string>
+
+    <string name="accounts_login">登入</string>
+    <string name="accounts_login_as">以 %s 的身分登入</string>
+    <string name="account_select">选择</string>
+    <string name="account_selected">(已选择)</string>
+    <string name="account_delete_dialog_message">确定要删除帐号 %s？</string>
+
+    <string name="logcat_clear">清除记录</string>
+    <string name="logcat_share">分享记录</string>
+
+    <string name="tab_dashboard">仪表板</string>
+    <string name="tab_accounts">帐号</string>
+    <string name="tab_configs">设定</string>
+    <string name="tab_logs">记录</string>
+    <string name="tab_btn_navigation_drawer">导览抽屉</string>
+
+    <string name="dialog_title">继续？</string>
+    <string name="dialog_confirm">确认</string>
+    <string name="dialog_cancel">取消</string>
+</resources>
