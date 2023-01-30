@@ -18,6 +18,7 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ProtoHax"
         tools:targetApi="33">
+
         <activity
             android:name="dev.sora.protohax.ui.activities.MainActivity"
             android:exported="true"
@@ -30,6 +31,11 @@
         </activity>
         <activity
             android:name="dev.sora.protohax.ui.activities.MicrosoftLoginActivity"
+            android:exported="false"
+            android:theme="@style/Theme.ProtoHax">
+        </activity>
+        <activity
+            android:name="dev.sora.protohax.ui.activities.AppPickerActivity"
             android:exported="false"
             android:theme="@style/Theme.ProtoHax">
         </activity>

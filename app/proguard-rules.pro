@@ -20,4 +20,4 @@
 # hide the original source file name.
 -renamesourcefileattribute null
 
--keep class dev.sora.** { *; }
+-keepclassmembers class dev.sora.** { *; }

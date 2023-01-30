@@ -5,7 +5,9 @@ import android.content.Context
 import android.content.Intent
 import android.net.VpnService
 import android.provider.Settings
+import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -33,6 +35,7 @@ import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import dev.sora.protohax.BuildConfig
 import dev.sora.protohax.R
 import dev.sora.protohax.relay.service.AppService
+import dev.sora.protohax.ui.activities.AppPickerActivity
 import dev.sora.protohax.ui.activities.MainActivity
 import dev.sora.protohax.ui.components.HyperlinkText
 import dev.sora.protohax.ui.components.PHaxAppBar
@@ -41,6 +44,7 @@ import dev.sora.protohax.util.ContextUtils.getPackageInfo
 import dev.sora.protohax.util.ContextUtils.isAppExists
 import dev.sora.protohax.util.ContextUtils.toast
 import dev.sora.protohax.util.NavigationType
+import dev.sora.relay.game.GameSession
 import kotlinx.coroutines.launch
 
 private fun getTargetPackage(ctx: Context): String {
@@ -61,9 +65,9 @@ fun DashboardScreen(
     val menuCreate = remember { mutableStateOf(false) }
     val dialogAbout = remember { mutableStateOf(false) }
     val applicationSelected = remember { mutableStateOf(getTargetPackage(ctx)) }
-//    val applicationSelected = remember {
-//        mutableStateOf("com.mojang.minecraftpe")
-//    }
+    val pickAppActivityLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+        applicationSelected.value = getTargetPackage(ctx)
+    }
 
     MenuDashboard(menuCreate, dialogAbout)
     DialogAbout(dialogAbout)
@@ -81,16 +85,17 @@ fun DashboardScreen(
         }
     ) {
         Column(modifier = Modifier.padding(it)) {
-            CardCurrentApplication(applicationSelected)
+            CardCurrentApplication(applicationSelected, pickAppActivityLauncher)
         }
     }
 
-    BottomFloatingActionButton(connectionState, applicationSelected)
+    BottomFloatingActionButton(connectionState, applicationSelected, pickAppActivityLauncher)
 }
 
 @Composable
 private fun CardCurrentApplication(
-    applicationSelected: MutableState<String>
+    applicationSelected: MutableState<String>,
+    pickAppActivityLauncher: ManagedActivityResultLauncher<Intent, ActivityResult>
 ) {
     val ctx = LocalContext.current
 
@@ -99,7 +104,7 @@ private fun CardCurrentApplication(
             .fillMaxWidth()
             .padding(15.dp)
             .clickable {
-                 // TODO: app picker
+                 pickAppActivityLauncher.launch(Intent(ctx, AppPickerActivity::class.java))
             },
     ) {
         Column(
@@ -144,7 +149,7 @@ private fun CardCurrentApplication(
                     color = MaterialTheme.colorScheme.onBackground
                 )
                 Text(
-                    stringResource(R.string.dashboard_recommended_version, "1.19.50.02"),
+                    stringResource(R.string.dashboard_recommended_version, GameSession.RECOMMENDED_VERSION),
                     fontSize = lineHeight,
                     color = MaterialTheme.colorScheme.onBackground
                 )
@@ -156,7 +161,8 @@ private fun CardCurrentApplication(
 @Composable
 private fun BottomFloatingActionButton(
     connectionState: State<Boolean>,
-    applicationSelected: State<String>
+    applicationSelected: State<String>,
+    pickAppActivityLauncher: ManagedActivityResultLauncher<Intent, ActivityResult>
 ) {
     val mContext = LocalContext.current
     val snackbarHostState = remember { SnackbarHostState() }
@@ -222,7 +228,7 @@ private fun BottomFloatingActionButton(
                             actionLabel = mContext.getString(R.string.dashboard_select_application)
                         )
                         if (result == SnackbarResult.ActionPerformed) {
-                            // TODO: app picker
+                            pickAppActivityLauncher.launch(Intent(mContext, AppPickerActivity::class.java))
                         }
                     }
                 } else {
@@ -242,11 +248,11 @@ private fun BottomFloatingActionButton(
         ) {
             Icon(
                 painter = painterResource(id = R.drawable.notification_icon),
-                contentDescription = stringResource(id = if (connectionState.value) R.string.tab_btn_disconnect else R.string.tab_btn_connect),
+                contentDescription = stringResource(id = if (connectionState.value) R.string.dashboard_fab_disconnect else R.string.dashboard_fab_connect),
             )
             Spacer(modifier = Modifier.padding(4.dp, 0.dp))
             Text(
-                text = stringResource(id = if (connectionState.value) R.string.tab_btn_disconnect else R.string.tab_btn_connect),
+                text = stringResource(id = if (connectionState.value) R.string.dashboard_fab_disconnect else R.string.dashboard_fab_connect),
                 textAlign = TextAlign.Center
             )
         }
