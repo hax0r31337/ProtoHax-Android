@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "954846711145",
+    "project_id": "protohax-6fe27",
+    "storage_bucket": "protohax-6fe27.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:954846711145:android:68b72ebed6da969cb1c1f8",
+        "android_client_info": {
+          "package_name": "dev.sora.protohax"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "954846711145-eobt6d7cg13adacslvljf197pe47lt5g.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCKrTSuvvhHz9vS1Vc_EGnFHIi5iOpboHA"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "954846711145-eobt6d7cg13adacslvljf197pe47lt5g.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
