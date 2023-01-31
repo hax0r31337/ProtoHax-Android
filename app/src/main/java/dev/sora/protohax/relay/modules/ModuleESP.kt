@@ -12,6 +12,7 @@ import dev.sora.relay.cheat.value.BoolValue
 import dev.sora.relay.cheat.value.IntValue
 import dev.sora.relay.game.entity.Entity
 import dev.sora.relay.game.entity.EntityPlayer
+import dev.sora.relay.game.entity.EntityPlayerSP
 import dev.sora.relay.game.event.Listen
 import kotlin.math.cos
 import kotlin.math.sin
@@ -44,11 +45,12 @@ class ModuleESP : CheatModule("ESP") {
         val canvas = event.canvas
         val screenWidth = canvas.width
         val screenHeight = canvas.height
+        val renderPartialTicks = player.renderPartialTicks
 
         val viewProjMatrix =  Matrix4f.createPerspective(fovValue.get().toFloat()+10, screenWidth.toFloat() / screenHeight, 0.1f, 128f)
             .mul(Matrix4f.createTranslation(player.vec3Position)
-                .mul(rotY(-player.rotationYaw-180))
-                .mul(rotX(-player.rotationPitch))
+                .mul(rotY(-(player.prevRotationYaw + (player.rotationYaw - player.prevRotationYaw) * renderPartialTicks)-180))
+                .mul(rotX(-(player.prevRotationPitch + (player.rotationPitch - player.prevRotationPitch) * renderPartialTicks)))
                 .invert())
 
         val paint = Paint()
