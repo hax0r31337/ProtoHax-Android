@@ -31,9 +31,9 @@ import java.net.NetworkInterface
 class AppService : VpnService(), Protector {
 
     private lateinit var windowManager: WindowManager
-    private var layoutView: View? = null
-    private var renderLayerView: View? = null
-    private val popupWindow = PopupWindow()
+    private val popupWindow = PopupWindow(this).also {
+        addListener(it)
+    }
 
     private var vpnDescriptor: ParcelFileDescriptor? = null
     private var tun: TUN? = null
@@ -48,6 +48,10 @@ class AppService : VpnService(), Protector {
         }
 
         windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
+    }
+
+    override fun onDestroy() {
+        removeListener(popupWindow)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -119,7 +123,7 @@ class AppService : VpnService(), Protector {
         Log.i("ProtoHax", "netstack started")
         isActive = true
         try {
-            onServiceStart()
+            MinecraftRelay.listen()
             serviceListeners.forEach { it.onServiceStarted() }
         } catch (t: Throwable) {
             Log.e("ProtoHax", "start callback", t)
@@ -129,7 +133,7 @@ class AppService : VpnService(), Protector {
     private fun stopVPN() {
         isActive = false
         try {
-            onServiceStop()
+            MinecraftRelay.close()
             serviceListeners.forEach { it.onServiceStopped() }
         } catch (t: Throwable) {
             Log.e("ProtoHax", "stop callback", t)
@@ -178,94 +182,6 @@ class AppService : VpnService(), Protector {
             .setContentIntent(pendingIntent)
 
         return builder.build()
-    }
-
-    private fun onServiceStart() {
-        MinecraftRelay.listen()
-        popupWindow()
-    }
-
-    private fun onServiceStop() {
-        layoutView?.let { windowManager.removeView(it) }
-        layoutView = null
-        renderLayerView?.let { windowManager.removeView(it) }
-        renderLayerView = null
-        popupWindow.destroy(windowManager)
-        MinecraftRelay.close()
-    }
-
-    private fun popupWindow() {
-        var params = WindowManager.LayoutParams(
-            WindowManager.LayoutParams.WRAP_CONTENT,
-            WindowManager.LayoutParams.WRAP_CONTENT,
-            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
-            PixelFormat.TRANSLUCENT
-        )
-        params.gravity = Gravity.TOP or Gravity.END
-        params.x = 0   // Initial Position of window
-        params.y = 100 // Initial Position of window
-
-        val layout = LinearLayout(this)
-
-        val imageView = ImageView(this)
-        imageView.setImageResource(R.mipmap.ic_launcher_round)
-        imageView.layoutParams = LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT,
-            LinearLayout.LayoutParams.WRAP_CONTENT
-        )
-
-        var dragPosX = 0f
-        var dragPosY = 0f
-        var pressDownTime = System.currentTimeMillis()
-        imageView.setOnClickListener {
-            popupWindow.toggle(windowManager, this)
-        }
-        imageView.setOnTouchListener { v, event ->
-            when (event.action) {
-                MotionEvent.ACTION_DOWN -> {
-                    dragPosX = event.rawX
-                    dragPosY = event.rawY
-                    pressDownTime = System.currentTimeMillis()
-                    true
-                }
-                MotionEvent.ACTION_UP -> {
-                    if (System.currentTimeMillis() - pressDownTime < 500) {
-                        v.performClick()
-                    }
-                    true
-                }
-                MotionEvent.ACTION_MOVE -> {
-                    if (System.currentTimeMillis() - pressDownTime < 500) {
-                        false
-                    } else {
-                        params.x += -((event.rawX - dragPosX)).toInt()
-                        params.y += (event.rawY - dragPosY).toInt()
-                        dragPosX = event.rawX
-                        dragPosY = event.rawY
-                        windowManager.updateViewLayout(layout, params)
-                        true
-                    }
-                }
-                else -> false
-            }
-        }
-
-        layout.addView(imageView)
-
-        this.layoutView = layout
-        windowManager.addView(layout, params)
-
-        val params1 = WindowManager.LayoutParams(
-            WindowManager.LayoutParams.MATCH_PARENT,
-            WindowManager.LayoutParams.MATCH_PARENT,
-            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
-            PixelFormat.TRANSLUCENT
-        )
-        params1.gravity = Gravity.TOP or Gravity.END
-        renderLayerView = RenderLayerView(this, MinecraftRelay.session)
-        windowManager.addView(renderLayerView, params1)
     }
 
     companion object {
