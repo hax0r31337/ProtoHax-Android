@@ -110,6 +110,16 @@ class AppPickerActivity : ComponentActivity() {
                         }
                     }
 
+                    if (listItems.isEmpty()) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center,
+                            modifier = Modifier.fillMaxSize()
+                        ) {
+                            Text(stringResource(R.string.dialog_loading))
+                        }
+                    }
+
                     LazyColumn {
                         items(listItems.filter { it.first.startsWith(text.value, true) }) {
                             val packageInfo = it.second
