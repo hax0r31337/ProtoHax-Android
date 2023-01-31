@@ -2,6 +2,7 @@ package dev.sora.protohax.relay
 
 import com.google.gson.*
 import com.google.gson.annotations.SerializedName
+import dev.sora.protohax.MyApplication
 import dev.sora.protohax.relay.service.AppService
 import dev.sora.protohax.util.ContextUtils.readString
 import dev.sora.protohax.util.ContextUtils.writeString
@@ -16,13 +17,13 @@ object AccountManager {
 
     val accounts = mutableListOf<Account>()
     private var currentRefreshToken: String?
-        get() = AppService.instance.readString(KEY_CURRENT_MICROSOFT_REFRESH_TOKEN)?.ifEmpty { null }
-        set(value) = AppService.instance.writeString(KEY_CURRENT_MICROSOFT_REFRESH_TOKEN, value ?: "")
+        get() = MyApplication.instance.readString(KEY_CURRENT_MICROSOFT_REFRESH_TOKEN)?.ifEmpty { null }
+        set(value) = MyApplication.instance.writeString(KEY_CURRENT_MICROSOFT_REFRESH_TOKEN, value ?: "")
     var currentAccount: Account?
         get() = currentRefreshToken?.let { t -> accounts.find { it.refreshToken == t } }
         set(value) { if (value == null) currentRefreshToken = null else if (accounts.contains(value)) currentRefreshToken = value?.refreshToken }
 
-    private val storeFile = File(AppService.instance.filesDir, "credentials.json")
+    private val storeFile = File(MyApplication.instance.filesDir, "credentials.json")
     private val gson = GsonBuilder()
         .registerTypeAdapter(RakNetRelaySessionListenerMicrosoft.DeviceInfo::class.java, DeviceInfoAdapter())
         .create()

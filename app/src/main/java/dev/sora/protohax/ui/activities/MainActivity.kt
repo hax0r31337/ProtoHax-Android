@@ -8,6 +8,7 @@ import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSiz
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.core.view.WindowCompat
 import com.google.accompanist.adaptive.calculateDisplayFeatures
+import dev.sora.protohax.MyApplication
 import dev.sora.protohax.relay.service.AppService
 import dev.sora.protohax.ui.components.PHaxApp
 import dev.sora.protohax.ui.theme.MyApplicationTheme
@@ -45,7 +46,7 @@ class MainActivity : ComponentActivity() {
         private const val KEY_TARGET_PACKAGE_CACHE = "TARGET_PACKAGE"
 
         var targetPackage: String
-            get() = AppService.instance.readStringOrDefault(KEY_TARGET_PACKAGE_CACHE, "")
-            set(value) = AppService.instance.writeString(KEY_TARGET_PACKAGE_CACHE, value)
+            get() = MyApplication.instance.readStringOrDefault(KEY_TARGET_PACKAGE_CACHE, "")
+            set(value) = MyApplication.instance.writeString(KEY_TARGET_PACKAGE_CACHE, value)
     }
 }

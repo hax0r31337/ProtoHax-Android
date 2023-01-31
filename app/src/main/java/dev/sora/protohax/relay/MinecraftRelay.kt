@@ -2,6 +2,7 @@ package dev.sora.protohax.relay
 
 import android.util.Log
 import com.nukkitx.network.raknet.RakNetServerSession
+import dev.sora.protohax.MyApplication
 import dev.sora.protohax.relay.log.NettyLoggerFactory
 import dev.sora.protohax.relay.modules.ModuleESP
 import dev.sora.protohax.relay.service.AppService
@@ -45,7 +46,7 @@ object MinecraftRelay {
         commandManager = CommandManager(session)
         commandManager.init(moduleManager)
 
-        configManager = ConfigManagerFileSystem(AppService.instance.getExternalFilesDir("configs")!!, ".json", moduleManager)
+        configManager = ConfigManagerFileSystem(MyApplication.instance.getExternalFilesDir("configs")!!, ".json", moduleManager)
 
         session.eventManager.registerListener(commandManager)
 
@@ -111,7 +112,7 @@ object MinecraftRelay {
         }
         relay.bind()
         this.relay = relay
-        AppService.instance.getExternalFilesDir("resource_packs")?.also {
+        MyApplication.instance.getExternalFilesDir("resource_packs")?.also {
             if (!it.exists()) it.mkdirs()
             ModuleResourcePackSpoof.resourcePackProvider = ModuleResourcePackSpoof.FileSystemResourcePackProvider(it)
         }

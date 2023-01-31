@@ -56,7 +56,6 @@ class AppService : VpnService(), Protector {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         intent ?: return START_NOT_STICKY
-        instance = this
 
         val action = intent.action
         try {
@@ -197,8 +196,6 @@ class AppService : VpnService(), Protector {
         const val PRIVATE_VLAN4_CLIENT = "26.26.26.1"
         const val PRIVATE_VLAN6_CLIENT = "da26:2626::1"
 
-        lateinit var instance: AppService
-            private set
         var isActive = false
         private val serviceListeners = mutableSetOf<ServiceListener>()
 

@@ -12,6 +12,7 @@ import android.view.View
 import android.view.WindowManager
 import android.widget.ImageView
 import android.widget.LinearLayout
+import dev.sora.protohax.MyApplication
 import dev.sora.protohax.R
 import dev.sora.protohax.relay.MinecraftRelay
 import dev.sora.protohax.relay.service.AppService
@@ -80,7 +81,7 @@ class PopupWindow(private val ctx: Context) : ServiceListener {
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onServiceStarted() {
-        val windowManager = AppService.instance.getSystemService(VpnService.WINDOW_SERVICE) as WindowManager
+        val windowManager = MyApplication.instance.getSystemService(VpnService.WINDOW_SERVICE) as WindowManager
         val params = WindowManager.LayoutParams(
             WindowManager.LayoutParams.WRAP_CONTENT,
             WindowManager.LayoutParams.WRAP_CONTENT,
@@ -155,7 +156,7 @@ class PopupWindow(private val ctx: Context) : ServiceListener {
     }
 
     override fun onServiceStopped() {
-        val windowManager = AppService.instance.getSystemService(VpnService.WINDOW_SERVICE) as WindowManager
+        val windowManager = MyApplication.instance.getSystemService(VpnService.WINDOW_SERVICE) as WindowManager
         layoutView?.let { windowManager.removeView(it) }
         layoutView = null
         renderLayerView?.let { windowManager.removeView(it) }
