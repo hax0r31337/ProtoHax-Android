@@ -17,11 +17,11 @@ object UdpForwarderHandler : Redirector, EstablishHandler, ServiceListener {
      * if the return is empty, the destination will not be modified
      */
     override fun redirect(src: String, srcPort: Long, dst: String, dstPort: Long): String {
-        if (dstPort.toInt() == 53 || src == "255.255.255.255") return ""
+        if (dstPort.toInt() == 53 || dst == "255.255.255.255") return ""
         return if (src.contains(":")) {
-            "[$src]:${MinecraftRelay.listenPort}"
+            "127.0.0.1:${MinecraftRelay.listenPort}"
         } else {
-            "$src:${MinecraftRelay.listenPort}"
+            "127.0.0.1:${MinecraftRelay.listenPort}"
         }
     }
 
@@ -38,6 +38,7 @@ object UdpForwarderHandler : Redirector, EstablishHandler, ServiceListener {
     }
 
     override fun handle(localIp: String, targetIp: String) {
+        if (targetIp.endsWith(":53")) return
         Log.i("ProtoHax", "$localIp -> $targetIp")
         val idx = targetIp.lastIndexOf(':')
         originalIpMap[localIp.substring(localIp.lastIndexOf(':')+1).toInt()] =

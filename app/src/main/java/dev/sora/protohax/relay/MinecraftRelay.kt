@@ -91,12 +91,6 @@ object MinecraftRelay {
                 }
             }
 
-            override fun onPrepareClientConnection(clientSocket: DatagramChannel): RakNetRelaySessionListener {
-                Log.i("ProtoHax", "PrepareClientConnection")
-                AppService.instance.protect(clientSocket.socket())
-                return super.onPrepareClientConnection(clientSocket)
-            }
-
             override fun onSession(session: RakNetRelaySession) {
                 Log.i("ProtoHax", "PreRelaySessionCreation")
                 session.listener.childListener.add(RakNetRelaySessionListenerAutoCodec(session))

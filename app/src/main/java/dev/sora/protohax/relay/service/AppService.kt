@@ -80,8 +80,7 @@ class AppService : VpnService(), Protector {
         builder.setMtu(VPN_MTU)
         builder.setSession("ProtoHax")
         builder.addAllowedApplication(MainActivity.targetPackage)
-        builder.addAllowedApplication(this.packageName)
-//        builder.addDnsServer("8.8.8.8")
+        builder.addDnsServer("8.8.8.8")
         // ipv4
         if (hasIPv4) {
             builder.addAddress(PRIVATE_VLAN4_CLIENT, 30)
