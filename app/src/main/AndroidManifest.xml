@@ -18,8 +18,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ProtoHax"
         tools:targetApi="33">
+
         <activity
-            android:name="dev.sora.protohax.MainActivity"
+            android:name="dev.sora.protohax.ui.activities.MainActivity"
             android:exported="true"
             android:theme="@style/Theme.ProtoHax">
             <intent-filter>
@@ -29,25 +30,36 @@
             </intent-filter>
         </activity>
         <activity
-            android:name="dev.sora.protohax.activity.MicrosoftLoginActivity"
+            android:name="dev.sora.protohax.ui.activities.MicrosoftLoginActivity"
             android:exported="false"
             android:theme="@style/Theme.ProtoHax">
         </activity>
         <activity
-            android:name="dev.sora.protohax.activity.LogcatActivity"
+            android:name="dev.sora.protohax.ui.activities.AppPickerActivity"
             android:exported="false"
             android:theme="@style/Theme.ProtoHax">
         </activity>
 
-        <service android:name="dev.sora.protohax.AppService"
+        <service android:name="dev.sora.protohax.relay.service.AppService"
             android:permission="android.permission.BIND_VPN_SERVICE"
             android:exported="false">
             <intent-filter>
                 <action android:name="android.net.VpnService" />
                 <action android:name="dev.sora.libmitm.vpn.start"/>
                 <action android:name="dev.sora.libmitm.vpn.stop"/>
+                <action android:name="dev.sora.libmitm.vpn.initialize"/>
             </intent-filter>
         </service>
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="dev.sora.protohax"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/provider_paths"/>
+        </provider>
 
         <meta-data
             android:name="com.google.firebase.messaging.default_notification_icon"

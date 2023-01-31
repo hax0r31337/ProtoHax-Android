@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
 
-    <style name="Theme.ProtoHax" parent="Theme.MaterialComponents.DayNight">
+    <style name="Theme.ProtoHax" parent="android:Theme.Material.NoActionBar">
     </style>
 </resources>

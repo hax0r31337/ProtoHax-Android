@@ -160,10 +160,9 @@ class SelectionMenu(private val window: PopupWindow) {
     }
 
     private fun moduleValues(ctx: Context, advisedWidth: Int, module: CheatModule, backButton: Button): Boolean {
-        val values = module.getValues()
-        if (values.isEmpty()) return false
+        if (module.values.isEmpty()) return false
         buttonList.removeAllViews()
-        values.forEach { value ->
+        module.values.forEach { value ->
             if (value is BoolValue) {
                 buttonList.addView(ctx.themedButton().also { b ->
                     fun Button.setText() {

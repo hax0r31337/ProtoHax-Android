@@ -1,9 +1,3 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="actionbtn_active">#4CAF50</color>
-    <color name="actionbtn_inactive">#6E6E6E</color>
-    <color name="green">#00FF00</color>
-    <color name="yellow">#FFFF00</color>
-    <color name="orange">#FF7F00</color>
-    <color name="red">#FF0000</color>
 </resources>

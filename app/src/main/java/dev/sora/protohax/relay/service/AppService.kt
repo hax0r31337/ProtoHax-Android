@@ -1,4 +1,4 @@
-package dev.sora.protohax
+package dev.sora.protohax.relay.service
 
 import android.app.*
 import android.content.Intent
@@ -14,11 +14,12 @@ import android.view.WindowManager
 import android.widget.ImageView
 import android.widget.LinearLayout
 import androidx.core.app.NotificationCompat
-import dev.sora.protohax.ContextUtils.readString
+import dev.sora.protohax.R
 import dev.sora.protohax.relay.MinecraftRelay
-import dev.sora.protohax.relay.UdpForwarderHandler
 import dev.sora.protohax.relay.gui.PopupWindow
 import dev.sora.protohax.relay.gui.RenderLayerView
+import dev.sora.protohax.ui.activities.MainActivity
+import dev.sora.protohax.util.ContextUtils.getApplicationName
 import libmitm.Libmitm
 import libmitm.Protector
 import libmitm.TUN
@@ -40,7 +41,10 @@ class AppService : VpnService(), Protector {
     override fun onCreate() {
         val notificationManager = getSystemService(Service.NOTIFICATION_SERVICE) as NotificationManager
         if (notificationManager.getNotificationChannel(CHANNEL_ID) == null) {
-            notificationManager.createNotificationChannel(NotificationChannel(CHANNEL_ID, getString(R.string.app_name), NotificationManager.IMPORTANCE_LOW))
+            notificationManager.createNotificationChannel(NotificationChannel(
+                CHANNEL_ID, getString(
+                    R.string.app_name
+                ), NotificationManager.IMPORTANCE_LOW))
         }
 
         windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
@@ -48,6 +52,7 @@ class AppService : VpnService(), Protector {
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
         intent ?: return START_NOT_STICKY
+        instance = this
 
         val action = intent.action
         try {
@@ -56,7 +61,7 @@ class AppService : VpnService(), Protector {
                 startForeground(1, createNotification())
             } else if (ACTION_STOP == action) {
                 stopVPN()
-                stopForeground(true)
+                stopForeground(STOP_FOREGROUND_REMOVE)
                 stopSelf()
             } else {
                 stopSelf()
@@ -74,9 +79,8 @@ class AppService : VpnService(), Protector {
         builder.setBlocking(true)
         builder.setMtu(VPN_MTU)
         builder.setSession("ProtoHax")
-        builder.addAllowedApplication(readString(MainActivity.KEY_TARGET_PACKAGE_CACHE)!!)
-        builder.addAllowedApplication(this.packageName)
-//        builder.addDnsServer("8.8.8.8")
+        builder.addAllowedApplication(MainActivity.targetPackage)
+        builder.addDnsServer("8.8.8.8")
         // ipv4
         if (hasIPv4) {
             builder.addAddress(PRIVATE_VLAN4_CLIENT, 30)
@@ -114,7 +118,6 @@ class AppService : VpnService(), Protector {
         tun.start()
         Log.i("ProtoHax", "netstack started")
         isActive = true
-        instance = this
         try {
             onServiceStart()
             serviceListeners.forEach { it.onServiceStarted() }
@@ -167,7 +170,8 @@ class AppService : VpnService(), Protector {
 
         val builder = NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle(getString(R.string.app_name))
-            .setContentText(getString(R.string.proxy_notification, getString(R.string.app_name), readString(MainActivity.KEY_TARGET_PACKAGE_CACHE) ?: "unknown"))
+            .setContentText(getString(
+                R.string.proxy_notification, getString(R.string.app_name), packageManager.getApplicationName(MainActivity.targetPackage)))
             .setSmallIcon(R.drawable.notification_icon)
             .setLargeIcon(BitmapFactory.decodeResource(resources, R.mipmap.ic_launcher))
             .setOngoing(true)
@@ -252,21 +256,25 @@ class AppService : VpnService(), Protector {
         this.layoutView = layout
         windowManager.addView(layout, params)
 
-        params = WindowManager.LayoutParams(
+        val params1 = WindowManager.LayoutParams(
             WindowManager.LayoutParams.MATCH_PARENT,
             WindowManager.LayoutParams.MATCH_PARENT,
             WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE,
             PixelFormat.TRANSLUCENT
         )
-        params.gravity = Gravity.TOP or Gravity.END
+        params1.gravity = Gravity.TOP or Gravity.END
         renderLayerView = RenderLayerView(this, MinecraftRelay.session)
-        windowManager.addView(renderLayerView, params)
+        windowManager.addView(renderLayerView, params1)
     }
 
     companion object {
         const val ACTION_START = "dev.sora.libmitm.vpn.start"
         const val ACTION_STOP = "dev.sora.libmitm.vpn.stop"
+        /**
+         * this does nothing but initialize context
+         */
+        const val ACTION_INITIALIZE = "dev.sora.libmitm.vpn.initialize"
         const val CHANNEL_ID = "dev.sora.protohax.NOTIFICATION_CHANNEL_ID"
 
         const val VPN_MTU = 1500

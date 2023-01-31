@@ -1,0 +1,57 @@
+<resources>
+    <string name="mitm_connected">Verbunden mit MITM-Proxy</string>
+    <string name="mitm_connected_launch">App starten</string>
+    <string name="mitm_disconnected">Vom MITM-Proxy getrennt</string>
+    <string name="request_overlay">Wir benötigen Berechtigungen für Overlays, um GUIs anzuzeigen, mit denen Sie im Spiel interagieren können</string>
+    <string name="proxy_notification">%s bearbeitet Pakete für %s</string>
+
+    <string name="clickgui_modules">Modul</string>
+    <string name="clickgui_modules_back">Zurück</string>
+    <string name="clickgui_configs">Konfigurieren</string>
+    <string name="clickgui_configs_create">erstellen</string>
+    <string name="clickgui_configs_save">speichern</string>
+
+    <string name="dashboard_more">Mehr</string>
+    <string name="dashboard_about">Über</string>
+    <string name="dashboard_no_account_selected">Melden Sie sich mit einem Microsoft-Konto an, um Xbox-authentifizierte Server zu verbinden</string>
+    <string name="dashboard_about_info">Lizensiert unter %s\nQuellcode auf %s ansehen\nUnser %s beitreten</string>
+    <string name="dashboard_select_application">Wähle eine Anwendung</string>
+    <string name="dashboard_select_application_placeholder">Wählen Sie Anwendungen</string>
+    <string name="dashboard_selected_application">Ausgewählte Anwendung</string>
+    <string name="dashboard_no_application">Keine Anwendung ausgewählt</string>
+    <string name="dashboard_current_version">Aktuell: v%s</string>
+    <string name="dashboard_recommended_version">Empfohlen: v%s</string>
+    <string name="dashboard_fab_connect">Verbinden</string>
+    <string name="dashboard_fab_disconnect">Trennen</string>
+
+    <string name="config_rename">Umbenennen</string>
+    <string name="config_copy">Kopieren</string>
+    <string name="config_share">Teilen</string>
+    <string name="config_delete">Löschen</string>
+    <string name="config_create">Neue Konfig erstellen</string>
+    <string name="config_import">Konfig importieren</string>
+    <string name="config_deselect">Abwählen</string>
+    <string name="config_delete_dialog_message">Sind Sie sicher, dass Sie die Konfig %s löschen möchten?</string>
+    <string name="config_rename_dialog_message">Umbenennen</string>
+    <string name="config_copy_dialog_message">Kopieren</string>
+
+    <string name="accounts_login">Anmelden</string>
+    <string name="accounts_login_as">Anmelden als %s</string>
+    <string name="account_select">Auswählen</string>
+    <string name="account_selected">(Ausgewählt)</string>
+    <string name="account_delete_dialog_message">Sind Sie sicher, dass Sie das Konto %s löschen möchten?</string>
+
+    <string name="logcat_clear">Protokolle löschen</string>
+    <string name="logcat_share">Protokolle teilen</string>
+
+    <string name="tab_dashboard">Übersicht</string>
+    <string name="tab_accounts">Konten</string>
+    <string name="tab_configs">Konfigurationen</string>
+    <string name="tab_logs">Protokolle</string>
+    <string name="tab_btn_navigation_drawer">Navigationsleiste</string>
+
+    <string name="dialog_title">Fortfahren?</string>
+    <string name="dialog_confirm">Bestätigen</string>
+    <string name="dialog_cancel">Abbrechen</string>
+    <string name="dialog_loading">Beladung</string>
+</resources>
