@@ -19,14 +19,14 @@ import kotlin.math.sin
 
 class ModuleESP : CheatModule("ESP") {
 
-    private val fovValue = IntValue("Fov", 110, 40, 110)
-    private val allObjectsValue = BoolValue("AllObjects", false)
-    private val botsValue = BoolValue("Bots", false)
-    private val avoidScreenValue = BoolValue("AvoidScreen", true)
-    private val strokeWidthValue = IntValue("StrokeWidth", 2, 1, 10)
-    private val colorRedValue = IntValue("ColorRed", 61, 0, 255)
-    private val colorGreenValue = IntValue("ColorGreen", 154, 0, 255)
-    private val colorBlueValue = IntValue("ColorBlue", 220, 0, 255)
+    private val fovValue = intValue("Fov", 110, 40, 110)
+    private val allObjectsValue = boolValue("AllObjects", false)
+    private val botsValue = boolValue("Bots", false)
+    private val avoidScreenValue = boolValue("AvoidScreen", true)
+    private val strokeWidthValue = intValue("StrokeWidth", 2, 1, 10)
+    private val colorRedValue = intValue("ColorRed", 61, 0, 255)
+    private val colorGreenValue = intValue("ColorGreen", 154, 0, 255)
+    private val colorBlueValue = intValue("ColorBlue", 220, 0, 255)
 
     override fun onEnable() {
         session.eventManager.emit(RenderLayerView.EventRefreshRender(session))

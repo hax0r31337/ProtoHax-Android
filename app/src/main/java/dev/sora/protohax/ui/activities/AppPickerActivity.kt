@@ -1,5 +1,6 @@
 package dev.sora.protohax.ui.activities
 
+import android.annotation.SuppressLint
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
@@ -55,6 +56,7 @@ class AppPickerActivity : ComponentActivity() {
         }
     }
 
+    @SuppressLint("CoroutineCreationDuringComposition")
     @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     private fun Content() {
@@ -93,19 +95,13 @@ class AppPickerActivity : ComponentActivity() {
                     )
 
                     val scope = rememberCoroutineScope()
-                    val listIcons = remember { mutableStateMapOf<String, Painter>() }
+                    val listIcons = remember { mutableStateMapOf<String, Painter?>() }
                     val listItems = remember {
                         mutableStateListOf<Pair<String, PackageInfo>>().also {
                             scope.launch {
                                 it.addAll(packageManager.getInstalledPackages(PackageManager.GET_PERMISSIONS)
                                     .filter { it.hasInternetPermission && it.applicationInfo.flags and ApplicationInfo.FLAG_SYSTEM == 0 && it.packageName != "dev.sora.protohax" }
                                     .map { packageManager.getApplicationLabel(it.applicationInfo).toString() to it }.sortedBy { it.first })
-                                scope.launch {
-                                    it.forEach {
-                                        val name = it.second.packageName
-                                        listIcons[name] = drawablePainter(packageManager.getApplicationIcon(name))
-                                    }
-                                }
                             }
                         }
                     }
@@ -122,24 +118,30 @@ class AppPickerActivity : ComponentActivity() {
 
                     LazyColumn {
                         items(listItems.filter { it.first.startsWith(text.value, true) }) {
-                            val packageInfo = it.second
+                            val packageName = it.second.packageName
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .padding(16.dp, 10.dp)
                                     .clickable {
-                                        MainActivity.targetPackage = packageInfo.packageName
+                                        MainActivity.targetPackage = packageName
                                         finish()
                                     },
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                val icon = listIcons[packageInfo.packageName]
+                                val icon = listIcons[packageName]
                                 if (icon == null) {
                                     Spacer(modifier = Modifier.size(42.dp))
+                                    if (!listIcons.containsKey(packageName)) {
+                                        listIcons[packageName] = null
+                                        scope.launch {
+                                            listIcons[packageName] = drawablePainter(packageManager.getApplicationIcon(packageName))
+                                        }
+                                    }
                                 } else {
                                     Image(
                                         painter = icon,
-                                        contentDescription = packageInfo.packageName,
+                                        contentDescription = packageName,
                                         modifier = Modifier
                                             .size(42.dp)
                                             .clip(RoundedCornerShape(8.dp))
@@ -148,7 +150,7 @@ class AppPickerActivity : ComponentActivity() {
                                 Spacer(modifier = Modifier.size(12.dp, 0.dp))
                                 Column {
                                     Text(it.first, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                                    Text(packageInfo.packageName, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                                    Text(packageName, maxLines = 1, overflow = TextOverflow.Ellipsis)
                                 }
                             }
                         }
