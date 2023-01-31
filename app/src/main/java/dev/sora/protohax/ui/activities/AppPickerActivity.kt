@@ -3,8 +3,10 @@ package dev.sora.protohax.ui.activities
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.ColorDrawable
+import android.graphics.drawable.Drawable
 import android.os.Bundle
-import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
@@ -12,9 +14,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Search
@@ -24,12 +24,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.asImageBitmap
+import androidx.compose.ui.graphics.painter.BitmapPainter
+import androidx.compose.ui.graphics.painter.ColorPainter
+import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
-import com.google.accompanist.drawablepainter.rememberDrawablePainter
+import com.google.accompanist.drawablepainter.DrawablePainter
 import dev.sora.protohax.R
 import dev.sora.protohax.ui.theme.MyApplicationTheme
 import dev.sora.protohax.util.ContextUtils.hasInternetPermission
@@ -89,12 +93,19 @@ class AppPickerActivity : ComponentActivity() {
                     )
 
                     val scope = rememberCoroutineScope()
+                    val listIcons = remember { mutableStateMapOf<String, Painter>() }
                     val listItems = remember {
                         mutableStateListOf<Pair<String, PackageInfo>>().also {
                             scope.launch {
                                 it.addAll(packageManager.getInstalledPackages(PackageManager.GET_PERMISSIONS)
                                     .filter { it.hasInternetPermission && it.applicationInfo.flags and ApplicationInfo.FLAG_SYSTEM == 0 && it.packageName != "dev.sora.protohax" }
                                     .map { packageManager.getApplicationLabel(it.applicationInfo).toString() to it }.sortedBy { it.first })
+                                scope.launch {
+                                    it.forEach {
+                                        val name = it.second.packageName
+                                        listIcons[name] = drawablePainter(packageManager.getApplicationIcon(name))
+                                    }
+                                }
                             }
                         }
                     }
@@ -112,16 +123,21 @@ class AppPickerActivity : ComponentActivity() {
                                     },
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
-                                Image(
-                                    painter = rememberDrawablePainter(packageManager.getApplicationIcon(packageInfo.packageName)),
-                                    contentDescription = packageInfo.packageName,
-                                    modifier = Modifier
-                                        .size(42.dp)
-                                        .clip(RoundedCornerShape(8.dp))
-                                )
+                                val icon = listIcons[packageInfo.packageName]
+                                if (icon == null) {
+                                    Spacer(modifier = Modifier.size(42.dp))
+                                } else {
+                                    Image(
+                                        painter = icon,
+                                        contentDescription = packageInfo.packageName,
+                                        modifier = Modifier
+                                            .size(42.dp)
+                                            .clip(RoundedCornerShape(8.dp))
+                                    )
+                                }
                                 Spacer(modifier = Modifier.size(12.dp, 0.dp))
                                 Column {
-                                    Text(packageManager.getApplicationLabel(packageInfo.applicationInfo).toString(), fontWeight = FontWeight.Bold)
+                                    Text(it.first, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
                                     Text(packageInfo.packageName, maxLines = 1, overflow = TextOverflow.Ellipsis)
                                 }
                             }
@@ -132,4 +148,13 @@ class AppPickerActivity : ComponentActivity() {
         )
     }
 
+    private fun drawablePainter(drawable: Drawable): Painter {
+        return when (drawable) {
+            is BitmapDrawable -> BitmapPainter(drawable.bitmap.asImageBitmap())
+            is ColorDrawable -> ColorPainter(Color(drawable.color))
+            // Since the DrawablePainter will be remembered and it implements RememberObserver, it
+            // will receive the necessary events
+            else -> DrawablePainter(drawable.mutate())
+        }
+    }
 }

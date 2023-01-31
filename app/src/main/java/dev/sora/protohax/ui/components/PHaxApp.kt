@@ -209,7 +209,8 @@ fun PHaxAppContent(
                 modifier = Modifier
                     .weight(1f)
                     .background(MaterialTheme.colorScheme.background),
-                connectionState = connectionState
+                connectionState = connectionState,
+                navigateToTopLevelDestination = navigateToTopLevelDestination
             )
             AnimatedVisibility(visible = navigationType == NavigationType.BOTTOM_NAVIGATION) {
                 PHaxBottomNavigationBar(
@@ -227,7 +228,8 @@ private fun PHaxNavHost(
     navController: NavHostController,
     navigationType: NavigationType,
     modifier: Modifier = Modifier,
-    connectionState: State<Boolean>
+    connectionState: State<Boolean>,
+    navigateToTopLevelDestination: (PHaxTopLevelDestination) -> Unit
 ) {
     AnimatedNavHost(
         modifier = modifier,
@@ -241,7 +243,7 @@ private fun PHaxNavHost(
         },
     ) {
         composable(PHaxRoute.DASHBOARD) {
-            DashboardScreen(navigationType, connectionState)
+            DashboardScreen(navigationType, connectionState, navigateToTopLevelDestination)
         }
         composable(PHaxRoute.CONFIG) {
             ConfigScreen(navigationType)

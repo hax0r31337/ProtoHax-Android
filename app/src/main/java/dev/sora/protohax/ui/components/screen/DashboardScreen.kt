@@ -34,6 +34,7 @@ import dev.sora.protohax.ui.components.CardCurrentApplication
 import dev.sora.protohax.ui.components.CardLoginAlert
 import dev.sora.protohax.ui.components.HyperlinkText
 import dev.sora.protohax.ui.components.PHaxAppBar
+import dev.sora.protohax.ui.navigation.PHaxTopLevelDestination
 import dev.sora.protohax.util.ContextUtils.isAppExists
 import dev.sora.protohax.util.ContextUtils.toast
 import dev.sora.protohax.util.NavigationType
@@ -51,7 +52,8 @@ private fun getTargetPackage(ctx: Context): String {
 @Composable
 fun DashboardScreen(
     navigationType: NavigationType,
-    connectionState: State<Boolean>
+    connectionState: State<Boolean>,
+    navigateToTopLevelDestination: (PHaxTopLevelDestination) -> Unit
 ) {
     val ctx = LocalContext.current
     val menuCreate = remember { mutableStateOf(false) }
@@ -77,7 +79,7 @@ fun DashboardScreen(
         }
     ) {
         Column(modifier = Modifier.padding(it)) {
-            CardLoginAlert()
+            CardLoginAlert(navigateToTopLevelDestination)
             CardCurrentApplication(applicationSelected, pickAppActivityLauncher)
         }
     }

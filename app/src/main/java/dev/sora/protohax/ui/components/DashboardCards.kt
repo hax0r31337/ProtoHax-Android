@@ -29,17 +29,23 @@ import com.google.accompanist.drawablepainter.rememberDrawablePainter
 import dev.sora.protohax.R
 import dev.sora.protohax.relay.AccountManager
 import dev.sora.protohax.ui.activities.AppPickerActivity
+import dev.sora.protohax.ui.navigation.PHaxTopLevelDestination
+import dev.sora.protohax.ui.navigation.TOP_LEVEL_DESTINATIONS
 import dev.sora.protohax.util.ContextUtils.getApplicationName
 import dev.sora.protohax.util.ContextUtils.getPackageInfo
 import dev.sora.relay.game.GameSession
 
 @Composable
-fun CardLoginAlert() {
+fun CardLoginAlert(
+    navigateToTopLevelDestination: (PHaxTopLevelDestination) -> Unit
+) {
     if (AccountManager.currentAccount == null) {
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(10.dp),
+                .padding(18.dp, 10.dp).clickable {
+                    navigateToTopLevelDestination(TOP_LEVEL_DESTINATIONS.find { it.iconTextId == R.string.tab_accounts } ?: return@clickable)
+                },
         ) {
             Row(
                 modifier = Modifier.padding(15.dp),
@@ -66,7 +72,7 @@ fun CardCurrentApplication(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(10.dp)
+            .padding(18.dp, 10.dp)
             .clickable {
                 pickAppActivityLauncher.launch(Intent(ctx, AppPickerActivity::class.java))
             },
