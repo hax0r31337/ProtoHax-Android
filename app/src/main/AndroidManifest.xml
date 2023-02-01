@@ -48,7 +48,6 @@
                 <action android:name="android.net.VpnService" />
                 <action android:name="dev.sora.libmitm.vpn.start"/>
                 <action android:name="dev.sora.libmitm.vpn.stop"/>
-                <action android:name="dev.sora.libmitm.vpn.initialize"/>
             </intent-filter>
         </service>
 

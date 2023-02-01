@@ -22,11 +22,6 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        // initialize vpn service
-        val intent = Intent(AppService.ACTION_INITIALIZE)
-        intent.setPackage(packageName)
-        startService(intent)
-
         WindowCompat.setDecorFitsSystemWindows(window, false)
 
         setContent {
