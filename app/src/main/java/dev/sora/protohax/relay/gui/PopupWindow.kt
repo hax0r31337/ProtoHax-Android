@@ -6,16 +6,13 @@ import android.graphics.PixelFormat
 import android.graphics.Point
 import android.net.VpnService
 import android.os.Build
-import android.view.Gravity
-import android.view.MotionEvent
-import android.view.View
-import android.view.WindowManager
+import android.view.*
 import android.widget.ImageView
 import android.widget.LinearLayout
+import android.widget.RelativeLayout
 import dev.sora.protohax.MyApplication
 import dev.sora.protohax.R
 import dev.sora.protohax.relay.MinecraftRelay
-import dev.sora.protohax.relay.service.AppService
 import dev.sora.protohax.relay.service.ServiceListener
 
 class PopupWindow(private val ctx: Context) : ServiceListener {
@@ -143,16 +140,27 @@ class PopupWindow(private val ctx: Context) : ServiceListener {
         this.layoutView = layout
         windowManager.addView(layout, params)
 
-        val params1 = WindowManager.LayoutParams(
+        startRenderLayer(windowManager)
+    }
+
+    private fun startRenderLayer(windowManager: WindowManager) {
+        val params = WindowManager.LayoutParams(
             WindowManager.LayoutParams.MATCH_PARENT,
             WindowManager.LayoutParams.MATCH_PARENT,
             WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE or WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL,
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE or WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
             PixelFormat.TRANSLUCENT
         )
-        params1.gravity = Gravity.TOP or Gravity.END
-        renderLayerView = RenderLayerView(ctx, MinecraftRelay.session)
-        windowManager.addView(renderLayerView, params1)
+        // this will fix https://developer.android.com/about/versions/12/behavior-changes-all#untrusted-touch-events
+        params.dimAmount = 0.8f
+        params.alpha = 0.8f
+        params.gravity = Gravity.TOP or Gravity.END
+        val layout = RelativeLayout(ctx)
+        layout.addView(RenderLayerView(ctx, MinecraftRelay.session),
+            ViewGroup.LayoutParams(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT))
+
+        renderLayerView = layout
+        windowManager.addView(layout, params)
     }
 
     override fun onServiceStopped() {

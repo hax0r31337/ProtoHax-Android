@@ -31,5 +31,5 @@
 }
 
 -keepclasseswithmembers class * {
-    <init>(...);
+    public <init>(...);
 }

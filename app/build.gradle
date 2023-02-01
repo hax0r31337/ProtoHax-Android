@@ -8,7 +8,7 @@ plugins {
 android {
     signingConfigs {
         debug {
-            storeFile rootProject.file("signing.keystore")
+            storeFile rootProject.file("signing.jks")
             keyAlias 'sora'
             keyPassword '1145141919'
             storePassword '1145141919'
@@ -22,7 +22,7 @@ android {
         minSdk 28
         targetSdk 33
         versionCode 1
-        versionName "1.2.1-patch1"
+        versionName "1.2.1-patch2"
 
         vectorDrawables {
             useSupportLibrary true

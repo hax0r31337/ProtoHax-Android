@@ -186,10 +186,6 @@ class AppService : VpnService(), Protector {
     companion object {
         const val ACTION_START = "dev.sora.libmitm.vpn.start"
         const val ACTION_STOP = "dev.sora.libmitm.vpn.stop"
-        /**
-         * this does nothing but initialize context
-         */
-        const val ACTION_INITIALIZE = "dev.sora.libmitm.vpn.initialize"
         const val CHANNEL_ID = "dev.sora.protohax.NOTIFICATION_CHANNEL_ID"
 
         const val VPN_MTU = 1500
