@@ -22,14 +22,16 @@
 
 -keep class io.netty.** { *; }
 
--keepclasseswithmembers class * {
+-keepclassmembers class * {
     @dev.sora.relay.game.event.Listen <methods>;
 }
 
--keepclasseswithmembers class * {
+-keepclassmembers class * {
     @com.google.gson.annotations.SerializedName <fields>;
 }
 
--keepclasseswithmembers class * {
+-keepclassmembers class * {
     public <init>(...);
 }
+
+-keepnames class com.nukkitx.protocol.bedrock.packet.NetworkSettingsPacket
