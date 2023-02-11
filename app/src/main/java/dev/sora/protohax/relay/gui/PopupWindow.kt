@@ -4,29 +4,33 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.PixelFormat
 import android.graphics.Point
+import android.graphics.drawable.GradientDrawable
 import android.net.VpnService
 import android.os.Build
 import android.view.*
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
+import android.widget.TextView
 import dev.sora.protohax.MyApplication
 import dev.sora.protohax.R
 import dev.sora.protohax.relay.MinecraftRelay
 import dev.sora.protohax.relay.service.ServiceListener
+import dev.sora.relay.cheat.module.CheatModule
 
 class PopupWindow(private val ctx: Context) : ServiceListener {
 
     private var layoutView: View? = null
     private var renderLayerView: View? = null
 
-    private var layout: View? = null
+    private var menuLayout: View? = null
     private val menu = SelectionMenu(this)
+    private val shortcuts = mutableMapOf<CheatModule, View>()
 
     val screenSize = Point()
 
     fun toggle(wm: WindowManager, ctx: Context) {
-        if (layout == null) {
+        if (menuLayout == null) {
             display(wm, ctx)
         } else {
             destroy(wm)
@@ -34,9 +38,9 @@ class PopupWindow(private val ctx: Context) : ServiceListener {
     }
 
     fun destroy(wm: WindowManager) {
-        if (layout == null) return
-        wm.removeView(layout)
-        layout = null
+        if (menuLayout == null) return
+        wm.removeView(menuLayout)
+        menuLayout = null
     }
 
     private fun getScreenSize(wm: WindowManager): Point {
@@ -52,7 +56,7 @@ class PopupWindow(private val ctx: Context) : ServiceListener {
     }
 
     fun display(wm: WindowManager, ctx: Context) {
-        if (layout != null) return
+        if (menuLayout != null) return
 
         getScreenSize(wm).also { screenSize.set(it.x, it.y) }
 
@@ -72,9 +76,43 @@ class PopupWindow(private val ctx: Context) : ServiceListener {
         params.x = 0   // Initial Position of window
         params.y = 0 // Initial Position of window
         wm.addView(layout, params)
-        this.layout = layout
+        this.menuLayout = layout
     }
 
+    private fun View.draggable(params: WindowManager.LayoutParams, windowManager: WindowManager) {
+        var dragPosX = 0f
+        var dragPosY = 0f
+        var pressDownTime = System.currentTimeMillis()
+        setOnTouchListener { v, event ->
+            when (event.action) {
+                MotionEvent.ACTION_DOWN -> {
+                    dragPosX = event.rawX
+                    dragPosY = event.rawY
+                    pressDownTime = System.currentTimeMillis()
+                    true
+                }
+                MotionEvent.ACTION_UP -> {
+                    if (System.currentTimeMillis() - pressDownTime < 500) {
+                        v.performClick()
+                    }
+                    true
+                }
+                MotionEvent.ACTION_MOVE -> {
+                    if (System.currentTimeMillis() - pressDownTime < 500) {
+                        false
+                    } else {
+                        params.x += -((event.rawX - dragPosX)).toInt()
+                        params.y += (event.rawY - dragPosY).toInt()
+                        dragPosX = event.rawX
+                        dragPosY = event.rawY
+                        windowManager.updateViewLayout(this, params)
+                        true
+                    }
+                }
+                else -> false
+            }
+        }
+    }
 
     @SuppressLint("ClickableViewAccessibility")
     override fun onServiceStarted() {
@@ -98,49 +136,23 @@ class PopupWindow(private val ctx: Context) : ServiceListener {
             LinearLayout.LayoutParams.MATCH_PARENT,
             LinearLayout.LayoutParams.WRAP_CONTENT
         )
-
-        var dragPosX = 0f
-        var dragPosY = 0f
-        var pressDownTime = System.currentTimeMillis()
         imageView.setOnClickListener {
             toggle(windowManager, ctx)
         }
-        imageView.setOnTouchListener { v, event ->
-            when (event.action) {
-                MotionEvent.ACTION_DOWN -> {
-                    dragPosX = event.rawX
-                    dragPosY = event.rawY
-                    pressDownTime = System.currentTimeMillis()
-                    true
-                }
-                MotionEvent.ACTION_UP -> {
-                    if (System.currentTimeMillis() - pressDownTime < 500) {
-                        v.performClick()
-                    }
-                    true
-                }
-                MotionEvent.ACTION_MOVE -> {
-                    if (System.currentTimeMillis() - pressDownTime < 500) {
-                        false
-                    } else {
-                        params.x += -((event.rawX - dragPosX)).toInt()
-                        params.y += (event.rawY - dragPosY).toInt()
-                        dragPosX = event.rawX
-                        dragPosY = event.rawY
-                        windowManager.updateViewLayout(layout, params)
-                        true
-                    }
-                }
-                else -> false
-            }
-        }
 
         layout.addView(imageView)
+        layout.draggable(params, windowManager)
 
         this.layoutView = layout
         windowManager.addView(layout, params)
 
         startRenderLayer(windowManager)
+
+        val shortcutList = shortcuts.keys.map { it }
+        shortcuts.clear()
+        shortcutList.forEach {
+            shortcutFor(it)
+        }
     }
 
     private fun startRenderLayer(windowManager: WindowManager) {
@@ -170,5 +182,68 @@ class PopupWindow(private val ctx: Context) : ServiceListener {
         renderLayerView?.let { windowManager.removeView(it) }
         renderLayerView = null
         destroy(windowManager)
+        shortcuts.values.forEach {
+            windowManager.removeView(it)
+        }
+    }
+
+    fun shortcutFor(module: CheatModule): Boolean {
+        val windowManager = MyApplication.instance.getSystemService(VpnService.WINDOW_SERVICE) as WindowManager
+        if (shortcuts.containsKey(module)) {
+            windowManager.removeView(shortcuts[module])
+            shortcuts.remove(module)
+            return false
+        }
+
+        fun TextView.updateTextColor() {
+            setTextColor(if (module.canToggle) if (module.state) SelectionMenu.TOGGLE_ON_COLOR_RGB else SelectionMenu.TOGGLE_OFF_COLOR_RGB else SelectionMenu.TEXT_COLOR)
+        }
+
+        val layout = LinearLayout(ctx).apply {
+            gravity = Gravity.CENTER or Gravity.CENTER
+            orientation = LinearLayout.HORIZONTAL
+        }
+        val text = TextView(ctx).apply {
+            gravity = Gravity.CENTER or Gravity.CENTER
+            text = module.name.filter { it.isUpperCase() }
+            textSize = 14f
+            updateTextColor()
+
+            setPadding(30, 30, 30, 30)
+
+            background = GradientDrawable().apply {
+                setColor(SelectionMenu.BACKGROUND_COLOR)
+                cornerRadius = 15f
+                alpha = 150
+            }
+        }
+        layout.addView(text)
+        layout.setOnClickListener {
+            module.toggle()
+            text.updateTextColor()
+        }
+
+        val params = WindowManager.LayoutParams(
+            WindowManager.LayoutParams.WRAP_CONTENT,
+            WindowManager.LayoutParams.WRAP_CONTENT,
+            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
+            WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+            PixelFormat.TRANSLUCENT
+        )
+        params.gravity = Gravity.TOP or Gravity.END
+        params.x = 600
+        params.y = 100
+
+        layout.draggable(params, windowManager)
+
+        windowManager.addView(layout, params)
+
+        shortcuts[module] = layout
+
+        return true
+    }
+
+    fun hasShortcut(module: CheatModule): Boolean {
+        return shortcuts.containsKey(module)
     }
 }
