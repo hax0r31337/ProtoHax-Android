@@ -101,7 +101,7 @@ class PopupWindow(private val ctx: Context) : ServiceListener {
                     if (System.currentTimeMillis() - pressDownTime < 500) {
                         false
                     } else {
-                        params.x += -((event.rawX - dragPosX)).toInt()
+                        params.x += (event.rawX - dragPosX).toInt()
                         params.y += (event.rawY - dragPosY).toInt()
                         dragPosX = event.rawX
                         dragPosY = event.rawY
@@ -124,27 +124,20 @@ class PopupWindow(private val ctx: Context) : ServiceListener {
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
             PixelFormat.TRANSLUCENT
         )
-        params.gravity = Gravity.TOP or Gravity.END
-        params.x = 0   // Initial Position of window
-        params.y = 100 // Initial Position of window
-
-        val layout = LinearLayout(ctx)
+        params.gravity = Gravity.TOP or Gravity.START
+        params.x = 0
+        params.y = 100
 
         val imageView = ImageView(ctx)
         imageView.setImageResource(R.mipmap.ic_launcher_round)
-        imageView.layoutParams = LinearLayout.LayoutParams(
-            LinearLayout.LayoutParams.MATCH_PARENT,
-            LinearLayout.LayoutParams.WRAP_CONTENT
-        )
         imageView.setOnClickListener {
             toggle(windowManager, ctx)
         }
 
-        layout.addView(imageView)
-        layout.draggable(params, windowManager)
+        imageView.draggable(params, windowManager)
 
-        this.layoutView = layout
-        windowManager.addView(layout, params)
+        this.layoutView = imageView
+        windowManager.addView(imageView, params)
 
         startRenderLayer(windowManager)
 
@@ -190,7 +183,11 @@ class PopupWindow(private val ctx: Context) : ServiceListener {
     fun shortcutFor(module: CheatModule): Boolean {
         val windowManager = MyApplication.instance.getSystemService(VpnService.WINDOW_SERVICE) as WindowManager
         if (shortcuts.containsKey(module)) {
-            windowManager.removeView(shortcuts[module])
+            try {
+                windowManager.removeView(shortcuts[module])
+            } catch (t: Throwable) {
+                t.printStackTrace()
+            }
             shortcuts.remove(module)
             return false
         }
@@ -230,8 +227,8 @@ class PopupWindow(private val ctx: Context) : ServiceListener {
             WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
             PixelFormat.TRANSLUCENT
         )
-        params.gravity = Gravity.TOP or Gravity.END
-        params.x = 600
+        params.gravity = Gravity.TOP or Gravity.START
+        params.x = 100
         params.y = 100
 
         layout.draggable(params, windowManager)
