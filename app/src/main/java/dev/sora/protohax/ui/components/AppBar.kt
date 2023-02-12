@@ -26,7 +26,7 @@ fun PHaxAppBar(
     Scaffold(
         modifier = Modifier.nestedScroll(scrollBehavior.nestedScrollConnection),
         topBar = {
-            if (navigationType == NavigationType.PERMANENT_NAVIGATION_DRAWER) {
+            if (navigationType != NavigationType.BOTTOM_NAVIGATION) {
                 TopAppBar(
                     title = {
                         Text(
