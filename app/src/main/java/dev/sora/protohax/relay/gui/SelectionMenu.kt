@@ -16,10 +16,7 @@ import dev.sora.protohax.R
 import dev.sora.protohax.relay.MinecraftRelay
 import dev.sora.protohax.util.Gpw
 import dev.sora.relay.cheat.module.CheatModule
-import dev.sora.relay.cheat.value.BoolValue
-import dev.sora.relay.cheat.value.FloatValue
-import dev.sora.relay.cheat.value.IntValue
-import dev.sora.relay.cheat.value.ListValue
+import dev.sora.relay.cheat.value.*
 import java.math.BigDecimal
 import java.math.RoundingMode
 
@@ -160,9 +157,16 @@ class SelectionMenu(private val window: PopupWindow) {
     }
 
     private fun moduleValues(ctx: Context, advisedWidth: Int, module: CheatModule, backButton: Button): Boolean {
-        if (module.values.isEmpty()) return false
         buttonList.removeAllViews()
-        module.values.forEach { value ->
+        val values = mutableListOf<Value<*>>()
+        values.addAll(module.values)
+        values.add(object : BoolValue("Shortcut", window.hasShortcut(module)) {
+            override fun onChanged(oldValue: Boolean, newValue: Boolean) {
+                super.onChange(oldValue, newValue)
+                window.shortcutFor(module)
+            }
+        })
+        values.forEach { value ->
             if (value is BoolValue) {
                 buttonList.addView(ctx.themedButton().also { b ->
                     fun Button.setText() {
@@ -259,14 +263,14 @@ class SelectionMenu(private val window: PopupWindow) {
     }
 
     companion object {
-        private val TEXT_COLOR = Color.parseColor("#c1c1c1")
-        private val BACKGROUND_COLOR_PRIMARY = Color.parseColor("#3c3c3c")
-        private val BACKGROUND_COLOR = Color.parseColor("#1b1b1b")
-        private val RIPPLE_COLOR = Color.parseColor("#888888")
-        private val THEME_COLOR = Color.parseColor("#3d9adc")
+        val TEXT_COLOR = Color.parseColor("#c1c1c1")
+        val BACKGROUND_COLOR_PRIMARY = Color.parseColor("#3c3c3c")
+        val BACKGROUND_COLOR = Color.parseColor("#1b1b1b")
+        val RIPPLE_COLOR = Color.parseColor("#888888")
+        val THEME_COLOR = Color.parseColor("#3d9adc")
         private const val TOGGLE_ON_COLOR = "#00a93f"
         private const val TOGGLE_OFF_COLOR = "#c81000"
-        private val TOGGLE_ON_COLOR_RGB = Color.parseColor(TOGGLE_ON_COLOR)
-        private val TOGGLE_OFF_COLOR_RGB = Color.parseColor(TOGGLE_OFF_COLOR)
+        val TOGGLE_ON_COLOR_RGB = Color.parseColor(TOGGLE_ON_COLOR)
+        val TOGGLE_OFF_COLOR_RGB = Color.parseColor(TOGGLE_OFF_COLOR)
     }
 }

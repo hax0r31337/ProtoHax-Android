@@ -21,14 +21,13 @@ import dev.sora.protohax.relay.gui.RenderLayerView
 import dev.sora.protohax.ui.activities.MainActivity
 import dev.sora.protohax.util.ContextUtils.getApplicationName
 import libmitm.Libmitm
-import libmitm.Protector
 import libmitm.TUN
 import java.net.Inet4Address
 import java.net.Inet6Address
 import java.net.NetworkInterface
 
 
-class AppService : VpnService(), Protector {
+class AppService : VpnService() {
 
     private lateinit var windowManager: WindowManager
     private val popupWindow = PopupWindow(this).also {
@@ -106,13 +105,6 @@ class AppService : VpnService(), Protector {
                 hasIPv4 -> Libmitm.IPv6Disable
                 hasIPv6 -> Libmitm.IPv6Only
                 else -> error("invalid state")
-            }
-            fdProtector = this@AppService
-            if (hasIPv4) {
-                addLocalIP(PRIVATE_VLAN4_CLIENT)
-            }
-            if (hasIPv6) {
-                addLocalIP(PRIVATE_VLAN6_CLIENT)
             }
             udpRedirector = UdpForwarderHandler
             udpEstablishHandler = UdpForwarderHandler
