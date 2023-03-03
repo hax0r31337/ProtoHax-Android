@@ -160,29 +160,30 @@ class SelectionMenu(private val window: PopupWindow) {
         buttonList.removeAllViews()
         val values = mutableListOf<Value<*>>()
         values.addAll(module.values)
-        values.add(object : BoolValue("Shortcut", window.hasShortcut(module)) {
-            override fun onChanged(oldValue: Boolean, newValue: Boolean) {
-                super.onChange(oldValue, newValue)
-                window.shortcutFor(module)
-            }
-        })
+        values.add(BoolValue("Shortcut", window.hasShortcut(module)).listen {
+			window.shortcutFor(module)
+		})
         values.forEach { value ->
             if (value is BoolValue) {
                 buttonList.addView(ctx.themedButton().also { b ->
                     fun Button.setText() {
-                        text = Html.fromHtml("${value.name}: <font color=\"${if(value.get()) "$TOGGLE_ON_COLOR\">ON" else "$TOGGLE_OFF_COLOR\">OFF"}</font>", Html.FROM_HTML_MODE_LEGACY)
+                        text = Html.fromHtml("${value.name}: <font color=\"${if(value.value) "$TOGGLE_ON_COLOR\">ON" else "$TOGGLE_OFF_COLOR\">OFF"}</font>", Html.FROM_HTML_MODE_LEGACY)
                     }
                     b.setText()
                     b.width = advisedWidth
                     b.setOnClickListener {
-                        value.set(!value.get())
+                        value.value = !value.value
                         b.setText()
                     }
                 })
-            } else  {
+            } else {
                 fun Button.setText() {
-                    text = Html.fromHtml("${value.name}: <font color=\"#AAAAAA\">${value.get()
-                        .let { if (it is Float) BigDecimal(it.toString()).setScale(2, RoundingMode.HALF_UP) else it }
+                    text = Html.fromHtml("${value.name}: <font color=\"#AAAAAA\">${value.value
+                        .let {
+							if (it is Float) BigDecimal(it.toString()).setScale(2, RoundingMode.HALF_UP)
+							else if (it is NamedChoice) it.choiceName
+							else it
+						}
                         .toString().replace("<", "&lt;").replace(">", "&gt;")}</font>", Html.FROM_HTML_MODE_LEGACY)
                 }
                 val button = ctx.themedButton().apply {
@@ -192,19 +193,15 @@ class SelectionMenu(private val window: PopupWindow) {
                 buttonList.addView(button)
                 if (value is ListValue) {
                     button.setOnClickListener {
-                        val valueList = value.values
-                        val idx = valueList.indexOf(value.get()) + 1
-                        value.set(if (idx == valueList.size) {
-                            valueList.first()
-                        } else valueList[idx])
+                        value.roll()
                         button.setText()
                     }
                 } else if (value is IntValue) {
                     button.background = ColorDrawable(BACKGROUND_COLOR)
                     buttonList.addView(SeekBar(ctx).apply {
-                        min = value.minimum
-                        max = value.maximum
-                        progress = value.get().coerceIn(value.minimum, value.maximum)
+                        min = value.range.first
+                        max = value.range.last
+                        progress = value.value.coerceIn(min, max)
                         onProgressChanged { _, progress, _ ->
                             value.set(progress)
                             button.setText()
@@ -217,9 +214,9 @@ class SelectionMenu(private val window: PopupWindow) {
                     buttonList.addView(SeekBar(ctx).apply {
                         min = 0
                         max = advisedWidth
-                        progress = (((value.get() - value.minimum) / (value.maximum - value.minimum) ) * advisedWidth).toInt().coerceIn(0, advisedWidth)
+                        progress = (((value.value - value.range.start) / (value.range.endInclusive - value.range.start) ) * advisedWidth).toInt().coerceIn(0, advisedWidth)
                         onProgressChanged { _, progress, _ ->
-                            value.set(value.minimum + (value.maximum - value.minimum) * (progress.toFloat() / advisedWidth))
+                            value.set(value.range.start + (value.range.endInclusive - value.range.start) * (progress.toFloat() / advisedWidth))
                             button.setText()
                         }
                         button.height -= height

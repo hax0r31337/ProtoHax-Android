@@ -3,64 +3,59 @@ package dev.sora.protohax.relay.modules
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
-import com.nukkitx.math.matrix.Matrix4f
-import com.nukkitx.math.vector.Vector2d
 import dev.sora.protohax.relay.gui.RenderLayerView
 import dev.sora.relay.cheat.module.CheatModule
 import dev.sora.relay.cheat.module.impl.ModuleAntiBot.isBot
-import dev.sora.relay.cheat.value.BoolValue
-import dev.sora.relay.cheat.value.IntValue
 import dev.sora.relay.game.entity.Entity
 import dev.sora.relay.game.entity.EntityPlayer
-import dev.sora.relay.game.entity.EntityPlayerSP
-import dev.sora.relay.game.event.Listen
+import org.cloudburstmc.math.matrix.Matrix4f
+import org.cloudburstmc.math.vector.Vector2d
 import kotlin.math.cos
 import kotlin.math.sin
 
 
 class ModuleESP : CheatModule("ESP") {
 
-    private val fovValue = intValue("Fov", 110, 40, 110)
-    private val allObjectsValue = boolValue("AllObjects", false)
-    private val botsValue = boolValue("Bots", false)
-    private val avoidScreenValue = boolValue("AvoidScreen", true)
-    private val strokeWidthValue = intValue("StrokeWidth", 2, 1, 10)
-    private val colorRedValue = intValue("ColorRed", 61, 0, 255)
-    private val colorGreenValue = intValue("ColorGreen", 154, 0, 255)
-    private val colorBlueValue = intValue("ColorBlue", 220, 0, 255)
+    private var fovValue by intValue("Fov", 110, 40..110)
+    private var allObjectsValue by boolValue("AllObjects", false)
+    private var botsValue by boolValue("Bots", false)
+    private var avoidScreenValue by boolValue("AvoidScreen", true)
+    private var strokeWidthValue by intValue("StrokeWidth", 2, 1..10)
+    private var colorRedValue by intValue("ColorRed", 61, 0..255)
+    private var colorGreenValue by intValue("ColorGreen", 154, 0..255)
+    private var colorBlueValue by intValue("ColorBlue", 220, 0..255)
 
     override fun onEnable() {
         session.eventManager.emit(RenderLayerView.EventRefreshRender(session))
     }
 
-    @Listen
-    fun onRender(event: RenderLayerView.EventRender) {
-        event.needRefresh = true
-        if (avoidScreenValue.get() && event.session.thePlayer.openContainer != null) return
-        val map = event.session.theWorld.entityMap.values
-            .let { if (allObjectsValue.get()) it else it.filter { e -> e is EntityPlayer && (botsValue.get() || !e.isBot(event.session))} }
-        if (map.isEmpty()) return
+ 	private val handleRender = handle<RenderLayerView.EventRender> { event ->
+		event.needRefresh = true
+		if (avoidScreenValue && event.session.thePlayer.openContainer != null) return@handle
+		val map = event.session.theWorld.entityMap.values
+			.let { if (allObjectsValue) it else it.filter { e -> e is EntityPlayer && (botsValue || !e.isBot(event.session))} }
+		if (map.isEmpty()) return@handle
 
-        val player = event.session.thePlayer
-        val canvas = event.canvas
-        val screenWidth = canvas.width
-        val screenHeight = canvas.height
-        val renderPartialTicks = player.renderPartialTicks
+		val player = event.session.thePlayer
+		val canvas = event.canvas
+		val screenWidth = canvas.width
+		val screenHeight = canvas.height
+		val renderPartialTicks = player.renderPartialTicks
 
-        val viewProjMatrix =  Matrix4f.createPerspective(fovValue.get().toFloat()+10, screenWidth.toFloat() / screenHeight, 0.1f, 128f)
-            .mul(Matrix4f.createTranslation(player.vec3Position)
-                .mul(rotY(-(player.prevRotationYaw + (player.rotationYaw - player.prevRotationYaw) * renderPartialTicks)-180))
-                .mul(rotX(-(player.prevRotationPitch + (player.rotationPitch - player.prevRotationPitch) * renderPartialTicks)))
-                .invert())
+		val viewProjMatrix =  Matrix4f.createPerspective(fovValue.toFloat(), screenWidth.toFloat() / screenHeight, 0.1f, 128f)
+			.mul(Matrix4f.createTranslation(player.vec3Position)
+				.mul(rotY(-(player.prevRotationYaw + (player.rotationYaw - player.prevRotationYaw) * renderPartialTicks)-180))
+				.mul(rotX(-(player.prevRotationPitch + (player.rotationPitch - player.prevRotationPitch) * renderPartialTicks)))
+				.invert())
 
-        val paint = Paint()
-        paint.strokeWidth = strokeWidthValue.get().toFloat()
-        paint.color = Color.rgb(colorRedValue.get(), colorGreenValue.get(), colorBlueValue.get())
+		val paint = Paint()
+		paint.strokeWidth = strokeWidthValue.toFloat()
+		paint.color = Color.rgb(colorRedValue, colorGreenValue, colorBlueValue)
 
-        map.forEach {
-            drawEntityBox(it, viewProjMatrix, screenWidth, screenHeight, canvas, paint)
-        }
-    }
+		map.forEach {
+			drawEntityBox(it, viewProjMatrix, screenWidth, screenHeight, canvas, paint)
+		}
+	}
 
     private fun drawEntityBox(entity: Entity, viewProjMatrix: Matrix4f, screenWidth: Int, screenHeight: Int, canvas: Canvas, paint: Paint) {
         var minX = entity.posX - 0.3
