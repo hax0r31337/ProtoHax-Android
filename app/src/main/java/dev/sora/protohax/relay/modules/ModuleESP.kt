@@ -5,7 +5,7 @@ import android.graphics.Color
 import android.graphics.Paint
 import dev.sora.protohax.relay.gui.RenderLayerView
 import dev.sora.relay.cheat.module.CheatModule
-import dev.sora.relay.cheat.module.impl.ModuleAntiBot.isBot
+import dev.sora.relay.cheat.module.impl.ModuleTargets
 import dev.sora.relay.game.entity.Entity
 import dev.sora.relay.game.entity.EntityPlayer
 import org.cloudburstmc.math.matrix.Matrix4f
@@ -32,8 +32,9 @@ class ModuleESP : CheatModule("ESP") {
  	private val handleRender = handle<RenderLayerView.EventRender> { event ->
 		event.needRefresh = true
 		if (avoidScreenValue && event.session.thePlayer.openContainer != null) return@handle
+		val moduleTargets = moduleManager.getModule(ModuleTargets::class.java) ?: error("no module found as Targets")
 		val map = event.session.theWorld.entityMap.values
-			.let { if (allObjectsValue) it else it.filter { e -> e is EntityPlayer && (botsValue || !e.isBot(event.session))} }
+			.let { if (allObjectsValue) it else it.filter { e -> e is EntityPlayer && (botsValue || with(moduleTargets) { !e.isBot() })} }
 		if (map.isEmpty()) return@handle
 
 		val player = event.session.thePlayer
