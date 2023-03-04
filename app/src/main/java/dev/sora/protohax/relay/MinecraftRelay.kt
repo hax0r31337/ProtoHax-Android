@@ -14,6 +14,7 @@ import dev.sora.relay.game.GameSession
 import dev.sora.relay.session.MinecraftRelaySession
 import dev.sora.relay.session.listener.RelayListenerAutoCodec
 import dev.sora.relay.session.listener.RelayListenerMicrosoftLogin
+import dev.sora.relay.session.listener.RelayListenerNetworkSettings
 import dev.sora.relay.utils.logInfo
 import io.netty.util.internal.logging.InternalLoggerFactory
 import java.net.DatagramSocket
@@ -68,11 +69,12 @@ object MinecraftRelay {
         System.setProperty("io.netty.noUnsafe", "true")
         InternalLoggerFactory.setDefaultFactory(NettyLoggerFactory())
 
-        listenPort = searchForUsablePort()
+		listenPort = searchForUsablePort()
 		var msLoginSession: RelayListenerMicrosoftLogin? = null
         val relay = ProtoHaxMinecraftRelay(object : MinecraftRelayListener {
 			override fun onSessionCreation(session: MinecraftRelaySession): InetSocketAddress {
 				// add listeners
+				session.listeners.add(RelayListenerNetworkSettings(session))
 				session.listeners.add(RelayListenerAutoCodec(session))
 				this@MinecraftRelay.session.netSession = session
 				session.listeners.add(this@MinecraftRelay.session)
