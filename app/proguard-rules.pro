@@ -24,16 +24,8 @@
 -keep class org.cloudburstmc.netty.** { *; }
 -keep class org.cloudburstmc.protocol.bedrock.netty.** { *; }
 
-#-keepclassmembers class org.cloudburstmc.protocol.bedrock.data.** {
-#    public <methods>;
-#}
-
 -keepclassmembers class * {
     @com.google.gson.annotations.SerializedName <fields>;
-}
-
--keepclassmembers class * {
-    public <init>(...);
 }
 
 -keep class org.cloudburstmc.protocol.bedrock.data.entity.** { *; }
