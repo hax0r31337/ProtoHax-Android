@@ -133,6 +133,7 @@ class AppService : VpnService() {
         val networkInterfaces = NetworkInterface.getNetworkInterfaces()
         while (networkInterfaces.hasMoreElements()) {
             val ni = networkInterfaces.nextElement()
+			if (!ni.isUp) continue
             for (addr in ni.interfaceAddresses) {
                 if (addr.address is Inet6Address) {
                     hasIPv6 = true
