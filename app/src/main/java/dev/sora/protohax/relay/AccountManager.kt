@@ -3,10 +3,9 @@ package dev.sora.protohax.relay
 import com.google.gson.*
 import com.google.gson.annotations.SerializedName
 import dev.sora.protohax.MyApplication
-import dev.sora.protohax.relay.service.AppService
 import dev.sora.protohax.util.ContextUtils.readString
 import dev.sora.protohax.util.ContextUtils.writeString
-import dev.sora.relay.session.RakNetRelaySessionListenerMicrosoft
+import dev.sora.relay.session.listener.RelayListenerMicrosoftLogin
 import dev.sora.relay.utils.HttpUtils
 import java.io.File
 import java.lang.reflect.Type
@@ -25,7 +24,7 @@ object AccountManager {
 
     private val storeFile = File(MyApplication.instance.filesDir, "credentials.json")
     private val gson = GsonBuilder()
-        .registerTypeAdapter(RakNetRelaySessionListenerMicrosoft.DeviceInfo::class.java, DeviceInfoAdapter())
+        .registerTypeAdapter(RelayListenerMicrosoftLogin.DeviceInfo::class.java, DeviceInfoAdapter())
         .create()
 
     init {
@@ -57,21 +56,21 @@ object AccountManager {
         currentRefreshToken = null
     }
 
-    private class DeviceInfoAdapter : JsonSerializer<RakNetRelaySessionListenerMicrosoft.DeviceInfo>, JsonDeserializer<RakNetRelaySessionListenerMicrosoft.DeviceInfo> {
+    private class DeviceInfoAdapter : JsonSerializer<RelayListenerMicrosoftLogin.DeviceInfo>, JsonDeserializer<RelayListenerMicrosoftLogin.DeviceInfo> {
 
-        override fun serialize(src: RakNetRelaySessionListenerMicrosoft.DeviceInfo, typeOf: Type?, ctx: JsonSerializationContext?): JsonElement {
+        override fun serialize(src: RelayListenerMicrosoftLogin.DeviceInfo, typeOf: Type?, ctx: JsonSerializationContext?): JsonElement {
             return JsonPrimitive(src.deviceType)
         }
 
-        override fun deserialize(json: JsonElement, typeOf: Type?, ctx: JsonDeserializationContext?): RakNetRelaySessionListenerMicrosoft.DeviceInfo {
-            return RakNetRelaySessionListenerMicrosoft.devices[json.asString]!!
+        override fun deserialize(json: JsonElement, typeOf: Type?, ctx: JsonDeserializationContext?): RelayListenerMicrosoftLogin.DeviceInfo {
+            return RelayListenerMicrosoftLogin.devices[json.asString]!!
         }
     }
 }
 
 class Account(
     @SerializedName("remark") var remark: String,
-    @SerializedName("device") val platform: RakNetRelaySessionListenerMicrosoft.DeviceInfo,
+    @SerializedName("device") val platform: RelayListenerMicrosoftLogin.DeviceInfo,
     @SerializedName("refresh_token") var refreshToken: String
 ) {
 

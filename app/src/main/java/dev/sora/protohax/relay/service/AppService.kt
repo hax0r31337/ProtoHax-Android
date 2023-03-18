@@ -3,23 +3,18 @@ package dev.sora.protohax.relay.service
 import android.app.*
 import android.content.Intent
 import android.graphics.BitmapFactory
-import android.graphics.PixelFormat
+import android.net.ConnectivityManager
 import android.net.VpnService
 import android.os.ParcelFileDescriptor
 import android.util.Log
-import android.view.Gravity
-import android.view.MotionEvent
-import android.view.View
 import android.view.WindowManager
-import android.widget.ImageView
-import android.widget.LinearLayout
 import androidx.core.app.NotificationCompat
 import dev.sora.protohax.R
 import dev.sora.protohax.relay.MinecraftRelay
 import dev.sora.protohax.relay.gui.PopupWindow
-import dev.sora.protohax.relay.gui.RenderLayerView
 import dev.sora.protohax.ui.activities.MainActivity
 import dev.sora.protohax.util.ContextUtils.getApplicationName
+import dev.sora.relay.utils.logInfo
 import libmitm.Libmitm
 import libmitm.TUN
 import java.net.Inet4Address
@@ -134,21 +129,28 @@ class AppService : VpnService() {
     }
 
     private fun checkNetState(): Pair<Boolean, Boolean> {
-        var hasIPv4 = false
-        var hasIPv6 = false
+		val connectivityManager = this.getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
+		val activeNetwork = connectivityManager.getLinkProperties(connectivityManager.activeNetwork ?: return true to false) ?: return true to false
+		val interfaceName = activeNetwork.interfaceName
 
-        val networkInterfaces = NetworkInterface.getNetworkInterfaces()
-        while (networkInterfaces.hasMoreElements()) {
-            val ni = networkInterfaces.nextElement()
-            for (addr in ni.interfaceAddresses) {
-                if (addr.address is Inet6Address) {
-                    hasIPv6 = true
-                } else if (addr.address is Inet4Address) {
-                    hasIPv4 = true
-                }
-            }
-        }
-        return hasIPv4 to hasIPv6
+		val networkInterfaces = NetworkInterface.getNetworkInterfaces()
+		while (networkInterfaces.hasMoreElements()) {
+			val ni = networkInterfaces.nextElement()
+			if (ni.name != interfaceName) continue
+
+			var hasIPv4 = false
+			var hasIPv6 = false
+			for (addr in ni.interfaceAddresses) {
+				if (addr.address is Inet6Address) {
+					hasIPv6 = true
+				} else if (addr.address is Inet4Address) {
+					hasIPv4 = true
+				}
+			}
+			return hasIPv4 to hasIPv6
+		}
+
+		return true to false
     }
 
     private fun createNotification(): Notification {

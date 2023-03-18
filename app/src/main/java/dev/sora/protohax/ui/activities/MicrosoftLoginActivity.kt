@@ -12,19 +12,19 @@ import android.webkit.WebView
 import android.webkit.WebViewClient
 import androidx.activity.result.contract.ActivityResultContract
 import com.google.gson.JsonParser
-import com.nukkitx.protocol.bedrock.util.EncryptionUtils
 import dev.sora.protohax.R
 import dev.sora.protohax.relay.Account
 import dev.sora.protohax.relay.AccountManager
-import dev.sora.relay.session.RakNetRelaySessionListenerMicrosoft
+import dev.sora.relay.session.listener.RelayListenerMicrosoftLogin
 import dev.sora.relay.utils.HttpUtils
 import dev.sora.relay.utils.base64Decode
+import org.cloudburstmc.protocol.bedrock.util.EncryptionUtils
 import java.io.IOException
 import kotlin.concurrent.thread
 
 class MicrosoftLoginActivity : Activity() {
 
-    private lateinit var device: RakNetRelaySessionListenerMicrosoft.DeviceInfo
+    private lateinit var device: RelayListenerMicrosoftLogin.DeviceInfo
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -41,7 +41,7 @@ class MicrosoftLoginActivity : Activity() {
         }
         webview.webViewClient = CustomWebViewClient(this)
 
-        device = intent.extras?.getString(EXTRAS_KEY_DEVICE_TYPE)?.let { RakNetRelaySessionListenerMicrosoft.devices[it] } ?: kotlin.run {
+        device = intent.extras?.getString(EXTRAS_KEY_DEVICE_TYPE)?.let { RelayListenerMicrosoftLogin.devices[it] } ?: kotlin.run {
             setResult(RESULT_CANCELED)
             finish()
             return
@@ -124,9 +124,9 @@ h1 {
                         activity.runOnUiThread { activity.showLoadingPage("Still loading (1/3)") }
                         // fetch username through chain
                         val username = try {
-                            val identityToken = RakNetRelaySessionListenerMicrosoft.fetchIdentityToken(json.get("access_token").asString, activity.device)
+                            val identityToken = RelayListenerMicrosoftLogin.fetchIdentityToken(json.get("access_token").asString, activity.device)
                             activity.runOnUiThread { activity.showLoadingPage("Still loading (2/3)") }
-                            getUsernameFromChain(RakNetRelaySessionListenerMicrosoft.fetchRawChain(identityToken, EncryptionUtils.createKeyPair().public).readText())
+                            getUsernameFromChain(RelayListenerMicrosoftLogin.fetchRawChain(identityToken, EncryptionUtils.createKeyPair().public).readText())
                         } catch (t: Throwable) {
                             Log.e("ProtoHax", "fetch username", t)
                             "user ${json.get("user_id").asString}"
@@ -163,8 +163,8 @@ h1 {
         }
     }
 
-    class LauncherContract : ActivityResultContract<RakNetRelaySessionListenerMicrosoft.DeviceInfo, Boolean>() {
-        override fun createIntent(context: Context, device: RakNetRelaySessionListenerMicrosoft.DeviceInfo): Intent {
+    class LauncherContract : ActivityResultContract<RelayListenerMicrosoftLogin.DeviceInfo, Boolean>() {
+        override fun createIntent(context: Context, device: RelayListenerMicrosoftLogin.DeviceInfo): Intent {
             return Intent(context, MicrosoftLoginActivity::class.java).apply {
                 putExtra(EXTRAS_KEY_DEVICE_TYPE, device.deviceType)
             }

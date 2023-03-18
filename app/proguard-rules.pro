@@ -21,17 +21,11 @@
 -renamesourcefileattribute null
 
 -keep class io.netty.** { *; }
-
--keepclassmembers class * {
-    @dev.sora.relay.game.event.Listen <methods>;
-}
+-keep class org.cloudburstmc.netty.** { *; }
+-keep class org.cloudburstmc.protocol.bedrock.netty.** { *; }
 
 -keepclassmembers class * {
     @com.google.gson.annotations.SerializedName <fields>;
 }
 
--keepclassmembers class * {
-    public <init>(...);
-}
-
--keepnames class com.nukkitx.protocol.bedrock.packet.NetworkSettingsPacket
+-keep class org.cloudburstmc.protocol.bedrock.data.entity.** { *; }
