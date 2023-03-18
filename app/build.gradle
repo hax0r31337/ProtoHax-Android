@@ -58,6 +58,15 @@ android {
         }
         jniLibs.useLegacyPackaging true
     }
+    configurations {
+        all {
+            resolutionStrategy {
+                // exclude duplicate classes
+                exclude group: 'com.google.guava', module: 'listenablefuture'
+                exclude group: 'com.google.errorprone', module: 'error_prone_annotations'
+            }
+        }
+    }
 }
 
 dependencies {
