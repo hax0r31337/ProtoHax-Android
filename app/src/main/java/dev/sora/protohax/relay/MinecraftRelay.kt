@@ -7,6 +7,7 @@ import dev.sora.protohax.relay.modules.ModuleESP
 import dev.sora.protohax.relay.service.UdpForwarderHandler
 import dev.sora.relay.MinecraftRelayListener
 import dev.sora.relay.cheat.command.CommandManager
+import dev.sora.relay.cheat.command.impl.CommandDownloadWorld
 import dev.sora.relay.cheat.config.ConfigManagerFileSystem
 import dev.sora.relay.cheat.module.ModuleManager
 import dev.sora.relay.cheat.module.impl.ModuleResourcePackSpoof
@@ -17,6 +18,7 @@ import dev.sora.relay.session.listener.RelayListenerMicrosoftLogin
 import dev.sora.relay.session.listener.RelayListenerNetworkSettings
 import dev.sora.relay.utils.logInfo
 import io.netty.util.internal.logging.InternalLoggerFactory
+import java.io.File
 import java.net.DatagramSocket
 import java.net.InetSocketAddress
 import kotlin.concurrent.thread
@@ -39,10 +41,17 @@ object MinecraftRelay {
         moduleManager = ModuleManager(session)
         moduleManager.init()
         registerAdditionalModules(moduleManager)
+		MyApplication.instance.getExternalFilesDir("resource_packs")?.also {
+			if (!it.exists()) it.mkdirs()
+			ModuleResourcePackSpoof.resourcePackProvider = ModuleResourcePackSpoof.FileSystemResourcePackProvider(it)
+		}
 
 		// command manager will register listener itself
         commandManager = CommandManager(session)
         commandManager.init(moduleManager)
+		MyApplication.instance.getExternalFilesDir("downloaded_worlds")?.also {
+			commandManager.registerCommand(CommandDownloadWorld(session.eventManager, it))
+		}
 
         configManager = ConfigManagerFileSystem(MyApplication.instance.getExternalFilesDir("configs")!!, ".json", moduleManager)
 
@@ -105,10 +114,6 @@ object MinecraftRelay {
 		})
 		relay.bind(InetSocketAddress("0.0.0.0", listenPort))
         this.relay = relay
-        MyApplication.instance.getExternalFilesDir("resource_packs")?.also {
-            if (!it.exists()) it.mkdirs()
-            ModuleResourcePackSpoof.resourcePackProvider = ModuleResourcePackSpoof.FileSystemResourcePackProvider(it)
-        }
         Log.i("ProtoHax", "relay started")
     }
 
