@@ -20,7 +20,7 @@ import dev.sora.protohax.relay.AccountManager
 import dev.sora.protohax.ui.activities.MicrosoftLoginActivity
 import dev.sora.protohax.ui.components.PHaxAppBar
 import dev.sora.protohax.util.NavigationType
-import dev.sora.relay.session.RakNetRelaySessionListenerMicrosoft
+import dev.sora.relay.session.listener.RelayListenerMicrosoftLogin
 
 @Composable
 fun AccountsScreen(navigationType: NavigationType) {
@@ -147,7 +147,7 @@ private fun MenuCreate(state: MutableState<Boolean>, callback: () -> Unit) {
             expanded = state.value,
             onDismissRequest = { state.value = false }
         ) {
-            RakNetRelaySessionListenerMicrosoft.devices.values.forEach { device ->
+            RelayListenerMicrosoftLogin.devices.values.forEach { device ->
                 DropdownMenuItem(
                     text = { Text(stringResource(R.string.accounts_login_as, device.deviceType)) },
                     onClick = {
