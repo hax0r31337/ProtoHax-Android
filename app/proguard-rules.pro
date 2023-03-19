@@ -18,8 +18,4 @@
 
 # If you keep the line number information, uncomment this to
 # hide the original source file name.
-#-renamesourcefileattribute SourceFile
-
-#-keep class dev.sora.** { *; }
-#-keep class com.github.** { *; }
-#-keep class com.nukkitx.** { *; }
+-renamesourcefileattribute null

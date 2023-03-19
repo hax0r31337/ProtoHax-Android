@@ -3,25 +3,22 @@ package dev.sora.protohax
 import android.app.*
 import android.content.Intent
 import android.graphics.BitmapFactory
+import android.net.ConnectivityManager
 import android.net.VpnService
 import android.os.ParcelFileDescriptor
 import android.util.Log
-import android.view.WindowManager
 import androidx.core.app.NotificationCompat
 import dev.sora.protohax.ContextUtils.readString
-import dev.sora.protohax.ContextUtils.toast
 import dev.sora.protohax.forwarder.R
 import libmitm.Libmitm
-import libmitm.Protector
 import libmitm.Redirector
 import libmitm.TUN
 import java.net.Inet4Address
 import java.net.Inet6Address
 import java.net.NetworkInterface
-import kotlin.random.Random
 
 
-class AppService : VpnService(), Protector {
+class AppService : VpnService() {
 
     private var vpnDescriptor: ParcelFileDescriptor? = null
     private var tun: TUN? = null
@@ -62,7 +59,6 @@ class AppService : VpnService(), Protector {
         builder.setMtu(VPN_MTU)
         builder.setSession("ProtoHax")
         builder.addAllowedApplication(readString(MainActivity.KEY_TARGET_PACKAGE_CACHE)!!)
-        builder.addAllowedApplication(this.packageName)
 //        builder.addDnsServer("8.8.8.8")
         // ipv4
         if (hasIPv4) {
@@ -86,13 +82,6 @@ class AppService : VpnService(), Protector {
                 hasIPv4 -> Libmitm.IPv6Disable
                 hasIPv6 -> Libmitm.IPv6Only
                 else -> error("invalid state")
-            }
-            fdProtector = this@AppService
-            if (hasIPv4) {
-                addLocalIP(PRIVATE_VLAN4_CLIENT)
-            }
-            if (hasIPv6) {
-                addLocalIP(PRIVATE_VLAN6_CLIENT)
             }
             val forward = readString(MainActivity.KEY_TARGET_PACKET_FORWARD)!!
             udpRedirector = Redirector { _, _, _, _ -> forward }
@@ -121,12 +110,17 @@ class AppService : VpnService(), Protector {
     }
 
     private fun checkNetState(): Pair<Boolean, Boolean> {
-        var hasIPv4 = false
-        var hasIPv6 = false
+        val connectivityManager = this.getSystemService(CONNECTIVITY_SERVICE) as ConnectivityManager
+        val activeNetwork = connectivityManager.getLinkProperties(connectivityManager.activeNetwork ?: return true to false) ?: return true to false
+        val interfaceName = activeNetwork.interfaceName
 
         val networkInterfaces = NetworkInterface.getNetworkInterfaces()
         while (networkInterfaces.hasMoreElements()) {
             val ni = networkInterfaces.nextElement()
+            if (ni.name != interfaceName) continue
+
+            var hasIPv4 = false
+            var hasIPv6 = false
             for (addr in ni.interfaceAddresses) {
                 if (addr.address is Inet6Address) {
                     hasIPv6 = true
@@ -134,8 +128,10 @@ class AppService : VpnService(), Protector {
                     hasIPv4 = true
                 }
             }
+            return hasIPv4 to hasIPv6
         }
-        return hasIPv4 to hasIPv6
+
+        return true to false
     }
 
     private fun createNotification(): Notification {
