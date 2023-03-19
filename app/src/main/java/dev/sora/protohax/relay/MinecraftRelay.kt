@@ -41,17 +41,17 @@ object MinecraftRelay {
         moduleManager = ModuleManager(session)
         moduleManager.init()
         registerAdditionalModules(moduleManager)
-		MyApplication.instance.getExternalFilesDir("resource_packs")?.also {
-			if (!it.exists()) it.mkdirs()
-			ModuleResourcePackSpoof.resourcePackProvider = ModuleResourcePackSpoof.FileSystemResourcePackProvider(it)
-		}
+        MyApplication.instance.getExternalFilesDir("resource_packs")?.also {
+            if (!it.exists()) it.mkdirs()
+            ModuleResourcePackSpoof.resourcePackProvider = ModuleResourcePackSpoof.FileSystemResourcePackProvider(it)
+        }
 
-		// command manager will register listener itself
+        // command manager will register listener itself
         commandManager = CommandManager(session)
         commandManager.init(moduleManager)
-		MyApplication.instance.getExternalFilesDir("downloaded_worlds")?.also {
-			commandManager.registerCommand(CommandDownloadWorld(session.eventManager, it))
-		}
+        MyApplication.instance.getExternalFilesDir("downloaded_worlds")?.also {
+            commandManager.registerCommand(CommandDownloadWorld(session.eventManager, it))
+        }
 
         configManager = ConfigManagerFileSystem(MyApplication.instance.getExternalFilesDir("configs")!!, ".json", moduleManager)
 
@@ -78,41 +78,41 @@ object MinecraftRelay {
         System.setProperty("io.netty.noUnsafe", "true")
         InternalLoggerFactory.setDefaultFactory(NettyLoggerFactory())
 
-		listenPort = searchForUsablePort()
-		var msLoginSession: RelayListenerMicrosoftLogin? = null
+        listenPort = searchForUsablePort()
+        var msLoginSession: RelayListenerMicrosoftLogin? = null
         val relay = ProtoHaxMinecraftRelay(object : MinecraftRelayListener {
-			override fun onSessionCreation(session: MinecraftRelaySession): InetSocketAddress {
-				// add listeners
-				session.listeners.add(RelayListenerNetworkSettings(session))
-				session.listeners.add(RelayListenerAutoCodec(session))
-				this@MinecraftRelay.session.netSession = session
-				session.listeners.add(this@MinecraftRelay.session)
-				if (msLoginSession == null) {
-					msLoginSession = AccountManager.currentAccount?.let {
-						val accessToken = it.refresh()
-						logInfo("logged in as ${it.remark}")
-						RelayListenerMicrosoftLogin(accessToken, it.platform)
-					}
-				}
-				msLoginSession?.let {
-					it.session = session
-					session.listeners.add(it)
-				}
+            override fun onSessionCreation(session: MinecraftRelaySession): InetSocketAddress {
+                // add listeners
+                session.listeners.add(RelayListenerNetworkSettings(session))
+                session.listeners.add(RelayListenerAutoCodec(session))
+                this@MinecraftRelay.session.netSession = session
+                session.listeners.add(this@MinecraftRelay.session)
+                if (msLoginSession == null) {
+                    msLoginSession = AccountManager.currentAccount?.let {
+                        val accessToken = it.refresh()
+                        logInfo("logged in as ${it.remark}")
+                        RelayListenerMicrosoftLogin(accessToken, it.platform)
+                    }
+                }
+                msLoginSession?.let {
+                    it.session = session
+                    session.listeners.add(it)
+                }
 
-				// resolve original ip and pass to relay client
-				val address = session.socketAddress as InetSocketAddress
-				Log.i("ProtoHax", "SessionCreation ${address.port}")
-				try {
-					val pair = UdpForwarderHandler.originalIpMap[address.port]!!
-					Log.i("ProtoHax", "EstablishConnection ${pair.first}:${pair.second}")
-					return InetSocketAddress(pair.first, pair.second)
-				} catch (t: Throwable) {
-					Log.e("ProtoHax", "establish", t)
-					throw t
-				}
-			}
-		})
-		relay.bind(InetSocketAddress("0.0.0.0", listenPort))
+                // resolve original ip and pass to relay client
+                val address = session.socketAddress as InetSocketAddress
+                Log.i("ProtoHax", "SessionCreation ${address.port}")
+                try {
+                    val pair = UdpForwarderHandler.originalIpMap[address.port]!!
+                    Log.i("ProtoHax", "EstablishConnection ${pair.first}:${pair.second}")
+                    return InetSocketAddress(pair.first, pair.second)
+                } catch (t: Throwable) {
+                    Log.e("ProtoHax", "establish", t)
+                    throw t
+                }
+            }
+        })
+        relay.bind(InetSocketAddress("0.0.0.0", listenPort))
         this.relay = relay
         Log.i("ProtoHax", "relay started")
     }

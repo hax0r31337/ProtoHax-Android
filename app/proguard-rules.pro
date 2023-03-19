@@ -27,5 +27,6 @@
 -keepclassmembers class * {
     @com.google.gson.annotations.SerializedName <fields>;
 }
+-keep class coelho.msftauth.** { *; }
 
 -keep class org.cloudburstmc.protocol.bedrock.data.entity.** { *; }
