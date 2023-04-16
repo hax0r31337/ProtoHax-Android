@@ -31,3 +31,6 @@
 -keep class coelho.msftauth.** { *; }
 
 -keep class org.cloudburstmc.protocol.bedrock.data.entity.** { *; }
+
+# disable R8 warning for missing classes
+-dontwarn **
