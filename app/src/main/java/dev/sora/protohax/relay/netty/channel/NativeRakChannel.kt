@@ -3,6 +3,7 @@ package dev.sora.protohax.relay.netty.channel
 import io.netty.buffer.ByteBuf
 import io.netty.buffer.Unpooled
 import io.netty.channel.*
+import io.netty.util.concurrent.DefaultEventExecutorGroup
 import io.netty.util.internal.StringUtil
 import libmitm.RakConn
 import org.cloudburstmc.netty.channel.raknet.packet.RakMessage
@@ -19,6 +20,7 @@ class NativeRakChannel(parent: Channel, private val rakConn: RakConn) : Abstract
 	}
 
 	private var readPending = false
+	private val eventLoopRead = DefaultEventLoop()
 
 	override fun config(): ChannelConfig {
 		return config
@@ -67,7 +69,8 @@ class NativeRakChannel(parent: Channel, private val rakConn: RakConn) : Abstract
 		if (readPending) return
 
 		readPending = true
-		eventLoop().execute {
+		// FIXME: find better solution
+		eventLoopRead.execute {
 			if (!readPending) {
 				// We have to check readPending here because the Runnable to read could have been scheduled and later
 				// during the same read loop readPending was set to false.
@@ -77,11 +80,8 @@ class NativeRakChannel(parent: Channel, private val rakConn: RakConn) : Abstract
 
 			val pipeline = pipeline()
 			try {
-				var message = rakConn.readNonBlocking()
-				while (message != null) { // read until no messages left
-					pipeline.fireChannelRead(Unpooled.wrappedBuffer(message))
-					message = rakConn.readNonBlocking()
-				}
+				val message = rakConn.read()
+				pipeline.fireChannelRead(Unpooled.wrappedBuffer(message))
 			} catch (t: Throwable) {
 				pipeline.fireExceptionCaught(t)
 				if (!rakConn.isOpen) {

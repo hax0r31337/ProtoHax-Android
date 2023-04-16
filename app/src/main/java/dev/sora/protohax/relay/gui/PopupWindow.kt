@@ -131,7 +131,7 @@ class PopupWindow(private val ctx: Context) : ServiceListener {
         params.x = 0
         params.y = 100
 
-        val imageView = ImageView(ctx)
+		val imageView = ImageView(ctx)
 
 		ResourcesCompat.getDrawable(
 			ctx.resources, R.mipmap.ic_launcher, ctx.theme
