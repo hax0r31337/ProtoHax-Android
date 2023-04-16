@@ -23,6 +23,7 @@
 -keep class io.netty.** { *; }
 -keep class org.cloudburstmc.netty.** { *; }
 -keep class org.cloudburstmc.protocol.bedrock.netty.** { *; }
+-keep class dev.sora.protohax.relay.netty.channel.** { *; }
 
 -keepclassmembers class * {
     @com.google.gson.annotations.SerializedName <fields>;

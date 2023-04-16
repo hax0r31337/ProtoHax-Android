@@ -1,4 +1,4 @@
-package dev.sora.protohax.relay.log;
+package dev.sora.protohax.relay.netty.log;
 
 import android.util.Log;
 

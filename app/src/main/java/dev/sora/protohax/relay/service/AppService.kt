@@ -14,7 +14,6 @@ import dev.sora.protohax.relay.MinecraftRelay
 import dev.sora.protohax.relay.gui.PopupWindow
 import dev.sora.protohax.ui.activities.MainActivity
 import dev.sora.protohax.util.ContextUtils.getApplicationName
-import dev.sora.relay.utils.logInfo
 import libmitm.Libmitm
 import libmitm.TUN
 import java.net.Inet4Address
@@ -101,15 +100,12 @@ class AppService : VpnService() {
                 hasIPv6 -> Libmitm.IPv6Only
                 else -> error("invalid state")
             }
-            udpRedirector = UdpForwarderHandler
-            udpEstablishHandler = UdpForwarderHandler
         }
         this.tun = tun
         tun.start()
         Log.i("ProtoHax", "netstack started")
         isActive = true
         try {
-            MinecraftRelay.listen()
             serviceListeners.forEach { it.onServiceStarted() }
         } catch (t: Throwable) {
             Log.e("ProtoHax", "start callback", t)
@@ -119,7 +115,6 @@ class AppService : VpnService() {
     private fun stopVPN() {
         isActive = false
         try {
-            MinecraftRelay.close()
             serviceListeners.forEach { it.onServiceStopped() }
         } catch (t: Throwable) {
             Log.e("ProtoHax", "stop callback", t)

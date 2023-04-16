@@ -2,9 +2,10 @@ package dev.sora.protohax.relay
 
 import android.util.Log
 import dev.sora.protohax.MyApplication
-import dev.sora.protohax.relay.log.NettyLoggerFactory
 import dev.sora.protohax.relay.modules.ModuleESP
-import dev.sora.protohax.relay.service.UdpForwarderHandler
+import dev.sora.protohax.relay.netty.channel.NativeRakConfig
+import dev.sora.protohax.relay.netty.channel.NativeRakServerChannel
+import dev.sora.protohax.relay.netty.log.NettyLoggerFactory
 import dev.sora.relay.MinecraftRelayListener
 import dev.sora.relay.cheat.command.CommandManager
 import dev.sora.relay.cheat.command.impl.CommandDownloadWorld
@@ -17,25 +18,19 @@ import dev.sora.relay.session.listener.RelayListenerAutoCodec
 import dev.sora.relay.session.listener.RelayListenerMicrosoftLogin
 import dev.sora.relay.session.listener.RelayListenerNetworkSettings
 import dev.sora.relay.utils.logInfo
+import io.netty.channel.ChannelFactory
+import io.netty.channel.ServerChannel
 import io.netty.util.internal.logging.InternalLoggerFactory
-import java.io.File
-import java.net.DatagramSocket
 import java.net.InetSocketAddress
-import kotlin.concurrent.thread
-import kotlin.random.Random
-
-typealias ProtoHaxMinecraftRelay = dev.sora.relay.MinecraftRelay
 
 object MinecraftRelay {
 
-    private var relay: ProtoHaxMinecraftRelay? = null
+    private val relay: Relay
 
     val session = GameSession()
     val moduleManager: ModuleManager
     val commandManager: CommandManager
     val configManager: ConfigManagerFileSystem
-
-    var listenPort: Int = 10000+Random.nextInt(55534)
 
     init {
         moduleManager = ModuleManager(session)
@@ -57,30 +52,20 @@ object MinecraftRelay {
 
         // initialize AccountManager
         AccountManager
+
+		relay = listen()
     }
 
     private fun registerAdditionalModules(moduleManager: ModuleManager) {
-        moduleManager.registerModule(ModuleESP())
-    }
+		moduleManager.registerModule(ModuleESP())
+	}
 
-    private fun searchForUsablePort(): Int {
-        var port = 10000+Random.nextInt(55534)
-        thread {
-            // android do not allow network operation on main thread
-            val socket = DatagramSocket()
-            port = socket.localPort
-            socket.close()
-        }.join()
-        return port
-    }
-
-    fun listen() {
-        System.setProperty("io.netty.noUnsafe", "true")
+    private fun listen(): Relay {
+//        System.setProperty("io.netty.noUnsafe", "true")
         InternalLoggerFactory.setDefaultFactory(NettyLoggerFactory())
 
-        listenPort = searchForUsablePort()
         var msLoginSession: RelayListenerMicrosoftLogin? = null
-        val relay = ProtoHaxMinecraftRelay(object : MinecraftRelayListener {
+        return Relay(object : MinecraftRelayListener {
             override fun onSessionCreation(session: MinecraftRelaySession): InetSocketAddress {
                 // add listeners
                 session.listeners.add(RelayListenerNetworkSettings(session))
@@ -100,26 +85,22 @@ object MinecraftRelay {
                 }
 
                 // resolve original ip and pass to relay client
-                val address = session.socketAddress as InetSocketAddress
-                Log.i("ProtoHax", "SessionCreation ${address.port}")
-                try {
-                    val pair = UdpForwarderHandler.originalIpMap[address.port]!!
-                    Log.i("ProtoHax", "EstablishConnection ${pair.first}:${pair.second}")
-                    return InetSocketAddress(pair.first, pair.second)
-                } catch (t: Throwable) {
-                    Log.e("ProtoHax", "establish", t)
-                    throw t
-                }
+                val address = session.peer.channel.config().getOption(NativeRakConfig.RAK_NATIVE_TARGET_ADDRESS)
+                Log.i("ProtoHax", "SessionCreation $address")
+				return address
             }
-        })
-        relay.bind(InetSocketAddress("0.0.0.0", listenPort))
-        this.relay = relay
-        Log.i("ProtoHax", "relay started")
+        }).also {
+			it.bind(InetSocketAddress("0.0.0.0", 1337))
+			Log.i("ProtoHax", "relay started")
+		}
     }
 
-    fun close() {
-        relay?.stop()
-        relay = null
-        Log.i("ProtoHax", "relay closed")
-    }
+	class Relay(listener: MinecraftRelayListener) : dev.sora.relay.MinecraftRelay(listener) {
+
+		override fun channelFactory(): ChannelFactory<out ServerChannel> {
+			return ChannelFactory {
+				NativeRakServerChannel()
+			}
+		}
+	}
 }
