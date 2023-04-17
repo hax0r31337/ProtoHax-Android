@@ -32,7 +32,7 @@ class ModuleESP : CheatModule("ESP") {
  	private val handleRender = handle<RenderLayerView.EventRender> { event ->
 		event.needRefresh = true
 		if (avoidScreenValue && event.session.thePlayer.openContainer != null) return@handle
-		val moduleTargets = moduleManager.getModule(ModuleTargets::class.java) ?: error("no module found as Targets")
+		val moduleTargets = moduleManager.getModule(ModuleTargets::class.java)
 		val map = event.session.theWorld.entityMap.values
 			.let { if (allObjectsValue) it else it.filter { e -> e is EntityPlayer && (botsValue || with(moduleTargets) { !e.isBot() })} }
 		if (map.isEmpty()) return@handle

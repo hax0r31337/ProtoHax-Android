@@ -106,6 +106,7 @@ class AppService : VpnService() {
         Log.i("ProtoHax", "netstack started")
         isActive = true
         try {
+			MinecraftRelay.announceRelayUp()
             serviceListeners.forEach { it.onServiceStarted() }
         } catch (t: Throwable) {
             Log.e("ProtoHax", "start callback", t)

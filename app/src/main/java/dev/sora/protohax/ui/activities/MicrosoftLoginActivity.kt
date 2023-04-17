@@ -1,5 +1,6 @@
 package dev.sora.protohax.ui.activities
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
@@ -26,7 +27,8 @@ class MicrosoftLoginActivity : Activity() {
 
     private lateinit var device: RelayListenerMicrosoftLogin.DeviceInfo
 
-    override fun onCreate(savedInstanceState: Bundle?) {
+    @SuppressLint("SetJavaScriptEnabled")
+	override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_microsoft_login)
         setResult(RESULT_CANCELED)
@@ -35,11 +37,11 @@ class MicrosoftLoginActivity : Activity() {
         val cookieManager = CookieManager.getInstance()
         cookieManager.removeAllCookies { /* do nothing */ }
 
-        val webview = findViewById<WebView>(R.id.webview)
-        webview.settings.apply {
+        val webView = findViewById<WebView>(R.id.webview)
+        webView.settings.apply {
             javaScriptEnabled = true
         }
-        webview.webViewClient = CustomWebViewClient(this)
+        webView.webViewClient = CustomWebViewClient(this)
 
         device = intent.extras?.getString(EXTRAS_KEY_DEVICE_TYPE)?.let { RelayListenerMicrosoftLogin.devices[it] } ?: kotlin.run {
             setResult(RESULT_CANCELED)
@@ -47,11 +49,10 @@ class MicrosoftLoginActivity : Activity() {
             return
         }
 
-        webview.loadUrl("https://login.live.com/oauth20_authorize.srf?client_id=${device.appId}&redirect_uri=https://login.live.com/oauth20_desktop.srf&response_type=code&scope=service::user.auth.xboxlive.com::MBI_SSL")
+        webView.loadUrl("https://login.live.com/oauth20_authorize.srf?client_id=${device.appId}&redirect_uri=https://login.live.com/oauth20_desktop.srf&response_type=code&scope=service::user.auth.xboxlive.com::MBI_SSL")
     }
 
     fun showLoadingPage(text: String) {
-        val webview = findViewById<WebView>(R.id.webview)
         // we need convert the body to base64 to make sure it loading properly
         // https://stackoverflow.com/questions/3961589/android-webview-and-loaddata
         val data = Base64.encodeToString("""
@@ -80,7 +81,7 @@ h1 {
 }
 </style>
 <div id="loading"></div>""".toByteArray(Charsets.UTF_8), Base64.DEFAULT)
-        webview.loadData(data, "text/html; charset=UTF-8", "base64")
+		findViewById<WebView>(R.id.webview).loadData(data, "text/html; charset=UTF-8", "base64")
     }
 
     fun loadData(text: String) {
@@ -164,9 +165,9 @@ h1 {
     }
 
     class LauncherContract : ActivityResultContract<RelayListenerMicrosoftLogin.DeviceInfo, Boolean>() {
-        override fun createIntent(context: Context, device: RelayListenerMicrosoftLogin.DeviceInfo): Intent {
+        override fun createIntent(context: Context, input: RelayListenerMicrosoftLogin.DeviceInfo): Intent {
             return Intent(context, MicrosoftLoginActivity::class.java).apply {
-                putExtra(EXTRAS_KEY_DEVICE_TYPE, device.deviceType)
+                putExtra(EXTRAS_KEY_DEVICE_TYPE, input.deviceType)
             }
         }
 

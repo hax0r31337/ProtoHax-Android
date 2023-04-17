@@ -22,45 +22,51 @@ import io.netty.channel.ChannelFactory
 import io.netty.channel.ServerChannel
 import io.netty.util.internal.logging.InternalLoggerFactory
 import java.net.InetSocketAddress
+import kotlin.concurrent.thread
 
 object MinecraftRelay {
 
-    private val relay: Relay
+    private var relay: Relay? = null
 
     val session = GameSession()
     val moduleManager: ModuleManager
     val commandManager: CommandManager
     val configManager: ConfigManagerFileSystem
 
+	var loaderThread: Thread? = null
+
     init {
         moduleManager = ModuleManager(session)
-        moduleManager.init()
-        registerAdditionalModules(moduleManager)
-        MyApplication.instance.getExternalFilesDir("resource_packs")?.also {
-            if (!it.exists()) it.mkdirs()
-            ModuleResourcePackSpoof.resourcePackProvider = ModuleResourcePackSpoof.FileSystemResourcePackProvider(it)
-        }
 
         // command manager will register listener itself
         commandManager = CommandManager(session)
-        commandManager.init(moduleManager)
-        MyApplication.instance.getExternalFilesDir("downloaded_worlds")?.also {
-            commandManager.registerCommand(CommandDownloadWorld(session.eventManager, it))
-        }
+
+		// load asynchronously
+		loaderThread = thread {
+			moduleManager.init()
+			registerAdditionalModules(moduleManager)
+			MyApplication.instance.getExternalFilesDir("resource_packs")?.also {
+				if (!it.exists()) it.mkdirs()
+				ModuleResourcePackSpoof.resourcePackProvider = ModuleResourcePackSpoof.FileSystemResourcePackProvider(it)
+			}
+
+			commandManager.init(moduleManager)
+			MyApplication.instance.getExternalFilesDir("downloaded_worlds")?.also {
+				commandManager.registerCommand(CommandDownloadWorld(session.eventManager, it))
+			}
+
+			// clean-up
+			loaderThread = null
+		}
 
         configManager = ConfigManagerFileSystem(MyApplication.instance.getExternalFilesDir("configs")!!, ".json", moduleManager)
-
-        // initialize AccountManager
-        AccountManager
-
-		relay = listen()
     }
 
     private fun registerAdditionalModules(moduleManager: ModuleManager) {
 		moduleManager.registerModule(ModuleESP())
 	}
 
-    private fun listen(): Relay {
+    private fun constructRelay(): Relay {
 //        System.setProperty("io.netty.noUnsafe", "true")
         InternalLoggerFactory.setDefaultFactory(NettyLoggerFactory())
 
@@ -89,11 +95,19 @@ object MinecraftRelay {
                 Log.i("ProtoHax", "SessionCreation $address")
 				return address
             }
-        }).also {
-			it.bind(InetSocketAddress("0.0.0.0", 1337))
+        })
+    }
+
+	fun announceRelayUp() {
+		if (relay == null) {
+			relay = constructRelay()
+		}
+		loaderThread?.join()
+		if (!relay!!.isRunning) {
+			relay!!.bind(InetSocketAddress("0.0.0.0", 1337))
 			Log.i("ProtoHax", "relay started")
 		}
-    }
+	}
 
 	class Relay(listener: MinecraftRelayListener) : dev.sora.relay.MinecraftRelay(listener) {
 
