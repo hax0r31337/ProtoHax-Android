@@ -1,6 +1,5 @@
 package dev.sora.protohax.relay
 
-import android.util.Log
 import dev.sora.protohax.MyApplication
 import dev.sora.protohax.relay.modules.ModuleESP
 import dev.sora.protohax.relay.netty.channel.NativeRakConfig
@@ -92,7 +91,7 @@ object MinecraftRelay {
 
                 // resolve original ip and pass to relay client
                 val address = session.peer.channel.config().getOption(NativeRakConfig.RAK_NATIVE_TARGET_ADDRESS)
-                Log.i("ProtoHax", "SessionCreation $address")
+                logInfo("SessionCreation $address")
 				return address
             }
         })
@@ -105,7 +104,7 @@ object MinecraftRelay {
 		loaderThread?.join()
 		if (!relay!!.isRunning) {
 			relay!!.bind(InetSocketAddress("0.0.0.0", 1337))
-			Log.i("ProtoHax", "relay started")
+			logInfo("relay started")
 		}
 	}
 

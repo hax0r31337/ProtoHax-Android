@@ -40,6 +40,7 @@ import dev.sora.protohax.R
 import dev.sora.protohax.ui.theme.MyApplicationTheme
 import dev.sora.protohax.util.ContextUtils.hasInternetPermission
 import kotlinx.coroutines.launch
+import kotlin.concurrent.thread
 
 class AppPickerActivity : ComponentActivity() {
 
@@ -99,12 +100,17 @@ class AppPickerActivity : ComponentActivity() {
                     val listIcons = remember { mutableStateMapOf<String, Painter?>() }
 					val doneLoading = remember { mutableStateOf(false) }
                     val listItems = remember {
-                        mutableStateListOf<Pair<String, PackageInfo>>().also {
+                        mutableStateListOf<Pair<String, PackageInfo>>().also { list ->
                             scope.launch {
-                                it.addAll(packageManager.getInstalledPackages(PackageManager.GET_PERMISSIONS)
-                                    .filter { it.hasInternetPermission && it.applicationInfo.flags and ApplicationInfo.FLAG_SYSTEM == 0 && it.packageName != BuildConfig.APPLICATION_ID }
-                                    .map { packageManager.getApplicationLabel(it.applicationInfo).toString() to it }.sortedBy { it.first })
+								list.addAll(packageManager.getInstalledPackages(PackageManager.GET_PERMISSIONS)
+									.filter { it.hasInternetPermission && it.applicationInfo.flags and ApplicationInfo.FLAG_SYSTEM == 0 && it.packageName != BuildConfig.APPLICATION_ID }
+									.map { packageManager.getApplicationLabel(it.applicationInfo).toString() to it }.sortedBy { it.first })
 								doneLoading.value = true
+								thread {
+									list.forEach { info ->
+										listIcons[info.second.packageName] = drawablePainter(packageManager.getApplicationIcon(info.second.packageName))
+									}
+								}
                             }
                         }
                     }
@@ -133,12 +139,6 @@ class AppPickerActivity : ComponentActivity() {
 									val icon = listIcons[packageName]
 									if (icon == null) {
 										Spacer(modifier = Modifier.size(42.dp))
-										if (!listIcons.containsKey(packageName)) {
-											listIcons[packageName] = null
-											scope.launch {
-												listIcons[packageName] = drawablePainter(packageManager.getApplicationIcon(packageName))
-											}
-										}
 									} else {
 										Image(
 											painter = icon,

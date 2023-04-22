@@ -1,12 +1,15 @@
 package dev.sora.protohax.relay.service
 
-import android.app.*
+import android.app.Notification
+import android.app.NotificationChannel
+import android.app.NotificationManager
+import android.app.PendingIntent
+import android.app.Service
 import android.content.Intent
 import android.graphics.BitmapFactory
 import android.net.ConnectivityManager
 import android.net.VpnService
 import android.os.ParcelFileDescriptor
-import android.util.Log
 import android.view.WindowManager
 import androidx.core.app.NotificationCompat
 import dev.sora.protohax.R
@@ -14,6 +17,8 @@ import dev.sora.protohax.relay.MinecraftRelay
 import dev.sora.protohax.relay.gui.PopupWindow
 import dev.sora.protohax.ui.activities.MainActivity
 import dev.sora.protohax.util.ContextUtils.getApplicationName
+import dev.sora.relay.utils.logError
+import dev.sora.relay.utils.logInfo
 import libmitm.Libmitm
 import libmitm.TUN
 import java.net.Inet4Address
@@ -63,7 +68,7 @@ class AppService : VpnService() {
                 stopSelf()
             }
         } catch (t: Throwable) {
-            Log.e("ProtoHax", "command", t)
+            logError("command", t)
         }
         return super.onStartCommand(intent, flags, startId)
     }
@@ -103,13 +108,13 @@ class AppService : VpnService() {
         }
         this.tun = tun
         tun.start()
-        Log.i("ProtoHax", "netstack started")
+        logInfo("netstack started")
         isActive = true
         try {
 			MinecraftRelay.announceRelayUp()
             serviceListeners.forEach { it.onServiceStarted() }
         } catch (t: Throwable) {
-            Log.e("ProtoHax", "start callback", t)
+            logError("start callback", t)
         }
     }
 
@@ -118,7 +123,7 @@ class AppService : VpnService() {
         try {
             serviceListeners.forEach { it.onServiceStopped() }
         } catch (t: Throwable) {
-            Log.e("ProtoHax", "stop callback", t)
+            logError("stop callback", t)
         }
         tun?.close()
         vpnDescriptor?.close()

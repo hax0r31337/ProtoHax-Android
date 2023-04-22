@@ -2,8 +2,14 @@ package dev.sora.protohax.relay.netty.channel
 
 import io.netty.buffer.ByteBuf
 import io.netty.buffer.Unpooled
-import io.netty.channel.*
-import io.netty.util.concurrent.DefaultEventExecutorGroup
+import io.netty.channel.AbstractChannel
+import io.netty.channel.Channel
+import io.netty.channel.ChannelConfig
+import io.netty.channel.ChannelMetadata
+import io.netty.channel.ChannelOutboundBuffer
+import io.netty.channel.ChannelPromise
+import io.netty.channel.DefaultEventLoop
+import io.netty.channel.EventLoop
 import io.netty.util.internal.StringUtil
 import libmitm.RakConn
 import org.cloudburstmc.netty.channel.raknet.packet.RakMessage

@@ -6,7 +6,6 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Base64
-import android.util.Log
 import android.webkit.CookieManager
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
@@ -19,6 +18,7 @@ import dev.sora.protohax.relay.AccountManager
 import dev.sora.relay.session.listener.RelayListenerMicrosoftLogin
 import dev.sora.relay.utils.HttpUtils
 import dev.sora.relay.utils.base64Decode
+import dev.sora.relay.utils.logError
 import org.cloudburstmc.protocol.bedrock.util.EncryptionUtils
 import java.io.IOException
 import kotlin.concurrent.thread
@@ -92,7 +92,7 @@ h1 {
 
         override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
             if (!request.url.toString().startsWith("https://login.live.com/oauth20_desktop.srf?", true)) {
-                Log.e("ProtoHax", "invalid url ${request.url}")
+                logError("invalid url ${request.url}")
                 return false
             }
             val query = mutableMapOf<String, String>()
@@ -104,7 +104,7 @@ h1 {
             }
 
             if (!query.contains("code")) {
-                Log.e("ProtoHax", "no token found in redirected url ${request.url}")
+                logError("no token found in redirected url ${request.url}")
                 activity.finish()
                 return true
             }
@@ -129,7 +129,7 @@ h1 {
                             activity.runOnUiThread { activity.showLoadingPage("Still loading (2/3)") }
                             getUsernameFromChain(RelayListenerMicrosoftLogin.fetchRawChain(identityToken, EncryptionUtils.createKeyPair().public).readText())
                         } catch (t: Throwable) {
-                            Log.e("ProtoHax", "fetch username", t)
+                            logError("fetch username", t)
                             "user ${json.get("user_id").asString}"
                         }
 
@@ -140,11 +140,11 @@ h1 {
                         activity.finish()
                         return@thread
                     } else if(json.has("error")) {
-                        Log.e("ProtoHax", "error during token convertion: ${json.get("error").asString}")
+                        logError("error refreshing token: ${json.get("error").asString}")
                     }
-                    throw java.lang.RuntimeException("error during token convertion")
+                    throw RuntimeException("error refreshing token")
                 } catch (t: Throwable) {
-                    Log.e("ProtoHax", "token convert", t)
+                    logError("obtain access token", t)
                     activity.runOnUiThread { activity.loadData(t.toString())}
                 }
             }
