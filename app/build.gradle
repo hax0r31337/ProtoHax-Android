@@ -71,7 +71,8 @@ android {
 
 dependencies {
     implementation 'dev.sora.relay:ProtoHax:1.3.0'
-    implementation 'dev.sora.networking:libmitm:1.2.1-raknet'
+    // implementation 'dev.sora.networking:libmitm:1.2.1-raknet'
+    implementation fileTree(dir: 'libs', include: ['*.aar'])
 
     implementation 'androidx.core:core-ktx:1.10.0'
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.6.1'

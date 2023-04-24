@@ -3,10 +3,7 @@ package dev.sora.protohax.ui.activities
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
@@ -27,11 +24,11 @@ import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.unit.em
 import androidx.core.view.WindowCompat
 import dev.sora.protohax.R
 import dev.sora.protohax.relay.netty.log.NettyLogger
@@ -68,15 +65,11 @@ class LogActivity : ComponentActivity() {
 			topBar = {
 				TopAppBar(
 					title = {
-						Row(verticalAlignment = Alignment.CenterVertically) {
-							Icon(
-								imageVector = Icons.Default.ArrowBack, contentDescription = "",
-								modifier = Modifier.clickable {
-									finish()
-								}
-							)
-							Spacer(modifier = Modifier.padding(4.dp))
-							Text(stringResource(id = R.string.setting_logs))
+						Text(stringResource(id = R.string.setting_logs))
+					},
+					navigationIcon = {
+						IconButton(onClick = { finish() }) {
+							Icon(Icons.Filled.ArrowBack, null)
 						}
 					},
 					actions = {
@@ -107,7 +100,8 @@ class LogActivity : ComponentActivity() {
 					scope.refreshLogs(text)
 
 					SelectionContainer {
-						Text(text = text.value, color = MaterialTheme.colorScheme.onSurfaceVariant)
+						Text(text = text.value, color = MaterialTheme.colorScheme.onSurfaceVariant,
+							fontFamily = FontFamily.Monospace, fontSize = 3.em, lineHeight = 1.2.em)
 					}
 				}
 			}
