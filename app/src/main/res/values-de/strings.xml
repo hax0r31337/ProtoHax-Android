@@ -16,7 +16,7 @@
     <string name="dashboard_no_account_selected">Melden Sie sich mit einem Microsoft-Konto an, um Xbox-authentifizierte Server zu verbinden</string>
     <string name="dashboard_about_info">Lizensiert unter %s\nQuellcode auf %s ansehen\nUnser %s beitreten</string>
     <string name="dashboard_select_application">Wähle eine Anwendung</string>
-    <string name="dashboard_select_application_placeholder">Wählen Sie Anwendungen</string>
+    <string name="dashboard_select_application_placeholder">Zoek naar Anwendungen</string>
     <string name="dashboard_selected_application">Ausgewählte Anwendung</string>
     <string name="dashboard_no_application">Keine Anwendung ausgewählt</string>
     <string name="dashboard_current_version">Aktuell: v%s</string>
@@ -44,10 +44,11 @@
     <string name="logcat_clear">Protokolle löschen</string>
     <string name="logcat_share">Protokolle teilen</string>
 
+    <string name="setting_logs">Protokolle</string>
+
     <string name="tab_dashboard">Übersicht</string>
     <string name="tab_accounts">Konten</string>
     <string name="tab_configs">Konfigurationen</string>
-    <string name="tab_logs">Protokolle</string>
     <string name="tab_btn_navigation_drawer">Navigationsleiste</string>
 
     <string name="dialog_title">Fortfahren?</string>

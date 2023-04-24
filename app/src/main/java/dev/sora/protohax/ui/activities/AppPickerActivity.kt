@@ -30,7 +30,6 @@ import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
@@ -150,8 +149,8 @@ class AppPickerActivity : ComponentActivity() {
 									}
 									Spacer(modifier = Modifier.size(12.dp, 0.dp))
 									Column {
-										Text(it.first, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
-										Text(packageName, maxLines = 1, overflow = TextOverflow.Ellipsis)
+										Text(it.first, maxLines = 1, overflow = TextOverflow.Ellipsis)
+										Text(packageName, maxLines = 1, overflow = TextOverflow.Ellipsis, color = MaterialTheme.colorScheme.outline)
 									}
 								}
 							}

@@ -41,13 +41,14 @@
     <string name="account_selected">(已選擇)</string>
     <string name="account_delete_dialog_message">確定要刪除帳號 %s？</string>
 
+    <string name="setting_logs">記錄</string>
+
     <string name="logcat_clear">清除記錄</string>
     <string name="logcat_share">分享記錄</string>
 
     <string name="tab_dashboard">儀表板</string>
     <string name="tab_accounts">帳號</string>
     <string name="tab_configs">設定</string>
-    <string name="tab_logs">記錄</string>
     <string name="tab_btn_navigation_drawer">導覽抽屜</string>
 
     <string name="dialog_title">繼續？</string>

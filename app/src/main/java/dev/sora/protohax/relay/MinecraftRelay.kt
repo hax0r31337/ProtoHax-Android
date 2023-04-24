@@ -5,6 +5,8 @@ import dev.sora.protohax.relay.modules.ModuleESP
 import dev.sora.protohax.relay.netty.channel.NativeRakConfig
 import dev.sora.protohax.relay.netty.channel.NativeRakServerChannel
 import dev.sora.protohax.relay.netty.log.NettyLoggerFactory
+import dev.sora.protohax.relay.service.AppService
+import dev.sora.protohax.util.ContextUtils.readString
 import dev.sora.relay.MinecraftRelayListener
 import dev.sora.relay.cheat.command.CommandManager
 import dev.sora.relay.cheat.command.impl.CommandDownloadWorld
@@ -14,6 +16,7 @@ import dev.sora.relay.cheat.module.impl.ModuleResourcePackSpoof
 import dev.sora.relay.game.GameSession
 import dev.sora.relay.session.MinecraftRelaySession
 import dev.sora.relay.session.listener.RelayListenerAutoCodec
+import dev.sora.relay.session.listener.RelayListenerEncryptedSession
 import dev.sora.relay.session.listener.RelayListenerMicrosoftLogin
 import dev.sora.relay.session.listener.RelayListenerNetworkSettings
 import dev.sora.relay.utils.logInfo
@@ -69,7 +72,7 @@ object MinecraftRelay {
 //        System.setProperty("io.netty.noUnsafe", "true")
         InternalLoggerFactory.setDefaultFactory(NettyLoggerFactory())
 
-        var msLoginSession: RelayListenerMicrosoftLogin? = null
+        var sessionEncryptor: RelayListenerEncryptedSession? = null
         return Relay(object : MinecraftRelayListener {
             override fun onSessionCreation(session: MinecraftRelaySession): InetSocketAddress {
                 // add listeners
@@ -77,14 +80,16 @@ object MinecraftRelay {
                 session.listeners.add(RelayListenerAutoCodec(session))
                 this@MinecraftRelay.session.netSession = session
                 session.listeners.add(this@MinecraftRelay.session)
-                if (msLoginSession == null) {
-                    msLoginSession = AccountManager.currentAccount?.let {
+                if (sessionEncryptor == null) {
+                    sessionEncryptor = AccountManager.currentAccount?.let {
                         val accessToken = it.refresh()
                         logInfo("logged in as ${it.remark}")
                         RelayListenerMicrosoftLogin(accessToken, it.platform)
                     }
-                }
-                msLoginSession?.let {
+                } else if (MyApplication.instance.readString(AppService.KEY_OFFLINE_SESSION_ENCRYPTION) == "true") {
+					sessionEncryptor = RelayListenerEncryptedSession()
+				}
+                sessionEncryptor?.let {
                     it.session = session
                     session.listeners.add(it)
                 }

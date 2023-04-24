@@ -39,6 +39,11 @@
             android:exported="false"
             android:theme="@style/Theme.ProtoHax">
         </activity>
+        <activity
+            android:name="dev.sora.protohax.ui.activities.LogActivity"
+            android:exported="false"
+            android:theme="@style/Theme.ProtoHax">
+        </activity>
 
         <service android:name="dev.sora.protohax.relay.service.AppService"
             android:permission="android.permission.BIND_VPN_SERVICE"

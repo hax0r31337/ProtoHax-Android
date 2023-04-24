@@ -21,7 +21,7 @@ import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import dev.sora.protohax.ui.components.screen.AccountsScreen
 import dev.sora.protohax.ui.components.screen.ConfigScreen
 import dev.sora.protohax.ui.components.screen.DashboardScreen
-import dev.sora.protohax.ui.components.screen.LogsScreen
+import dev.sora.protohax.ui.components.screen.SettingsScreen
 import dev.sora.protohax.ui.navigation.*
 import dev.sora.protohax.util.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -251,8 +251,8 @@ private fun PHaxNavHost(
         composable(PHaxRoute.ACCOUNTS) {
             AccountsScreen(navigationType)
         }
-        composable(PHaxRoute.LOGS) {
-            LogsScreen(navigationType)
+        composable(PHaxRoute.SETTINGS) {
+            SettingsScreen(navigationType)
         }
     }
 }
