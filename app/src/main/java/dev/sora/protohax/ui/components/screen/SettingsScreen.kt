@@ -60,19 +60,20 @@ fun SettingsScreen(navigationType: NavigationType) {
 		) {
 			val mContext = LocalContext.current
 			val switchEncryptionSession = remember { mutableStateOf(mContext.readString(AppService.KEY_OFFLINE_SESSION_ENCRYPTION) == "true") }
+			fun updateEncryptionSession() {
+				switchEncryptionSession.value = !switchEncryptionSession.value
+				mContext.writeString(
+					AppService.KEY_OFFLINE_SESSION_ENCRYPTION,
+					"${switchEncryptionSession.value}"
+				)
+			}
 			SettingsTab(
 				name = R.string.setting_encryption, description = R.string.setting_encryption_desc,
 				modifier = Modifier
-					.clickable {
-						switchEncryptionSession.value = !switchEncryptionSession.value
-						mContext.writeString(
-							AppService.KEY_OFFLINE_SESSION_ENCRYPTION,
-							"${switchEncryptionSession.value}"
-						)
-					}
+					.clickable { updateEncryptionSession() }
 					.padding(18.dp, 10.dp)
 			) {
-				Switch(switchEncryptionSession.value, onCheckedChange = {})
+				Switch(switchEncryptionSession.value, onCheckedChange = { updateEncryptionSession() })
 			}
 			SettingsTab(
 				name = R.string.setting_logs, description = R.string.setting_logs_desc,
