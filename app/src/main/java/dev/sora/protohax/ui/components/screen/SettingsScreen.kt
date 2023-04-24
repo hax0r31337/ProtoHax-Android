@@ -28,7 +28,7 @@ import dev.sora.protohax.util.ContextUtils.writeString
 import dev.sora.protohax.util.NavigationType
 
 @Composable
-fun SettingsTab(
+private fun SettingsTab(
 	name: Int,
 	description: Int,
 	modifier: Modifier = Modifier,
@@ -48,6 +48,43 @@ fun SettingsTab(
 }
 
 @Composable
+private fun SettingsTabToggle(
+	name: Int,
+	description: Int,
+	modifier: Modifier = Modifier,
+	value: Boolean,
+	onChanged: (Boolean) -> Unit,
+) {
+	SettingsTab(
+		name = name, description = description,
+		modifier = modifier
+			.clickable { onChanged(!value) }
+			.padding(18.dp, 10.dp)
+	) {
+		Switch(value, onCheckedChange = { onChanged(!value) })
+	}
+}
+
+@Composable
+private fun SettingsTabTogglePerf(
+	name: Int,
+	description: Int,
+	key: String,
+	modifier: Modifier = Modifier
+) {
+	val mContext = LocalContext.current
+	val value = remember { mutableStateOf(mContext.readString(key) == "true") }
+
+	SettingsTabToggle(
+		name = name, description = description, modifier = modifier,
+		value = value.value, onChanged = {
+			value.value = it
+			mContext.writeString(key, it.toString())
+		}
+	)
+}
+
+@Composable
 fun SettingsScreen(navigationType: NavigationType) {
 	PHaxAppBar(
 		title = stringResource(id = R.string.tab_settings),
@@ -59,22 +96,10 @@ fun SettingsScreen(navigationType: NavigationType) {
 				.verticalScroll(rememberScrollState()),
 		) {
 			val mContext = LocalContext.current
-			val switchEncryptionSession = remember { mutableStateOf(mContext.readString(AppService.KEY_OFFLINE_SESSION_ENCRYPTION) == "true") }
-			fun updateEncryptionSession() {
-				switchEncryptionSession.value = !switchEncryptionSession.value
-				mContext.writeString(
-					AppService.KEY_OFFLINE_SESSION_ENCRYPTION,
-					"${switchEncryptionSession.value}"
-				)
-			}
-			SettingsTab(
+			SettingsTabTogglePerf(
 				name = R.string.setting_encryption, description = R.string.setting_encryption_desc,
-				modifier = Modifier
-					.clickable { updateEncryptionSession() }
-					.padding(18.dp, 10.dp)
-			) {
-				Switch(switchEncryptionSession.value, onCheckedChange = { updateEncryptionSession() })
-			}
+				key = AppService.KEY_OFFLINE_SESSION_ENCRYPTION
+			)
 			SettingsTab(
 				name = R.string.setting_logs, description = R.string.setting_logs_desc,
 				modifier = Modifier
