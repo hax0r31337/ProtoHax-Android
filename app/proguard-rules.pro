@@ -20,10 +20,10 @@
 # hide the original source file name.
 -renamesourcefileattribute null
 
+# keep netty related classes
 -keep class io.netty.** { *; }
 -keep class org.cloudburstmc.netty.** { *; }
--keep class org.cloudburstmc.protocol.bedrock.netty.** { *; }
--keep class dev.sora.protohax.relay.netty.channel.** { *; }
+-keep @io.netty.channel.ChannelHandler$Sharable class *
 
 -keepclassmembers class * {
     @com.google.gson.annotations.SerializedName <fields>;
