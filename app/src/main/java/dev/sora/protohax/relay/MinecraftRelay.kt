@@ -4,7 +4,6 @@ import dev.sora.protohax.MyApplication
 import dev.sora.protohax.relay.modules.ModuleESP
 import dev.sora.protohax.relay.netty.channel.NativeRakConfig
 import dev.sora.protohax.relay.netty.channel.NativeRakServerChannel
-import dev.sora.protohax.relay.netty.log.NettyLoggerFactory
 import dev.sora.protohax.relay.service.AppService
 import dev.sora.protohax.util.ContextUtils.readString
 import dev.sora.relay.MinecraftRelayListener
@@ -22,7 +21,6 @@ import dev.sora.relay.session.listener.RelayListenerNetworkSettings
 import dev.sora.relay.utils.logInfo
 import io.netty.channel.ChannelFactory
 import io.netty.channel.ServerChannel
-import io.netty.util.internal.logging.InternalLoggerFactory
 import java.net.InetSocketAddress
 import kotlin.concurrent.thread
 
@@ -69,9 +67,6 @@ object MinecraftRelay {
 	}
 
     private fun constructRelay(): Relay {
-//        System.setProperty("io.netty.noUnsafe", "true")
-        InternalLoggerFactory.setDefaultFactory(NettyLoggerFactory())
-
         var sessionEncryptor: RelayListenerEncryptedSession? = null
         return Relay(object : MinecraftRelayListener {
             override fun onSessionCreation(session: MinecraftRelaySession): InetSocketAddress {
