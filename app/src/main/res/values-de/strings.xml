@@ -41,15 +41,19 @@
     <string name="account_selected">(Ausgewählt)</string>
     <string name="account_delete_dialog_message">Sind Sie sicher, dass Sie das Konto %s löschen möchten?</string>
 
-    <string name="logcat_clear">Protokolle löschen</string>
-    <string name="logcat_share">Protokolle teilen</string>
+    <string name="setting_encryption">Offline Sessie Override</string>
+    <string name="setting_encryption_desc">Sta versleuteling toe voor offline modus</string>
+    <string name="setting_logs">Logs</string>
+    <string name="setting_logs_desc">Toon Logs</string>
 
-    <string name="setting_logs">Protokolle</string>
+    <string name="logcat_clear">Logs wissen</string>
+    <string name="logcat_share">Logs delen</string>
 
-    <string name="tab_dashboard">Übersicht</string>
-    <string name="tab_accounts">Konten</string>
-    <string name="tab_configs">Konfigurationen</string>
-    <string name="tab_btn_navigation_drawer">Navigationsleiste</string>
+    <string name="tab_dashboard">Dashboard</string>
+    <string name="tab_accounts">Accounts</string>
+    <string name="tab_configs">Configuraties</string>
+    <string name="tab_settings">Instellingen</string>
+    <string name="tab_btn_navigation_drawer">Navigatie Lade</string>
 
     <string name="dialog_title">Fortfahren?</string>
     <string name="dialog_confirm">Bestätigen</string>

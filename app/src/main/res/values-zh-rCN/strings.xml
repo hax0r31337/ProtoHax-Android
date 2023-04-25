@@ -41,14 +41,18 @@
     <string name="account_selected">(已选择)</string>
     <string name="account_delete_dialog_message">确定要删除帐号 %s？</string>
 
-    <string name="setting_logs">记录</string>
+    <string name="setting_encryption">离线模式覆写</string>
+    <string name="setting_encryption_desc">允许离线模式加密</string>
+    <string name="setting_logs">日志</string>
+    <string name="setting_logs_desc">显示日志</string>
 
-    <string name="logcat_clear">清除记录</string>
-    <string name="logcat_share">分享记录</string>
+    <string name="logcat_clear">清除日志</string>
+    <string name="logcat_share">共享日志</string>
 
     <string name="tab_dashboard">仪表板</string>
-    <string name="tab_accounts">帐号</string>
-    <string name="tab_configs">设定</string>
+    <string name="tab_accounts">帐户</string>
+    <string name="tab_configs">配置</string>
+    <string name="tab_settings">设定</string>
     <string name="tab_btn_navigation_drawer">导览抽屉</string>
 
     <string name="dialog_title">继续？</string>
