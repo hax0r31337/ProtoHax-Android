@@ -45,6 +45,10 @@
 
     <string name="setting_encryption">Offline Session Override</string>
     <string name="setting_encryption_desc">Allows encryption for offline mode</string>
+    <string name="setting_commands">Commands</string>
+    <string name="setting_commands_desc">Allows use commands to control ProtoHax in-game</string>
+    <string name="setting_restart_required">Restart required to take effect</string>
+    <string name="setting_restart_required_action">Restart</string>
     <string name="setting_logs">Logs</string>
     <string name="setting_logs_desc">Show Logs</string>
 

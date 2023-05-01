@@ -182,7 +182,6 @@ class AppService : VpnService() {
         const val ACTION_START = "dev.sora.libmitm.vpn.start"
         const val ACTION_STOP = "dev.sora.libmitm.vpn.stop"
         const val CHANNEL_ID = "dev.sora.protohax.NOTIFICATION_CHANNEL_ID"
-		const val KEY_OFFLINE_SESSION_ENCRYPTION = "OFFLINE_SESSION_ENCRYPTION"
 
         const val VPN_MTU = 1500
         const val PRIVATE_VLAN4_CLIENT = "26.26.26.1"

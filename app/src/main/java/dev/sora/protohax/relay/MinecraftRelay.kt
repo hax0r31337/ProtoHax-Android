@@ -4,8 +4,7 @@ import dev.sora.protohax.MyApplication
 import dev.sora.protohax.relay.modules.ModuleESP
 import dev.sora.protohax.relay.netty.channel.NativeRakConfig
 import dev.sora.protohax.relay.netty.channel.NativeRakServerChannel
-import dev.sora.protohax.relay.service.AppService
-import dev.sora.protohax.util.ContextUtils.readString
+import dev.sora.protohax.util.ContextUtils.readBoolean
 import dev.sora.relay.MinecraftRelayListener
 import dev.sora.relay.cheat.command.CommandManager
 import dev.sora.relay.cheat.command.impl.CommandDownloadWorld
@@ -30,16 +29,12 @@ object MinecraftRelay {
 
     val session = GameSession()
     val moduleManager: ModuleManager
-    val commandManager: CommandManager
     val configManager: ConfigManagerFileSystem
 
 	var loaderThread: Thread? = null
 
     init {
         moduleManager = ModuleManager(session)
-
-        // command manager will register listener itself
-        commandManager = CommandManager(session)
 
 		// load asynchronously
 		loaderThread = thread {
@@ -50,9 +45,13 @@ object MinecraftRelay {
 				ModuleResourcePackSpoof.resourcePackProvider = ModuleResourcePackSpoof.FileSystemResourcePackProvider(it)
 			}
 
-			commandManager.init(moduleManager)
-			MyApplication.instance.getExternalFilesDir("downloaded_worlds")?.also {
-				commandManager.registerCommand(CommandDownloadWorld(session.eventManager, it))
+			if (MyApplication.instance.readBoolean(Constants.KEY_ENABLE_COMMAND_MANAGER, Constants.KEY_ENABLE_COMMAND_MANAGER_DEFAULT)) {
+				// command manager will register listener itself
+				val commandManager = CommandManager(session)
+				commandManager.init(moduleManager)
+				MyApplication.instance.getExternalFilesDir("downloaded_worlds")?.also {
+					commandManager.registerCommand(CommandDownloadWorld(session.eventManager, it))
+				}
 			}
 
 			// clean-up
@@ -81,7 +80,7 @@ object MinecraftRelay {
                         logInfo("logged in as ${it.remark}")
                         RelayListenerMicrosoftLogin(accessToken, it.platform)
                     }
-                } else if (MyApplication.instance.readString(AppService.KEY_OFFLINE_SESSION_ENCRYPTION) == "true") {
+                } else if (MyApplication.instance.readBoolean(Constants.KEY_OFFLINE_SESSION_ENCRYPTION, Constants.KEY_OFFLINE_SESSION_ENCRYPTION_DEFAULT)) {
 					sessionEncryptor = RelayListenerEncryptedSession()
 				}
                 sessionEncryptor?.let {
@@ -115,5 +114,14 @@ object MinecraftRelay {
 				NativeRakServerChannel()
 			}
 		}
+	}
+
+	object Constants {
+
+		const val KEY_OFFLINE_SESSION_ENCRYPTION = "OFFLINE_SESSION_ENCRYPTION"
+		const val KEY_OFFLINE_SESSION_ENCRYPTION_DEFAULT = false
+
+		const val KEY_ENABLE_COMMAND_MANAGER = "ENABLE_COMMAND_MANAGER"
+		const val KEY_ENABLE_COMMAND_MANAGER_DEFAULT = true
 	}
 }
