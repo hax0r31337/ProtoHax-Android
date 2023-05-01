@@ -6,7 +6,6 @@ import dev.sora.protohax.MyApplication
 import dev.sora.protohax.util.ContextUtils.readString
 import dev.sora.protohax.util.ContextUtils.writeString
 import dev.sora.relay.session.listener.RelayListenerMicrosoftLogin
-import dev.sora.relay.utils.HttpUtils
 import java.io.File
 import java.lang.reflect.Type
 
@@ -79,16 +78,13 @@ class Account(
      */
     fun refresh(): String {
         val isCurrent = AccountManager.currentAccount == this
-        val body = JsonParser.parseReader(
-            HttpUtils.make("https://login.live.com/oauth20_token.srf", "POST",
-                "client_id=${platform.appId}&scope=service::user.auth.xboxlive.com::MBI_SSL&grant_type=refresh_token&redirect_uri=https://login.live.com/oauth20_desktop.srf&refresh_token=${refreshToken}",
-                mapOf("Content-Type" to "application/x-www-form-urlencoded")).inputStream.reader(Charsets.UTF_8)).asJsonObject
-        refreshToken = body.get("refresh_token").asString
+		val (accessToken, refreshToken) = platform.refreshToken(refreshToken)
+        this.refreshToken = refreshToken
         if (isCurrent) {
             // refreshes the token field
             AccountManager.currentAccount = this
         }
         AccountManager.save()
-        return body.get("access_token").asString
+        return accessToken
     }
 }

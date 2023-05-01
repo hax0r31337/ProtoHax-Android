@@ -16,11 +16,10 @@ import dev.sora.protohax.R
 import dev.sora.protohax.relay.Account
 import dev.sora.protohax.relay.AccountManager
 import dev.sora.relay.session.listener.RelayListenerMicrosoftLogin
-import dev.sora.relay.utils.HttpUtils
 import dev.sora.relay.utils.base64Decode
 import dev.sora.relay.utils.logError
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import org.cloudburstmc.protocol.bedrock.util.EncryptionUtils
-import java.io.IOException
 import kotlin.concurrent.thread
 
 class MicrosoftLoginActivity : Activity() {
@@ -91,58 +90,35 @@ h1 {
     class CustomWebViewClient(private val activity: MicrosoftLoginActivity) : WebViewClient() {
 
         override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
-            if (!request.url.toString().startsWith("https://login.live.com/oauth20_desktop.srf?", true)) {
+			val url = request.url.toString().toHttpUrlOrNull() ?: return false
+            if (url.host != "login.live.com" || url.encodedPath != "/oauth20_desktop.srf") {
                 logError("invalid url ${request.url}")
                 return false
             }
-            val query = mutableMapOf<String, String>()
-            (request.url.query ?: "").split("&").forEach {
-                if (it.contains("=")) {
-                    val idx = it.indexOf("=")
-                    query[it.substring(0, idx)] = it.substring(idx + 1)
-                } else query[it] = ""
-            }
 
-            if (!query.contains("code")) {
-                logError("no token found in redirected url ${request.url}")
-                activity.finish()
-                return true
-            }
+			val authCode = url.queryParameter("code") ?: return false
 
-            // convert m.r3_bay token to refresh token
+			// convert m.r3_bay token to refresh token
             activity.showLoadingPage("Still loading (0/3)")
             thread {
                 try {
-                    val conn = HttpUtils.make("https://login.live.com/oauth20_token.srf", "POST",
-                        "client_id=${activity.device.appId}&redirect_uri=https://login.live.com/oauth20_desktop.srf&grant_type=authorization_code&code=${query["code"]}",
-                        mapOf("Content-Type" to "application/x-www-form-urlencoded"))
-                    val json = JsonParser.parseReader(try {
-                        conn.inputStream.reader(Charsets.UTF_8)
-                    } catch (t: IOException) {
-                        conn.errorStream.reader(Charsets.UTF_8)
-                    }).asJsonObject
-                    if (json.has("refresh_token") && json.has("access_token") && json.has("user_id")) {
-                        activity.runOnUiThread { activity.showLoadingPage("Still loading (1/3)") }
-                        // fetch username through chain
-                        val username = try {
-                            val identityToken = RelayListenerMicrosoftLogin.fetchIdentityToken(json.get("access_token").asString, activity.device)
-                            activity.runOnUiThread { activity.showLoadingPage("Still loading (2/3)") }
-                            getUsernameFromChain(RelayListenerMicrosoftLogin.fetchRawChain(identityToken, EncryptionUtils.createKeyPair().public).readText())
-                        } catch (t: Throwable) {
-                            logError("fetch username", t)
-                            "user ${json.get("user_id").asString}"
-                        }
+					val (accessToken, refreshToken) = activity.device.refreshToken(authCode)
+					activity.runOnUiThread { activity.showLoadingPage("Still loading (1/3)") }
+					// fetch username through chain
+					val username = try {
+						val identityToken = RelayListenerMicrosoftLogin.fetchIdentityToken(accessToken, activity.device)
+						activity.runOnUiThread { activity.showLoadingPage("Still loading (2/3)") }
+						getUsernameFromChain(RelayListenerMicrosoftLogin.fetchRawChain(identityToken, EncryptionUtils.createKeyPair().public).readText())
+					} catch (t: Throwable) {
+						logError("fetch username", t)
+						"user ${System.currentTimeMillis()}"
+					}
 
-                        AccountManager.accounts.add(Account(username, activity.device, json.get("refresh_token").asString))
-                        AccountManager.save()
+					AccountManager.accounts.add(Account(username, activity.device, refreshToken))
+					AccountManager.save()
 
-                        activity.setResult(RESULT_OK)
-                        activity.finish()
-                        return@thread
-                    } else if(json.has("error")) {
-                        logError("error refreshing token: ${json.get("error").asString}")
-                    }
-                    throw RuntimeException("error refreshing token")
+					activity.setResult(RESULT_OK)
+					activity.finish()
                 } catch (t: Throwable) {
                     logError("obtain access token", t)
                     activity.runOnUiThread { activity.loadData(t.toString())}
