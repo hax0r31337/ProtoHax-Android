@@ -18,6 +18,7 @@ import dev.sora.protohax.relay.AccountManager
 import dev.sora.relay.session.listener.RelayListenerMicrosoftLogin
 import dev.sora.relay.utils.base64Decode
 import dev.sora.relay.utils.logError
+import dev.sora.relay.utils.logInfo
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import org.cloudburstmc.protocol.bedrock.util.EncryptionUtils
 import kotlin.concurrent.thread
@@ -89,7 +90,8 @@ h1 {
 
     class CustomWebViewClient(private val activity: MicrosoftLoginActivity) : WebViewClient() {
 
-        override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
+        @SuppressLint("SuspiciousIndentation")
+		override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
 			val url = request.url.toString().toHttpUrlOrNull() ?: return false
             if (url.host != "login.live.com" || url.encodedPath != "/oauth20_desktop.srf") {
                 logError("invalid url ${request.url}")
