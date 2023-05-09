@@ -27,6 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import dev.sora.protohax.R
 import dev.sora.protohax.relay.MinecraftRelay
 import dev.sora.protohax.ui.activities.LogActivity
@@ -50,7 +51,7 @@ private fun SettingsTab(
 	) {
 		Column(modifier = Modifier.fillMaxWidth(0.8f)) {
 			Text(text = stringResource(name))
-			Text(text = stringResource(description), color = MaterialTheme.colorScheme.outline)
+			Text(text = stringResource(description), color = MaterialTheme.colorScheme.outline, fontSize = 14.sp, lineHeight = 18.sp)
 		}
 		Spacer(Modifier.weight(1f))
 		extra()
@@ -101,6 +102,21 @@ private fun SettingsTabTogglePerf(
 fun SettingsScreen(navigationType: NavigationType) {
 	val snackbarHostState = remember { SnackbarHostState() }
 	val scope = rememberCoroutineScope()
+	val mContext = LocalContext.current
+
+	val restartRequired = { _: Boolean ->
+		scope.launch {
+			val result = snackbarHostState.showSnackbar(
+				message = mContext.getString(R.string.setting_restart_required),
+				actionLabel = mContext.getString(R.string.setting_restart_required_action),
+				duration = SnackbarDuration.Long
+			)
+			if (result == SnackbarResult.ActionPerformed) {
+				exitProcess(0)
+			}
+		}
+		Unit
+	}
 
 	PHaxAppBar(
 		title = stringResource(id = R.string.tab_settings),
@@ -111,26 +127,20 @@ fun SettingsScreen(navigationType: NavigationType) {
 				.padding(innerPadding)
 				.verticalScroll(rememberScrollState()),
 		) {
-			val mContext = LocalContext.current
 			SettingsTabTogglePerf(
 				name = R.string.setting_encryption, description = R.string.setting_encryption_desc,
 				key = MinecraftRelay.Constants.KEY_OFFLINE_SESSION_ENCRYPTION,  default = MinecraftRelay.Constants.KEY_OFFLINE_SESSION_ENCRYPTION_DEFAULT
 			)
 			SettingsTabTogglePerf(
 				name = R.string.setting_commands, description = R.string.setting_commands_desc,
-				key = MinecraftRelay.Constants.KEY_ENABLE_COMMAND_MANAGER,  default = MinecraftRelay.Constants.KEY_ENABLE_COMMAND_MANAGER_DEFAULT
-			) {
-				scope.launch {
-					val result = snackbarHostState.showSnackbar(
-						message = mContext.getString(R.string.setting_restart_required),
-						actionLabel = mContext.getString(R.string.setting_restart_required_action),
-						duration = SnackbarDuration.Long
-					)
-					if (result == SnackbarResult.ActionPerformed) {
-						exitProcess(0)
-					}
-				}
-			}
+				key = MinecraftRelay.Constants.KEY_ENABLE_COMMAND_MANAGER,  default = MinecraftRelay.Constants.KEY_ENABLE_COMMAND_MANAGER_DEFAULT,
+				onToggle = restartRequired
+			)
+			SettingsTabTogglePerf(
+				name = R.string.setting_rak_reliability, description = R.string.setting_rak_reliability_desc,
+				key = MinecraftRelay.Constants.KEY_ENABLE_RAK_RELIABILITY,  default = MinecraftRelay.Constants.KEY_ENABLE_RAK_RELIABILITY_DEFAULT,
+				onToggle = restartRequired
+			)
 			SettingsTab(
 				name = R.string.setting_logs, description = R.string.setting_logs_desc,
 				modifier = Modifier

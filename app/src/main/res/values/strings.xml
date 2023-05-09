@@ -47,6 +47,8 @@
     <string name="setting_encryption_desc">Allows encryption for offline mode</string>
     <string name="setting_commands">Commands</string>
     <string name="setting_commands_desc">Allows use commands to control ProtoHax in-game</string>
+    <string name="setting_rak_reliability">RakReliability</string>
+    <string name="setting_rak_reliability_desc">Disables HoL blocking of RakNet, causing packet disorder but improves latency</string>
     <string name="setting_restart_required">Restart required to take effect</string>
     <string name="setting_restart_required_action">Restart</string>
     <string name="setting_logs">Logs</string>

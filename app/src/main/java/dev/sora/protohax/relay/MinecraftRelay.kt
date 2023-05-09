@@ -20,6 +20,7 @@ import dev.sora.relay.session.listener.RelayListenerNetworkSettings
 import dev.sora.relay.utils.logInfo
 import io.netty.channel.ChannelFactory
 import io.netty.channel.ServerChannel
+import org.cloudburstmc.netty.channel.raknet.RakReliability
 import java.net.InetSocketAddress
 import kotlin.concurrent.thread
 
@@ -93,7 +94,10 @@ object MinecraftRelay {
                 logInfo("SessionCreation $address")
 				return address
             }
-        })
+        }).also {
+			it.optionReliability = if (MyApplication.instance.readBoolean(Constants.KEY_ENABLE_RAK_RELIABILITY, Constants.KEY_ENABLE_RAK_RELIABILITY_DEFAULT))
+				RakReliability.RELIABLE_ORDERED else RakReliability.RELIABLE
+		}
     }
 
 	fun announceRelayUp() {
@@ -123,5 +127,8 @@ object MinecraftRelay {
 
 		const val KEY_ENABLE_COMMAND_MANAGER = "ENABLE_COMMAND_MANAGER"
 		const val KEY_ENABLE_COMMAND_MANAGER_DEFAULT = true
+
+		const val KEY_ENABLE_RAK_RELIABILITY = "ENABLE_RAK_RELIABILITY"
+		const val KEY_ENABLE_RAK_RELIABILITY_DEFAULT = true
 	}
 }
