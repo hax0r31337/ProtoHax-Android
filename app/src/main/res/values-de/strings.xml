@@ -43,6 +43,12 @@
 
     <string name="setting_encryption">Offline Sessie Override</string>
     <string name="setting_encryption_desc">Sta versleuteling toe voor offline modus</string>
+    <string name="setting_commands">Befehle</string>
+    <string name="setting_commands_desc">Erlaubt die Verwendung von Befehlen zur Steuerung von ProtoHax im Spiel</string>
+    <string name="setting_rak_reliability">RakNet Zuverlässigkeit</string>
+    <string name="setting_rak_reliability_desc">Deaktivieren Sie dies, um HoL-Blocking von RakNet zu deaktivieren, was zu Paketstörungen führen kann, aber die Latenz verbessert</string>
+    <string name="setting_restart_required">Neustart erforderlich, um die Änderungen anzuwenden</string>
+    <string name="setting_restart_required_action">Neustart</string>
     <string name="setting_logs">Logs</string>
     <string name="setting_logs_desc">Toon Logs</string>
 

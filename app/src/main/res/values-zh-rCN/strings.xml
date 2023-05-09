@@ -43,6 +43,12 @@
 
     <string name="setting_encryption">离线模式覆写</string>
     <string name="setting_encryption_desc">允许离线模式加密</string>
+    <string name="setting_commands">命令</string>
+    <string name="setting_commands_desc">允许使用命令在游戏中控制ProtoHax</string>
+    <string name="setting_rak_reliability">RakNet 可靠性</string>
+    <string name="setting_rak_reliability_desc">关闭以禁用RakNet的HoL阻塞，会导致数据包混乱，但会提高延迟</string>
+    <string name="setting_restart_required">需要重新启动才能生效</string>
+    <string name="setting_restart_required_action">重新启动</string>
     <string name="setting_logs">日志</string>
     <string name="setting_logs_desc">显示日志</string>
 
