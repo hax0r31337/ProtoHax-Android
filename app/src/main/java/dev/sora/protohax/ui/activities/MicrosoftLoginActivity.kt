@@ -15,17 +15,18 @@ import com.google.gson.JsonParser
 import dev.sora.protohax.R
 import dev.sora.protohax.relay.Account
 import dev.sora.protohax.relay.AccountManager
-import dev.sora.relay.session.listener.RelayListenerMicrosoftLogin
+import dev.sora.relay.session.listener.xbox.RelayListenerXboxLogin
+import dev.sora.relay.session.listener.xbox.XboxDeviceInfo
+import dev.sora.relay.session.listener.xbox.XboxGamerTagException
 import dev.sora.relay.utils.base64Decode
 import dev.sora.relay.utils.logError
-import dev.sora.relay.utils.logInfo
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import org.cloudburstmc.protocol.bedrock.util.EncryptionUtils
 import kotlin.concurrent.thread
 
 class MicrosoftLoginActivity : Activity() {
 
-    private lateinit var device: RelayListenerMicrosoftLogin.DeviceInfo
+    private lateinit var device: XboxDeviceInfo
 
     @SuppressLint("SetJavaScriptEnabled")
 	override fun onCreate(savedInstanceState: Bundle?) {
@@ -43,7 +44,7 @@ class MicrosoftLoginActivity : Activity() {
         }
         webView.webViewClient = CustomWebViewClient(this)
 
-        device = intent.extras?.getString(EXTRAS_KEY_DEVICE_TYPE)?.let { RelayListenerMicrosoftLogin.devices[it] } ?: kotlin.run {
+        device = intent.extras?.getString(EXTRAS_KEY_DEVICE_TYPE)?.let { XboxDeviceInfo.devices[it] } ?: kotlin.run {
             setResult(RESULT_CANCELED)
             finish()
             return
@@ -90,8 +91,31 @@ h1 {
 
     class CustomWebViewClient(private val activity: MicrosoftLoginActivity) : WebViewClient() {
 
+		private var account: Pair<String, String>? = null
+
         @SuppressLint("SuspiciousIndentation")
 		override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
+			if (account != null && (request.url.scheme ?: "").startsWith("ms-xal")) {
+				thread {
+					try {
+						activity.runOnUiThread { activity.showLoadingPage("Still loading (0/2)") }
+						// fetch username through chain
+						val identityToken = RelayListenerXboxLogin.fetchIdentityToken(account!!.first, activity.device)
+						activity.runOnUiThread { activity.showLoadingPage("Still loading (1/2)") }
+						val username = getUsernameFromChain(RelayListenerXboxLogin.fetchRawChain(identityToken, EncryptionUtils.createKeyPair().public).readText())
+
+						AccountManager.accounts.add(Account(username, activity.device, account!!.second))
+						AccountManager.save()
+
+						activity.setResult(RESULT_OK)
+						activity.finish()
+					} catch (t: Throwable) {
+						logError("obtain access token", t)
+						activity.runOnUiThread { activity.loadData(t.toString()) }
+					}
+				}
+				return true
+			}
 			val url = request.url.toString().toHttpUrlOrNull() ?: return false
             if (url.host != "login.live.com" || url.encodedPath != "/oauth20_desktop.srf") {
                 logError("invalid url ${request.url}")
@@ -108,12 +132,15 @@ h1 {
 					activity.runOnUiThread { activity.showLoadingPage("Still loading (1/3)") }
 					// fetch username through chain
 					val username = try {
-						val identityToken = RelayListenerMicrosoftLogin.fetchIdentityToken(accessToken, activity.device)
+						val identityToken = RelayListenerXboxLogin.fetchIdentityToken(accessToken, activity.device)
 						activity.runOnUiThread { activity.showLoadingPage("Still loading (2/3)") }
-						getUsernameFromChain(RelayListenerMicrosoftLogin.fetchRawChain(identityToken, EncryptionUtils.createKeyPair().public).readText())
-					} catch (t: Throwable) {
-						logError("fetch username", t)
-						"user ${System.currentTimeMillis()}"
+						getUsernameFromChain(RelayListenerXboxLogin.fetchRawChain(identityToken, EncryptionUtils.createKeyPair().public).readText())
+					} catch (e: XboxGamerTagException) {
+						account = accessToken to refreshToken
+						activity.runOnUiThread {
+							activity.findViewById<WebView>(R.id.webview).loadUrl(e.sisuStartUrl)
+						}
+						return@thread
 					}
 
 					AccountManager.accounts.add(Account(username, activity.device, refreshToken))
@@ -123,7 +150,7 @@ h1 {
 					activity.finish()
                 } catch (t: Throwable) {
                     logError("obtain access token", t)
-                    activity.runOnUiThread { activity.loadData(t.toString())}
+                    activity.runOnUiThread { activity.loadData(t.toString()) }
                 }
             }
             return true
@@ -142,8 +169,8 @@ h1 {
         }
     }
 
-    class LauncherContract : ActivityResultContract<RelayListenerMicrosoftLogin.DeviceInfo, Boolean>() {
-        override fun createIntent(context: Context, input: RelayListenerMicrosoftLogin.DeviceInfo): Intent {
+    class LauncherContract : ActivityResultContract<XboxDeviceInfo, Boolean>() {
+        override fun createIntent(context: Context, input: XboxDeviceInfo): Intent {
             return Intent(context, MicrosoftLoginActivity::class.java).apply {
                 putExtra(EXTRAS_KEY_DEVICE_TYPE, input.deviceType)
             }

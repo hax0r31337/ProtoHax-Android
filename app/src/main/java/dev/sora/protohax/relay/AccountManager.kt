@@ -5,7 +5,7 @@ import com.google.gson.annotations.SerializedName
 import dev.sora.protohax.MyApplication
 import dev.sora.protohax.util.ContextUtils.readString
 import dev.sora.protohax.util.ContextUtils.writeString
-import dev.sora.relay.session.listener.RelayListenerMicrosoftLogin
+import dev.sora.relay.session.listener.xbox.XboxDeviceInfo
 import java.io.File
 import java.lang.reflect.Type
 
@@ -23,7 +23,7 @@ object AccountManager {
 
     private val storeFile = File(MyApplication.instance.filesDir, "credentials.json")
     private val gson = GsonBuilder()
-        .registerTypeAdapter(RelayListenerMicrosoftLogin.DeviceInfo::class.java, DeviceInfoAdapter())
+        .registerTypeAdapter(XboxDeviceInfo::class.java, DeviceInfoAdapter())
         .create()
 
     init {
@@ -55,21 +55,21 @@ object AccountManager {
         currentRefreshToken = null
     }
 
-    private class DeviceInfoAdapter : JsonSerializer<RelayListenerMicrosoftLogin.DeviceInfo>, JsonDeserializer<RelayListenerMicrosoftLogin.DeviceInfo> {
+    private class DeviceInfoAdapter : JsonSerializer<XboxDeviceInfo>, JsonDeserializer<XboxDeviceInfo> {
 
-        override fun serialize(src: RelayListenerMicrosoftLogin.DeviceInfo, typeOf: Type?, ctx: JsonSerializationContext?): JsonElement {
+        override fun serialize(src: XboxDeviceInfo, typeOf: Type?, ctx: JsonSerializationContext?): JsonElement {
             return JsonPrimitive(src.deviceType)
         }
 
-        override fun deserialize(json: JsonElement, typeOf: Type?, ctx: JsonDeserializationContext?): RelayListenerMicrosoftLogin.DeviceInfo {
-            return RelayListenerMicrosoftLogin.devices[json.asString]!!
+        override fun deserialize(json: JsonElement, typeOf: Type?, ctx: JsonDeserializationContext?): XboxDeviceInfo {
+            return XboxDeviceInfo.devices[json.asString] ?: XboxDeviceInfo.DEVICE_ANDROID
         }
     }
 }
 
 class Account(
     @SerializedName("remark") var remark: String,
-    @SerializedName("device") val platform: RelayListenerMicrosoftLogin.DeviceInfo,
+    @SerializedName("device") val platform: XboxDeviceInfo,
     @SerializedName("refresh_token") var refreshToken: String
 ) {
 

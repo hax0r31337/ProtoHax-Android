@@ -15,8 +15,8 @@ import dev.sora.relay.game.GameSession
 import dev.sora.relay.session.MinecraftRelaySession
 import dev.sora.relay.session.listener.RelayListenerAutoCodec
 import dev.sora.relay.session.listener.RelayListenerEncryptedSession
-import dev.sora.relay.session.listener.RelayListenerMicrosoftLogin
 import dev.sora.relay.session.listener.RelayListenerNetworkSettings
+import dev.sora.relay.session.listener.xbox.RelayListenerXboxLogin
 import dev.sora.relay.utils.logInfo
 import io.netty.channel.ChannelFactory
 import io.netty.channel.ServerChannel
@@ -79,7 +79,7 @@ object MinecraftRelay {
                     sessionEncryptor = AccountManager.currentAccount?.let {
                         val accessToken = it.refresh()
                         logInfo("logged in as ${it.remark}")
-                        RelayListenerMicrosoftLogin(accessToken, it.platform)
+                        RelayListenerXboxLogin(accessToken, it.platform)
                     }
                 } else if (MyApplication.instance.readBoolean(Constants.KEY_OFFLINE_SESSION_ENCRYPTION, Constants.KEY_OFFLINE_SESSION_ENCRYPTION_DEFAULT)) {
 					sessionEncryptor = RelayListenerEncryptedSession()
