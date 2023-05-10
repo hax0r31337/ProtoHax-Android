@@ -118,6 +118,12 @@ h1 {
 			}
 			val url = request.url.toString().toHttpUrlOrNull() ?: return false
             if (url.host != "login.live.com" || url.encodedPath != "/oauth20_desktop.srf") {
+				if (url.queryParameter("res") == "cancel") {
+					logError("action cancelled")
+					activity.setResult(RESULT_CANCELED)
+					activity.finish()
+					return false
+				}
                 logError("invalid url ${request.url}")
                 return false
             }
