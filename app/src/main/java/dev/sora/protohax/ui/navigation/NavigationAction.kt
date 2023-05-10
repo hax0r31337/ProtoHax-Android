@@ -1,14 +1,14 @@
 package dev.sora.protohax.ui.navigation
 
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.Feed
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.People
-import androidx.compose.material.icons.outlined.BugReport
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.outlined.Feed
 import androidx.compose.material.icons.outlined.Home
 import androidx.compose.material.icons.outlined.People
+import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
@@ -19,7 +19,7 @@ object PHaxRoute {
     const val DASHBOARD = "Dashboard"
     const val CONFIG = "Config"
     const val ACCOUNTS = "Accounts"
-    const val LOGS = "Logs"
+    const val SETTINGS = "Settings"
 }
 
 data class PHaxTopLevelDestination(
@@ -68,9 +68,9 @@ val TOP_LEVEL_DESTINATIONS = listOf(
         iconTextId = R.string.tab_accounts
     ),
     PHaxTopLevelDestination(
-        route = PHaxRoute.LOGS,
-        selectedIcon = Icons.Filled.BugReport,
-        unselectedIcon = Icons.Outlined.BugReport,
-        iconTextId = R.string.tab_logs
+        route = PHaxRoute.SETTINGS,
+        selectedIcon = Icons.Filled.Settings,
+        unselectedIcon = Icons.Outlined.Settings,
+        iconTextId = R.string.tab_settings
     )
 )

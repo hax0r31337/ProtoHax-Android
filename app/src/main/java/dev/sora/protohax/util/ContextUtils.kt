@@ -28,6 +28,22 @@ object ContextUtils {
             .getString(key, null)
     }
 
+	fun Context.readBoolean(key: String, default: Boolean): Boolean {
+		val sharedPerf = this.getSharedPreferences(SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE)
+		return try {
+		    sharedPerf.getBoolean(key, default)
+		} catch (t: Throwable) {
+			sharedPerf.getString(key, null) == "true"
+		}
+	}
+
+	fun Context.writeBoolean(key: String, value: Boolean) {
+		val editor = this.getSharedPreferences(SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE)
+			.edit()
+		editor.putBoolean(key, value)
+		editor.apply()
+	}
+
     fun Context.readStringOrDefault(key: String, default: String): String {
         return this.getSharedPreferences(SHARED_PREFERENCES_KEY, Context.MODE_PRIVATE)
             .getString(key, null) ?: default

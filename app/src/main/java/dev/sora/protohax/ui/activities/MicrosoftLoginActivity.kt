@@ -1,11 +1,11 @@
 package dev.sora.protohax.ui.activities
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.util.Base64
-import android.util.Log
 import android.webkit.CookieManager
 import android.webkit.WebResourceRequest
 import android.webkit.WebView
@@ -15,18 +15,21 @@ import com.google.gson.JsonParser
 import dev.sora.protohax.R
 import dev.sora.protohax.relay.Account
 import dev.sora.protohax.relay.AccountManager
-import dev.sora.relay.session.listener.RelayListenerMicrosoftLogin
-import dev.sora.relay.utils.HttpUtils
+import dev.sora.relay.session.listener.xbox.RelayListenerXboxLogin
+import dev.sora.relay.session.listener.xbox.XboxDeviceInfo
+import dev.sora.relay.session.listener.xbox.XboxGamerTagException
 import dev.sora.relay.utils.base64Decode
+import dev.sora.relay.utils.logError
+import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import org.cloudburstmc.protocol.bedrock.util.EncryptionUtils
-import java.io.IOException
 import kotlin.concurrent.thread
 
 class MicrosoftLoginActivity : Activity() {
 
-    private lateinit var device: RelayListenerMicrosoftLogin.DeviceInfo
+    private lateinit var device: XboxDeviceInfo
 
-    override fun onCreate(savedInstanceState: Bundle?) {
+    @SuppressLint("SetJavaScriptEnabled")
+	override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_microsoft_login)
         setResult(RESULT_CANCELED)
@@ -35,23 +38,22 @@ class MicrosoftLoginActivity : Activity() {
         val cookieManager = CookieManager.getInstance()
         cookieManager.removeAllCookies { /* do nothing */ }
 
-        val webview = findViewById<WebView>(R.id.webview)
-        webview.settings.apply {
+        val webView = findViewById<WebView>(R.id.webview)
+        webView.settings.apply {
             javaScriptEnabled = true
         }
-        webview.webViewClient = CustomWebViewClient(this)
+        webView.webViewClient = CustomWebViewClient(this)
 
-        device = intent.extras?.getString(EXTRAS_KEY_DEVICE_TYPE)?.let { RelayListenerMicrosoftLogin.devices[it] } ?: kotlin.run {
+        device = intent.extras?.getString(EXTRAS_KEY_DEVICE_TYPE)?.let { XboxDeviceInfo.devices[it] } ?: kotlin.run {
             setResult(RESULT_CANCELED)
             finish()
             return
         }
 
-        webview.loadUrl("https://login.live.com/oauth20_authorize.srf?client_id=${device.appId}&redirect_uri=https://login.live.com/oauth20_desktop.srf&response_type=code&scope=service::user.auth.xboxlive.com::MBI_SSL")
+        webView.loadUrl("https://login.live.com/oauth20_authorize.srf?client_id=${device.appId}&redirect_uri=https://login.live.com/oauth20_desktop.srf&response_type=code&scope=service::user.auth.xboxlive.com::MBI_SSL")
     }
 
     fun showLoadingPage(text: String) {
-        val webview = findViewById<WebView>(R.id.webview)
         // we need convert the body to base64 to make sure it loading properly
         // https://stackoverflow.com/questions/3961589/android-webview-and-loaddata
         val data = Base64.encodeToString("""
@@ -80,7 +82,7 @@ h1 {
 }
 </style>
 <div id="loading"></div>""".toByteArray(Charsets.UTF_8), Base64.DEFAULT)
-        webview.loadData(data, "text/html; charset=UTF-8", "base64")
+		findViewById<WebView>(R.id.webview).loadData(data, "text/html; charset=UTF-8", "base64")
     }
 
     fun loadData(text: String) {
@@ -89,62 +91,66 @@ h1 {
 
     class CustomWebViewClient(private val activity: MicrosoftLoginActivity) : WebViewClient() {
 
-        override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
-            if (!request.url.toString().startsWith("https://login.live.com/oauth20_desktop.srf?", true)) {
-                Log.e("ProtoHax", "invalid url ${request.url}")
+		private var account: Pair<String, String>? = null
+
+        @SuppressLint("SuspiciousIndentation")
+		override fun shouldOverrideUrlLoading(view: WebView, request: WebResourceRequest): Boolean {
+			if (account != null && (request.url.scheme ?: "").startsWith("ms-xal")) {
+				thread {
+					try {
+						activity.runOnUiThread { activity.showLoadingPage("Still loading (0/2)") }
+						// fetch username through chain
+						val identityToken = RelayListenerXboxLogin.fetchIdentityToken(account!!.first, activity.device)
+						activity.runOnUiThread { activity.showLoadingPage("Still loading (1/2)") }
+						val username = getUsernameFromChain(RelayListenerXboxLogin.fetchRawChain(identityToken, EncryptionUtils.createKeyPair().public).readText())
+
+						AccountManager.accounts.add(Account(username, activity.device, account!!.second))
+						AccountManager.save()
+
+						activity.setResult(RESULT_OK)
+						activity.finish()
+					} catch (t: Throwable) {
+						logError("obtain access token", t)
+						activity.runOnUiThread { activity.loadData(t.toString()) }
+					}
+				}
+				return true
+			}
+			val url = request.url.toString().toHttpUrlOrNull() ?: return false
+            if (url.host != "login.live.com" || url.encodedPath != "/oauth20_desktop.srf") {
+                logError("invalid url ${request.url}")
                 return false
             }
-            val query = mutableMapOf<String, String>()
-            (request.url.query ?: "").split("&").forEach {
-                if (it.contains("=")) {
-                    val idx = it.indexOf("=")
-                    query[it.substring(0, idx)] = it.substring(idx + 1)
-                } else query[it] = ""
-            }
 
-            if (!query.contains("code")) {
-                Log.e("ProtoHax", "no token found in redirected url ${request.url}")
-                activity.finish()
-                return true
-            }
+			val authCode = url.queryParameter("code") ?: return false
 
-            // convert m.r3_bay token to refresh token
+			// convert m.r3_bay token to refresh token
             activity.showLoadingPage("Still loading (0/3)")
             thread {
                 try {
-                    val conn = HttpUtils.make("https://login.live.com/oauth20_token.srf", "POST",
-                        "client_id=${activity.device.appId}&redirect_uri=https://login.live.com/oauth20_desktop.srf&grant_type=authorization_code&code=${query["code"]}",
-                        mapOf("Content-Type" to "application/x-www-form-urlencoded"))
-                    val json = JsonParser.parseReader(try {
-                        conn.inputStream.reader(Charsets.UTF_8)
-                    } catch (t: IOException) {
-                        conn.errorStream.reader(Charsets.UTF_8)
-                    }).asJsonObject
-                    if (json.has("refresh_token") && json.has("access_token") && json.has("user_id")) {
-                        activity.runOnUiThread { activity.showLoadingPage("Still loading (1/3)") }
-                        // fetch username through chain
-                        val username = try {
-                            val identityToken = RelayListenerMicrosoftLogin.fetchIdentityToken(json.get("access_token").asString, activity.device)
-                            activity.runOnUiThread { activity.showLoadingPage("Still loading (2/3)") }
-                            getUsernameFromChain(RelayListenerMicrosoftLogin.fetchRawChain(identityToken, EncryptionUtils.createKeyPair().public).readText())
-                        } catch (t: Throwable) {
-                            Log.e("ProtoHax", "fetch username", t)
-                            "user ${json.get("user_id").asString}"
-                        }
+					val (accessToken, refreshToken) = activity.device.refreshToken(authCode)
+					activity.runOnUiThread { activity.showLoadingPage("Still loading (1/3)") }
+					// fetch username through chain
+					val username = try {
+						val identityToken = RelayListenerXboxLogin.fetchIdentityToken(accessToken, activity.device)
+						activity.runOnUiThread { activity.showLoadingPage("Still loading (2/3)") }
+						getUsernameFromChain(RelayListenerXboxLogin.fetchRawChain(identityToken, EncryptionUtils.createKeyPair().public).readText())
+					} catch (e: XboxGamerTagException) {
+						account = accessToken to refreshToken
+						activity.runOnUiThread {
+							activity.findViewById<WebView>(R.id.webview).loadUrl(e.sisuStartUrl)
+						}
+						return@thread
+					}
 
-                        AccountManager.accounts.add(Account(username, activity.device, json.get("refresh_token").asString))
-                        AccountManager.save()
+					AccountManager.accounts.add(Account(username, activity.device, refreshToken))
+					AccountManager.save()
 
-                        activity.setResult(RESULT_OK)
-                        activity.finish()
-                        return@thread
-                    } else if(json.has("error")) {
-                        Log.e("ProtoHax", "error during token convertion: ${json.get("error").asString}")
-                    }
-                    throw java.lang.RuntimeException("error during token convertion")
+					activity.setResult(RESULT_OK)
+					activity.finish()
                 } catch (t: Throwable) {
-                    Log.e("ProtoHax", "token convert", t)
-                    activity.runOnUiThread { activity.loadData(t.toString())}
+                    logError("obtain access token", t)
+                    activity.runOnUiThread { activity.loadData(t.toString()) }
                 }
             }
             return true
@@ -163,10 +169,10 @@ h1 {
         }
     }
 
-    class LauncherContract : ActivityResultContract<RelayListenerMicrosoftLogin.DeviceInfo, Boolean>() {
-        override fun createIntent(context: Context, device: RelayListenerMicrosoftLogin.DeviceInfo): Intent {
+    class LauncherContract : ActivityResultContract<XboxDeviceInfo, Boolean>() {
+        override fun createIntent(context: Context, input: XboxDeviceInfo): Intent {
             return Intent(context, MicrosoftLoginActivity::class.java).apply {
-                putExtra(EXTRAS_KEY_DEVICE_TYPE, device.deviceType)
+                putExtra(EXTRAS_KEY_DEVICE_TYPE, input.deviceType)
             }
         }
 

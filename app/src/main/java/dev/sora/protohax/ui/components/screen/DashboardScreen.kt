@@ -9,12 +9,34 @@ import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.State
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -30,6 +52,7 @@ import dev.sora.protohax.R
 import dev.sora.protohax.relay.service.AppService
 import dev.sora.protohax.ui.activities.AppPickerActivity
 import dev.sora.protohax.ui.activities.MainActivity
+import dev.sora.protohax.ui.components.AppIcon
 import dev.sora.protohax.ui.components.CardCurrentApplication
 import dev.sora.protohax.ui.components.CardLoginAlert
 import dev.sora.protohax.ui.components.HyperlinkText
@@ -135,7 +158,7 @@ private fun BottomFloatingActionButton(
         }
     }
     val overlayRequestLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-        if (it.resultCode == Activity.RESULT_OK) {
+		if (Settings.canDrawOverlays(mContext)) {
             checkVPN()
         }
     }
@@ -144,8 +167,8 @@ private fun BottomFloatingActionButton(
         SnackbarHost(
             snackbarHostState,
             modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(0.dp, 70.dp)
+				.align(Alignment.BottomEnd)
+				.padding(0.dp, 70.dp)
         )
 
         ExtendedFloatingActionButton(
@@ -216,7 +239,7 @@ private fun MenuDashboard(state: MutableState<Boolean>, aboutState: MutableState
 private fun DialogAbout(state: MutableState<Boolean>) {
     if (state.value) {
         AlertDialog(
-            icon = { Image(painterResource(id = R.mipmap.ic_launcher_round), null) },
+            icon = { AppIcon() },
             onDismissRequest = { state.value = false },
             title = { Text(stringResource(R.string.app_name)) },
             text = {

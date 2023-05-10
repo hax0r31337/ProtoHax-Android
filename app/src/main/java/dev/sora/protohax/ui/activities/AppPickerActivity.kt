@@ -30,15 +30,16 @@ import androidx.compose.ui.graphics.painter.BitmapPainter
 import androidx.compose.ui.graphics.painter.ColorPainter
 import androidx.compose.ui.graphics.painter.Painter
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.core.view.WindowCompat
 import com.google.accompanist.drawablepainter.DrawablePainter
+import dev.sora.protohax.BuildConfig
 import dev.sora.protohax.R
 import dev.sora.protohax.ui.theme.MyApplicationTheme
 import dev.sora.protohax.util.ContextUtils.hasInternetPermission
 import kotlinx.coroutines.launch
+import kotlin.concurrent.thread
 
 class AppPickerActivity : ComponentActivity() {
 
@@ -85,8 +86,8 @@ class AppPickerActivity : ComponentActivity() {
                         leadingIcon = { Icon(Icons.Filled.Search, null)},
                         shape = RoundedCornerShape(8.dp),
                         modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(8.dp, 0.dp),
+							.fillMaxWidth()
+							.padding(8.dp, 0.dp),
                         colors = TextFieldDefaults.textFieldColors(
                             focusedIndicatorColor = Color.Transparent,
                             unfocusedIndicatorColor = Color.Transparent,
@@ -96,17 +97,24 @@ class AppPickerActivity : ComponentActivity() {
 
                     val scope = rememberCoroutineScope()
                     val listIcons = remember { mutableStateMapOf<String, Painter?>() }
+					val doneLoading = remember { mutableStateOf(false) }
                     val listItems = remember {
-                        mutableStateListOf<Pair<String, PackageInfo>>().also {
+                        mutableStateListOf<Pair<String, PackageInfo>>().also { list ->
                             scope.launch {
-                                it.addAll(packageManager.getInstalledPackages(PackageManager.GET_PERMISSIONS)
-                                    .filter { it.hasInternetPermission && it.applicationInfo.flags and ApplicationInfo.FLAG_SYSTEM == 0 && it.packageName != "dev.sora.protohax" }
-                                    .map { packageManager.getApplicationLabel(it.applicationInfo).toString() to it }.sortedBy { it.first })
+								list.addAll(packageManager.getInstalledPackages(PackageManager.GET_PERMISSIONS)
+									.filter { it.hasInternetPermission && it.applicationInfo.flags and ApplicationInfo.FLAG_SYSTEM == 0 && it.packageName != BuildConfig.APPLICATION_ID }
+									.map { packageManager.getApplicationLabel(it.applicationInfo).toString() to it }.sortedBy { it.first })
+								doneLoading.value = true
+								thread {
+									list.forEach { info ->
+										listIcons[info.second.packageName] = drawablePainter(packageManager.getApplicationIcon(info.second.packageName))
+									}
+								}
                             }
                         }
                     }
 
-                    if (listItems.isEmpty()) {
+                    if (!doneLoading.value) {
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.Center,
@@ -114,47 +122,40 @@ class AppPickerActivity : ComponentActivity() {
                         ) {
                             Text(stringResource(R.string.dialog_loading))
                         }
-                    }
-
-                    LazyColumn {
-                        items(listItems.filter { it.first.startsWith(text.value, true) }) {
-                            val packageName = it.second.packageName
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(16.dp, 10.dp)
-                                    .clickable {
-                                        MainActivity.targetPackage = packageName
-                                        finish()
-                                    },
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                val icon = listIcons[packageName]
-                                if (icon == null) {
-                                    Spacer(modifier = Modifier.size(42.dp))
-                                    if (!listIcons.containsKey(packageName)) {
-                                        listIcons[packageName] = null
-                                        scope.launch {
-                                            listIcons[packageName] = drawablePainter(packageManager.getApplicationIcon(packageName))
-                                        }
-                                    }
-                                } else {
-                                    Image(
-                                        painter = icon,
-                                        contentDescription = packageName,
-                                        modifier = Modifier
-                                            .size(42.dp)
-                                            .clip(RoundedCornerShape(8.dp))
-                                    )
-                                }
-                                Spacer(modifier = Modifier.size(12.dp, 0.dp))
-                                Column {
-                                    Text(it.first, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                                    Text(packageName, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                                }
-                            }
-                        }
-                    }
+                    } else {
+						LazyColumn {
+							items(listItems.filter { it.first.startsWith(text.value, true) }) {
+								val packageName = it.second.packageName
+								Row(
+									modifier = Modifier
+										.fillMaxWidth()
+										.clickable {
+											MainActivity.targetPackage = packageName
+											finish()
+										}.padding(16.dp, 10.dp),
+									verticalAlignment = Alignment.CenterVertically
+								) {
+									val icon = listIcons[packageName]
+									if (icon == null) {
+										Spacer(modifier = Modifier.size(42.dp))
+									} else {
+										Image(
+											painter = icon,
+											contentDescription = packageName,
+											modifier = Modifier
+												.size(42.dp)
+												.clip(RoundedCornerShape(8.dp))
+										)
+									}
+									Spacer(modifier = Modifier.size(12.dp, 0.dp))
+									Column {
+										Text(it.first, maxLines = 1, overflow = TextOverflow.Ellipsis)
+										Text(packageName, maxLines = 1, overflow = TextOverflow.Ellipsis, color = MaterialTheme.colorScheme.outline)
+									}
+								}
+							}
+						}
+					}
                 }
             }
         )

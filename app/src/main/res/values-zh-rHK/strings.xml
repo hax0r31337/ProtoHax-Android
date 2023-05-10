@@ -41,13 +41,24 @@
     <string name="account_selected">(已選擇)</string>
     <string name="account_delete_dialog_message">確定要刪除帳號 %s？</string>
 
-    <string name="logcat_clear">清除記錄</string>
-    <string name="logcat_share">分享記錄</string>
+    <string name="setting_encryption">離線模式覆寫</string>
+    <string name="setting_encryption_desc">允許離線模式加密</string>
+    <string name="setting_commands">命令</string>
+    <string name="setting_commands_desc">允許在遊戲中使用命令控制ProtoHax</string>
+    <string name="setting_rak_reliability">RakNet 可靠性</string>
+    <string name="setting_rak_reliability_desc">關閉以禁用RakNet的隊頭阻塞，會導致數據包混亂，但會提高延遲</string>
+    <string name="setting_restart_required">需要重新啟動才能生效</string>
+    <string name="setting_restart_required_action">重新啟動</string>
+    <string name="setting_logs">日誌</string>
+    <string name="setting_logs_desc">顯示日誌</string>
+
+    <string name="logcat_clear">清除日誌</string>
+    <string name="logcat_share">共享日誌</string>
 
     <string name="tab_dashboard">儀表板</string>
-    <string name="tab_accounts">帳號</string>
-    <string name="tab_configs">設定</string>
-    <string name="tab_logs">記錄</string>
+    <string name="tab_accounts">帳戶</string>
+    <string name="tab_configs">配置</string>
+    <string name="tab_settings">設定</string>
     <string name="tab_btn_navigation_drawer">導覽抽屜</string>
 
     <string name="dialog_title">繼續？</string>

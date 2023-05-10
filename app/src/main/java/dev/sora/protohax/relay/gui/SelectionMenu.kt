@@ -14,16 +14,20 @@ import android.widget.SeekBar
 import android.widget.SeekBar.OnSeekBarChangeListener
 import dev.sora.protohax.R
 import dev.sora.protohax.relay.MinecraftRelay
-import dev.sora.protohax.util.Gpw
 import dev.sora.relay.cheat.module.CheatModule
-import dev.sora.relay.cheat.value.*
+import dev.sora.relay.cheat.value.BoolValue
+import dev.sora.relay.cheat.value.FloatValue
+import dev.sora.relay.cheat.value.IntValue
+import dev.sora.relay.cheat.value.ListValue
+import dev.sora.relay.cheat.value.NamedChoice
+import dev.sora.relay.cheat.value.Value
 import java.math.BigDecimal
 import java.math.RoundingMode
 
 
 class SelectionMenu(private val window: PopupWindow) {
 
-    private var currentConfig: String = Gpw.generate(7)
+    private var currentConfig: String = "default"
     /**
      * a list liked layout who contains the features of selected menus
      */
@@ -116,15 +120,6 @@ class SelectionMenu(private val window: PopupWindow) {
             btn.text = ctx.getString(R.string.clickgui_configs)
             btn.width = advisedWidth / 2
             btn.normalOnClickListener {
-                it.addView(ctx.themedButton().apply {
-                    text = ctx.getString(R.string.clickgui_configs_create)
-                    width = advisedWidth
-                    setOnClickListener {
-                        currentConfig = Gpw.generate(kotlin.random.Random.nextInt(5) + 5)
-                        MinecraftRelay.configManager.saveConfig(currentConfig)
-                        btn.performClick() // refresh
-                    }
-                })
                 it.addView(ctx.themedButton().apply {
                     text = ctx.getString(R.string.clickgui_configs_save)
                     width = advisedWidth

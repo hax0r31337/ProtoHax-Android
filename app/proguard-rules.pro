@@ -20,9 +20,10 @@
 # hide the original source file name.
 -renamesourcefileattribute null
 
+# keep netty related classes
 -keep class io.netty.** { *; }
 -keep class org.cloudburstmc.netty.** { *; }
--keep class org.cloudburstmc.protocol.bedrock.netty.** { *; }
+-keep @io.netty.channel.ChannelHandler$Sharable class *
 
 -keepclassmembers class * {
     @com.google.gson.annotations.SerializedName <fields>;
@@ -30,3 +31,6 @@
 -keep class coelho.msftauth.** { *; }
 
 -keep class org.cloudburstmc.protocol.bedrock.data.entity.** { *; }
+
+# disable R8 warning for missing classes
+-dontwarn **

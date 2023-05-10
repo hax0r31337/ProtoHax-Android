@@ -5,8 +5,7 @@ import com.google.gson.annotations.SerializedName
 import dev.sora.protohax.MyApplication
 import dev.sora.protohax.util.ContextUtils.readString
 import dev.sora.protohax.util.ContextUtils.writeString
-import dev.sora.relay.session.listener.RelayListenerMicrosoftLogin
-import dev.sora.relay.utils.HttpUtils
+import dev.sora.relay.session.listener.xbox.XboxDeviceInfo
 import java.io.File
 import java.lang.reflect.Type
 
@@ -20,11 +19,11 @@ object AccountManager {
         set(value) = MyApplication.instance.writeString(KEY_CURRENT_MICROSOFT_REFRESH_TOKEN, value ?: "")
     var currentAccount: Account?
         get() = currentRefreshToken?.let { t -> accounts.find { it.refreshToken == t } }
-        set(value) { if (value == null) currentRefreshToken = null else if (accounts.contains(value)) currentRefreshToken = value?.refreshToken }
+        set(value) { if (value == null) currentRefreshToken = null else if (accounts.contains(value)) currentRefreshToken = value.refreshToken }
 
     private val storeFile = File(MyApplication.instance.filesDir, "credentials.json")
     private val gson = GsonBuilder()
-        .registerTypeAdapter(RelayListenerMicrosoftLogin.DeviceInfo::class.java, DeviceInfoAdapter())
+        .registerTypeAdapter(XboxDeviceInfo::class.java, DeviceInfoAdapter())
         .create()
 
     init {
@@ -56,21 +55,21 @@ object AccountManager {
         currentRefreshToken = null
     }
 
-    private class DeviceInfoAdapter : JsonSerializer<RelayListenerMicrosoftLogin.DeviceInfo>, JsonDeserializer<RelayListenerMicrosoftLogin.DeviceInfo> {
+    private class DeviceInfoAdapter : JsonSerializer<XboxDeviceInfo>, JsonDeserializer<XboxDeviceInfo> {
 
-        override fun serialize(src: RelayListenerMicrosoftLogin.DeviceInfo, typeOf: Type?, ctx: JsonSerializationContext?): JsonElement {
+        override fun serialize(src: XboxDeviceInfo, typeOf: Type?, ctx: JsonSerializationContext?): JsonElement {
             return JsonPrimitive(src.deviceType)
         }
 
-        override fun deserialize(json: JsonElement, typeOf: Type?, ctx: JsonDeserializationContext?): RelayListenerMicrosoftLogin.DeviceInfo {
-            return RelayListenerMicrosoftLogin.devices[json.asString]!!
+        override fun deserialize(json: JsonElement, typeOf: Type?, ctx: JsonDeserializationContext?): XboxDeviceInfo {
+            return XboxDeviceInfo.devices[json.asString] ?: XboxDeviceInfo.DEVICE_ANDROID
         }
     }
 }
 
 class Account(
     @SerializedName("remark") var remark: String,
-    @SerializedName("device") val platform: RelayListenerMicrosoftLogin.DeviceInfo,
+    @SerializedName("device") val platform: XboxDeviceInfo,
     @SerializedName("refresh_token") var refreshToken: String
 ) {
 
@@ -79,16 +78,13 @@ class Account(
      */
     fun refresh(): String {
         val isCurrent = AccountManager.currentAccount == this
-        val body = JsonParser.parseReader(
-            HttpUtils.make("https://login.live.com/oauth20_token.srf", "POST",
-                "client_id=${platform.appId}&scope=service::user.auth.xboxlive.com::MBI_SSL&grant_type=refresh_token&redirect_uri=https://login.live.com/oauth20_desktop.srf&refresh_token=${refreshToken}",
-                mapOf("Content-Type" to "application/x-www-form-urlencoded")).inputStream.reader(Charsets.UTF_8)).asJsonObject
-        refreshToken = body.get("refresh_token").asString
+		val (accessToken, refreshToken) = platform.refreshToken(refreshToken)
+        this.refreshToken = refreshToken
         if (isCurrent) {
             // refreshes the token field
             AccountManager.currentAccount = this
         }
         AccountManager.save()
-        return body.get("access_token").asString
+        return accessToken
     }
 }

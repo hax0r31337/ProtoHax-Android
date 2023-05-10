@@ -14,7 +14,6 @@
         android:fullBackupContent="@xml/backup_rules"
         android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
-        android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:name="dev.sora.protohax.MyApplication"
         android:theme="@style/Theme.ProtoHax"
@@ -37,6 +36,11 @@
         </activity>
         <activity
             android:name="dev.sora.protohax.ui.activities.AppPickerActivity"
+            android:exported="false"
+            android:theme="@style/Theme.ProtoHax">
+        </activity>
+        <activity
+            android:name="dev.sora.protohax.ui.activities.LogActivity"
             android:exported="false"
             android:theme="@style/Theme.ProtoHax">
         </activity>

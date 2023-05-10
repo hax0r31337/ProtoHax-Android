@@ -1,4 +1,4 @@
-package dev.sora.protohax.relay.log;
+package dev.sora.protohax.relay.netty.log;
 
 import android.util.Log;
 
@@ -7,7 +7,7 @@ import io.netty.util.internal.logging.AbstractInternalLogger;
 
 public class NettyLogger extends AbstractInternalLogger {
 
-    private static final String TAG = "ProtoHax";
+    public static final String TAG = "ProtoHax";
 
     protected NettyLogger(String name) {
         super(name);

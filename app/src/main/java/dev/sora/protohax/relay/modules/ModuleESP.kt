@@ -9,7 +9,7 @@ import dev.sora.relay.cheat.module.impl.ModuleTargets
 import dev.sora.relay.game.entity.Entity
 import dev.sora.relay.game.entity.EntityPlayer
 import org.cloudburstmc.math.matrix.Matrix4f
-import org.cloudburstmc.math.vector.Vector2d
+import org.cloudburstmc.math.vector.Vector2f
 import kotlin.math.cos
 import kotlin.math.sin
 
@@ -32,7 +32,7 @@ class ModuleESP : CheatModule("ESP") {
  	private val handleRender = handle<RenderLayerView.EventRender> { event ->
 		event.needRefresh = true
 		if (avoidScreenValue && event.session.thePlayer.openContainer != null) return@handle
-		val moduleTargets = moduleManager.getModule(ModuleTargets::class.java) ?: error("no module found as Targets")
+		val moduleTargets = moduleManager.getModule(ModuleTargets::class.java)
 		val map = event.session.theWorld.entityMap.values
 			.let { if (allObjectsValue) it else it.filter { e -> e is EntityPlayer && (botsValue || with(moduleTargets) { !e.isBot() })} }
 		if (map.isEmpty()) return@handle
@@ -59,42 +59,32 @@ class ModuleESP : CheatModule("ESP") {
 	}
 
     private fun drawEntityBox(entity: Entity, viewProjMatrix: Matrix4f, screenWidth: Int, screenHeight: Int, canvas: Canvas, paint: Paint) {
-        var minX = entity.posX - 0.3
-        val minZ = entity.posZ - 0.3
-        var maxX = entity.posX + 0.3
-        val maxZ = entity.posZ + 0.3
+        var minX = entity.posX - 0.3f
+        val minZ = entity.posZ - 0.3f
+        var maxX = entity.posX + 0.3f
+        val maxZ = entity.posZ + 0.3f
         var minY = entity.posY
-        var maxY = entity.posY + 1
-        val boxVertices = if (entity is EntityPlayer) {
-            minY -= 1.62
-            maxY -= 0.82
+        var maxY = entity.posY + 1f
+		if (entity is EntityPlayer) {
+			minY -= 1.62f
+			maxY -= 0.82f
+		}
+        val boxVertices =
             arrayOf(
-                doubleArrayOf(minX, minY, minZ),
-                doubleArrayOf(minX, maxY, minZ),
-                doubleArrayOf(maxX, maxY, minZ),
-                doubleArrayOf(maxX, minY, minZ),
-                doubleArrayOf(minX, minY, maxZ),
-                doubleArrayOf(minX, maxY, maxZ),
-                doubleArrayOf(maxX, maxY, maxZ),
-                doubleArrayOf(maxX, minY, maxZ)
+                floatArrayOf(minX, minY, minZ),
+				floatArrayOf(minX, maxY, minZ),
+				floatArrayOf(maxX, maxY, minZ),
+				floatArrayOf(maxX, minY, minZ),
+				floatArrayOf(minX, minY, maxZ),
+				floatArrayOf(minX, maxY, maxZ),
+				floatArrayOf(maxX, maxY, maxZ),
+				floatArrayOf(maxX, minY, maxZ)
             )
-        } else {
-            arrayOf(
-                doubleArrayOf(minX, minY, minZ),
-                doubleArrayOf(minX, maxY, minZ),
-                doubleArrayOf(maxX, maxY, minZ),
-                doubleArrayOf(maxX, minY, minZ),
-                doubleArrayOf(minX, minY, maxZ),
-                doubleArrayOf(minX, maxY, maxZ),
-                doubleArrayOf(maxX, maxY, maxZ),
-                doubleArrayOf(maxX, minY, maxZ)
-            )
-        }
 
-        minX = screenWidth.toDouble()
-        minY = screenHeight.toDouble()
-        maxX = .0
-        maxY = .0
+        minX = screenWidth.toFloat()
+        minY = screenHeight.toFloat()
+        maxX = 0f
+        maxY = 0f
         for (boxVertex in boxVertices) {
             val screenPos = worldToScreen(boxVertex[0], boxVertex[1], boxVertex[2], viewProjMatrix, screenWidth, screenHeight)?: continue
             minX = screenPos.x.coerceAtMost(minX)
@@ -105,14 +95,14 @@ class ModuleESP : CheatModule("ESP") {
         // out of screen
         if (!(minX >= screenWidth || minY >= screenHeight || maxX <= 0 || maxY <= 0)) {
             val fit = paint.strokeWidth * 0.5f
-            canvas.drawLine(minX.toFloat() - fit, minY.toFloat(), maxX.toFloat() + fit, minY.toFloat(), paint)
-            canvas.drawLine(minX.toFloat() - fit, maxY.toFloat(), maxX.toFloat() + fit, maxY.toFloat(), paint)
-            canvas.drawLine(minX.toFloat(), minY.toFloat(), minX.toFloat(), maxY.toFloat(), paint)
-            canvas.drawLine(maxX.toFloat(), minY.toFloat(), maxX.toFloat(), maxY.toFloat(), paint)
+			canvas.drawLine(minX - fit, minY, maxX + fit, minY, paint)
+			canvas.drawLine(minX - fit, maxY, maxX + fit, maxY, paint)
+			canvas.drawLine(minX, minY, minX, maxY, paint)
+			canvas.drawLine(maxX, minY, maxX, maxY, paint)
         }
     }
 
-    private fun worldToScreen(posX: Double, posY: Double, posZ: Double, viewProjMatrix: Matrix4f, screenWidth: Int, screenHeight: Int): Vector2d? {
+    private fun worldToScreen(posX: Float, posY: Float, posZ: Float, viewProjMatrix: Matrix4f, screenWidth: Int, screenHeight: Int): Vector2f? {
         val w = viewProjMatrix.get(3, 0) * posX +
                 viewProjMatrix.get(3, 1) * posY +
                 viewProjMatrix.get(3, 2) * posZ +
@@ -124,7 +114,7 @@ class ModuleESP : CheatModule("ESP") {
                 viewProjMatrix.get(0, 2) * posZ + viewProjMatrix.get(0, 3)) * inverseW) * screenWidth + 0.5f)
         val screenY = screenHeight / 2f - (0.5f * ((viewProjMatrix.get(1, 0) * posX + viewProjMatrix.get(1, 1) * posY +
                 viewProjMatrix.get(1, 2) * posZ + viewProjMatrix.get(1, 3)) * inverseW) * screenHeight + 0.5f)
-        return Vector2d.from(screenX, screenY)
+        return Vector2f.from(screenX, screenY)
     }
 
     private fun rotX(angle: Float): Matrix4f {
