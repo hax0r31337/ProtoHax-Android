@@ -10,7 +10,7 @@ object Settings {
 	val enableRakReliability = BoolSetting(R.string.setting_rak_reliability, R.string.setting_rak_reliability_desc, "ENABLE_RAK_RELIABILITY", true) {
 		MinecraftRelay.updateReliability()
 	}
-	val ipv6Status = TabSetting(R.string.setting_ip, "INTERNET_PROTOCOL", IPv6Choices.AUTOMATIC, IPv6Choices.values(), restartRequired = true)
+	val ipv6Status = TabSetting(R.string.setting_ip, "INTERNET_PROTOCOL", IPv6Choices.AUTOMATIC, IPv6Choices.values())
 
 //	const val KEY_INTERNET_PROTOCOL = "ENABLE_INTERNET_PROTOCOL"
 //	const val KEY_INTERNET_PROTOCOL_DEFAULT = "auto"
