@@ -16,6 +16,7 @@ import dev.sora.protohax.R
 import dev.sora.protohax.relay.MinecraftRelay
 import dev.sora.protohax.relay.gui.PopupWindow
 import dev.sora.protohax.ui.activities.MainActivity
+import dev.sora.protohax.ui.components.screen.settings.Settings
 import dev.sora.protohax.util.ContextUtils.getApplicationName
 import dev.sora.relay.utils.logError
 import dev.sora.relay.utils.logInfo
@@ -74,7 +75,12 @@ class AppService : VpnService() {
     }
 
     private fun startVPN() {
-        val (hasIPv4, hasIPv6) = checkNetState()
+        val (hasIPv4, hasIPv6) = when(Settings.ipv6Status.getValue(this)) {
+			Settings.IPv6Choices.AUTOMATIC -> checkNetState()
+			Settings.IPv6Choices.ENABLED -> true to true
+			Settings.IPv6Choices.DISABLED -> true to false
+			Settings.IPv6Choices.V6ONLY -> false to true
+		}
 
         val builder = Builder()
         builder.setBlocking(true)

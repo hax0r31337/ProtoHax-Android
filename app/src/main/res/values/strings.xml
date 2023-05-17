@@ -51,6 +51,11 @@
     <string name="setting_rak_reliability_desc">Toggle off to disable HoL blocking of RakNet, causing packet disorder but improves latency</string>
     <string name="setting_restart_required">Restart required to take effect</string>
     <string name="setting_restart_required_action">Restart</string>
+    <string name="setting_ip" translatable="false">IPv6</string>
+    <string name="setting_ip_auto">Auto</string>
+    <string name="setting_ip_enabled">Enabled</string>
+    <string name="setting_ip_disabled">Disabled</string>
+    <string name="setting_ip_only">IPv6 Only</string>
     <string name="setting_logs">Logs</string>
     <string name="setting_logs_desc">Show Logs</string>
 

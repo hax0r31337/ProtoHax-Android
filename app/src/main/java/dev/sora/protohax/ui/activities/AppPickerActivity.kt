@@ -75,13 +75,13 @@ class AppPickerActivity : ComponentActivity() {
                 )
             },
             content = { innerPadding ->
-                val text = remember { mutableStateOf("") }
+                var text by remember { mutableStateOf("") }
 
                 Column(modifier = Modifier.padding(innerPadding)) {
                     TextField(
-                        value = text.value,
+                        value = text,
                         singleLine = true,
-                        onValueChange = { text.value = it },
+                        onValueChange = { text = it },
                         placeholder = { Text(stringResource(R.string.dashboard_select_application_placeholder)) },
                         leadingIcon = { Icon(Icons.Filled.Search, null)},
                         shape = RoundedCornerShape(8.dp),
@@ -124,7 +124,7 @@ class AppPickerActivity : ComponentActivity() {
                         }
                     } else {
 						LazyColumn {
-							items(listItems.filter { it.first.startsWith(text.value, true) }) {
+							items(listItems.filter { it.first.startsWith(text, true) }) {
 								val packageName = it.second.packageName
 								Row(
 									modifier = Modifier
