@@ -22,15 +22,14 @@
 
 # keep netty related classes
 -keep class io.netty.** { *; }
--keep class org.cloudburstmc.netty.** { *; }
 -keep @io.netty.channel.ChannelHandler$Sharable class *
 
 -keepclassmembers class * {
     @com.google.gson.annotations.SerializedName <fields>;
 }
 -keep class coelho.msftauth.** { *; }
-
--keep class org.cloudburstmc.protocol.bedrock.data.entity.** { *; }
+-keep class dev.sora.** { *; }
+-keep class org.cloudburstmc.** { *; }
 
 # disable R8 warning for missing classes
 -dontwarn **
