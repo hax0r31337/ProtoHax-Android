@@ -88,7 +88,7 @@ class AppPickerActivity : ComponentActivity() {
                         modifier = Modifier
 							.fillMaxWidth()
 							.padding(8.dp, 0.dp),
-                        colors = TextFieldDefaults.textFieldColors(
+						colors = TextFieldDefaults.colors(
                             focusedIndicatorColor = Color.Transparent,
                             unfocusedIndicatorColor = Color.Transparent,
                             disabledIndicatorColor = Color.Transparent

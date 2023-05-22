@@ -25,7 +25,6 @@ import libmitm.TUN
 import java.net.Inet4Address
 import java.net.Inet6Address
 import java.net.NetworkInterface
-import kotlin.concurrent.thread
 
 
 class AppService : VpnService() {
