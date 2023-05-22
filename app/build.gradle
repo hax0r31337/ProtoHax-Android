@@ -75,7 +75,7 @@ android {
 
 dependencies {
     implementation 'dev.sora.relay:ProtoHax:1.3.1'
-    implementation 'dev.sora.networking:libmitm:1.2.2-raknet'
+    implementation 'dev.sora.networking:libmitm:1.2.3-raknet'
 
     implementation 'androidx.core:core-ktx:1.10.0'
     implementation 'androidx.activity:activity-compose:1.7.1'

@@ -25,6 +25,7 @@ import libmitm.TUN
 import java.net.Inet4Address
 import java.net.Inet6Address
 import java.net.NetworkInterface
+import kotlin.concurrent.thread
 
 
 class AppService : VpnService() {
@@ -61,11 +62,9 @@ class AppService : VpnService() {
             if (ACTION_START == action) {
                 startVPN()
                 startForeground(1, createNotification())
-            } else if (ACTION_STOP == action) {
+            } else {
                 stopVPN()
                 stopForeground(STOP_FOREGROUND_REMOVE)
-                stopSelf()
-            } else {
                 stopSelf()
             }
         } catch (t: Throwable) {
@@ -126,13 +125,15 @@ class AppService : VpnService() {
 
     private fun stopVPN() {
         isActive = false
-        try {
-            serviceListeners.forEach { it.onServiceStopped() }
-        } catch (t: Throwable) {
-            logError("stop callback", t)
-        }
-        tun?.close()
-        vpnDescriptor?.close()
+		vpnDescriptor?.close()
+		tun?.let {
+			try {
+				serviceListeners.forEach { l -> l.onServiceStopped() }
+			} catch (t: Throwable) {
+				logError("stop callback", t)
+			}
+			Thread(it::close).start()
+		}
     }
 
     private fun checkNetState(): Pair<Boolean, Boolean> {
