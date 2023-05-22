@@ -23,6 +23,8 @@ import dev.sora.relay.utils.logError
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import org.cloudburstmc.protocol.bedrock.util.EncryptionUtils
 import kotlin.concurrent.thread
+import kotlin.random.Random
+import kotlin.random.nextInt
 
 class MicrosoftLoginActivity : Activity() {
 
@@ -149,7 +151,11 @@ h1 {
 						return@thread
 					}
 
-					AccountManager.accounts.add(Account(username, activity.device, refreshToken))
+					val account = Account(username, activity.device, refreshToken)
+					while (AccountManager.accounts.map { it.remark }.contains(account.remark)) {
+						account.remark += Random.nextInt(0..9)
+					}
+					AccountManager.accounts.add(account)
 					AccountManager.save()
 
 					activity.setResult(RESULT_OK)

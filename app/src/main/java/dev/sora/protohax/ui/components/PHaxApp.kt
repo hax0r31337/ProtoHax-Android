@@ -97,8 +97,7 @@ fun PHaxApp(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class,
-    ExperimentalCoroutinesApi::class)
+@OptIn(ExperimentalAnimationApi::class, ExperimentalCoroutinesApi::class)
 @Composable
 private fun PHaxNavigationWrapper(
     navigationType: NavigationType,

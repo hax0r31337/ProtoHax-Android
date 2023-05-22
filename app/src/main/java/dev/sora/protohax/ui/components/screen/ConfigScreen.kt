@@ -9,12 +9,24 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.FileOpen
+import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.Delete
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.Share
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
+import androidx.compose.material3.TextField
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -24,6 +36,8 @@ import dev.sora.protohax.relay.MinecraftRelay
 import dev.sora.protohax.ui.components.ListItem
 import dev.sora.protohax.ui.components.PHaxAppBar
 import dev.sora.protohax.util.NavigationType
+import dev.sora.protohax.util.isValidRemark
+import dev.sora.protohax.util.suggestRemark
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -134,22 +148,36 @@ fun ConfigScreen(navigationType: NavigationType) {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun DialogCreate(target: MutableState<Boolean>, callback: () -> Unit) {
     if (target.value) {
         val name = remember { mutableStateOf("") }
+		if (name.value.isEmpty()) {
+			name.value = suggestRemark()
+		}
 
         AlertDialog(
             onDismissRequest = { target.value = false },
             title = { Text(stringResource(R.string.config_create)) },
-            text = { TextField(name.value, { name.value = it }) },
+			text = {
+				TextField(
+					value = name.value,
+					onValueChange = { name.value = it },
+					trailingIcon = {
+						IconButton(onClick = { name.value = suggestRemark() }) {
+							Icon(Icons.Filled.Refresh, null)
+						}
+					}
+				)
+			},
             confirmButton = {
                 TextButton(
+					enabled = isValidRemark(MinecraftRelay.configManager.listConfig(), name.value),
                     onClick = {
                         target.value = false
                         MinecraftRelay.configManager.getConfigFile(name.value)
                             .writeText("{}")
+						name.value = ""
                         callback()
                     }
                 ) {
@@ -167,18 +195,31 @@ private fun DialogCreate(target: MutableState<Boolean>, callback: () -> Unit) {
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun DialogRenameCopy(target: MutableState<String>, copy: Boolean, callback: () -> Unit) {
     if (target.value.isNotEmpty()) {
         val name = remember { mutableStateOf("") }
+		if (name.value.isEmpty()) {
+			name.value = target.value
+		}
 
         AlertDialog(
             onDismissRequest = { target.value = "" },
             title = { Text(stringResource(if (copy) R.string.config_copy_dialog_message else R.string.config_rename_dialog_message)) },
-            text = { TextField(name.value, { name.value = it }) },
+			text = {
+				TextField(
+					value = name.value,
+					onValueChange = { name.value = it },
+					trailingIcon = {
+						IconButton(onClick = { name.value = suggestRemark() }) {
+							Icon(Icons.Filled.Refresh, null)
+						}
+					}
+				)
+			},
             confirmButton = {
                 TextButton(
+					enabled = isValidRemark(MinecraftRelay.configManager.listConfig(), name.value),
                     onClick = {
                         if (copy) {
                             MinecraftRelay.configManager.copyConfig(target.value, name.value)
@@ -186,6 +227,7 @@ private fun DialogRenameCopy(target: MutableState<String>, copy: Boolean, callba
                             MinecraftRelay.configManager.renameConfig(target.value, name.value)
                         }
                         target.value = ""
+						name.value = ""
                         callback()
                     }
                 ) {
