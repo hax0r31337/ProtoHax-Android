@@ -88,9 +88,9 @@ fun ConfigScreen(navigationType: NavigationType) {
             }
         }
     ) { innerPadding ->
-        val dialogCopy = remember { mutableStateOf("") }
-        val dialogRename = remember { mutableStateOf("") }
-        val dialogDelete = remember { mutableStateOf("") }
+        val dialogCopy: MutableState<String?> = remember { mutableStateOf(null) }
+        val dialogRename: MutableState<String?> = remember { mutableStateOf(null) }
+        val dialogDelete: MutableState<String?> = remember { mutableStateOf(null) }
 
         DialogRenameCopy(dialogCopy, true, refreshList)
         DialogRenameCopy(dialogRename, false, refreshList)
@@ -196,19 +196,21 @@ private fun DialogCreate(target: MutableState<Boolean>, callback: () -> Unit) {
 }
 
 @Composable
-private fun DialogRenameCopy(target: MutableState<String>, copy: Boolean, callback: () -> Unit) {
-    if (target.value.isNotEmpty()) {
-        val name = remember { mutableStateOf("") }
-		if (name.value.isEmpty()) {
-			name.value = target.value
+private fun DialogRenameCopy(target: MutableState<String?>, copy: Boolean, callback: () -> Unit) {
+    val value = target.value
+
+	if (value != null) {
+		val name: MutableState<String?> = remember { mutableStateOf(null) }
+		if (name.value == null) {
+			name.value = value
 		}
 
         AlertDialog(
-            onDismissRequest = { target.value = "" },
+            onDismissRequest = { target.value = null },
             title = { Text(stringResource(if (copy) R.string.config_copy_dialog_message else R.string.config_rename_dialog_message)) },
 			text = {
 				TextField(
-					value = name.value,
+					value = name.value ?: "",
 					onValueChange = { name.value = it },
 					trailingIcon = {
 						IconButton(onClick = { name.value = suggestRemark() }) {
@@ -219,15 +221,15 @@ private fun DialogRenameCopy(target: MutableState<String>, copy: Boolean, callba
 			},
             confirmButton = {
                 TextButton(
-					enabled = isValidRemark(MinecraftRelay.configManager.listConfig(), name.value),
+					enabled = isValidRemark(MinecraftRelay.configManager.listConfig(), name.value ?: ""),
                     onClick = {
                         if (copy) {
-                            MinecraftRelay.configManager.copyConfig(target.value, name.value)
+                            MinecraftRelay.configManager.copyConfig(value, name.value ?: "")
                         } else {
-                            MinecraftRelay.configManager.renameConfig(target.value, name.value)
+                            MinecraftRelay.configManager.renameConfig(value, name.value ?: "")
                         }
-                        target.value = ""
-						name.value = ""
+                        target.value = null
+						name.value = null
                         callback()
                     }
                 ) {
@@ -236,7 +238,7 @@ private fun DialogRenameCopy(target: MutableState<String>, copy: Boolean, callba
             },
             dismissButton = {
                 TextButton(
-                    onClick = { target.value = "" }
+                    onClick = { target.value = null }
                 ) {
                     Text(stringResource(R.string.dialog_cancel))
                 }
@@ -246,17 +248,19 @@ private fun DialogRenameCopy(target: MutableState<String>, copy: Boolean, callba
 }
 
 @Composable
-private fun DialogDelete(target: MutableState<String>, callback: () -> Unit) {
-    if (target.value.isNotEmpty()) {
+private fun DialogDelete(target: MutableState<String?>, callback: () -> Unit) {
+	val value = target.value
+
+	if (value != null) {
         AlertDialog(
-            onDismissRequest = { target.value = "" },
+            onDismissRequest = { target.value = null },
             title = { Text(stringResource(R.string.dialog_title)) },
-            text = { Text(stringResource(R.string.config_delete_dialog_message, target.value)) },
+            text = { Text(stringResource(R.string.config_delete_dialog_message, value)) },
             confirmButton = {
                 TextButton(
                     onClick = {
-                        MinecraftRelay.configManager.deleteConfig(target.value)
-                        target.value = ""
+                        MinecraftRelay.configManager.deleteConfig(value)
+                        target.value = null
                         callback()
                     }
                 ) {
@@ -265,7 +269,7 @@ private fun DialogDelete(target: MutableState<String>, callback: () -> Unit) {
             },
             dismissButton = {
                 TextButton(
-                    onClick = { target.value = "" }
+                    onClick = { target.value = null }
                 ) {
                     Text(stringResource(R.string.dialog_cancel))
                 }

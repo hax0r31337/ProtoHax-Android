@@ -186,8 +186,8 @@ private fun MenuCreate(state: MutableState<Boolean>, callback: () -> Unit) {
 private fun DialogRename(target: MutableState<Account?>, callback: () -> Unit) {
     val value = target.value
     if (value != null) {
-        val name = remember { mutableStateOf(value.remark) }
-		if (name.value.isEmpty()) {
+		val name: MutableState<String?> = remember { mutableStateOf(null) }
+		if (name.value == null) {
 			name.value = value.remark
 		}
 
@@ -196,7 +196,7 @@ private fun DialogRename(target: MutableState<Account?>, callback: () -> Unit) {
             title = { Text(stringResource(R.string.config_rename_dialog_message)) },
 			text = {
 				TextField(
-					value = name.value,
+					value = name.value ?: "",
 					onValueChange = { name.value = it },
 					trailingIcon = {
 						IconButton(onClick = { name.value = suggestRemark() }) {
@@ -207,12 +207,12 @@ private fun DialogRename(target: MutableState<Account?>, callback: () -> Unit) {
 			},
             confirmButton = {
                 TextButton(
-					enabled = isValidRemark(AccountManager.accounts.map { it.remark }, name.value),
+					enabled = isValidRemark(AccountManager.accounts.map { it.remark }, name.value ?: ""),
                     onClick = {
-						value.remark = name.value
+						value.remark = name.value ?: ""
 						AccountManager.save()
 						target.value = null
-						name.value = ""
+						name.value = null
 
 						callback()
                     }
