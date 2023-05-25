@@ -50,7 +50,8 @@ class AppService : VpnService() {
     }
 
     override fun onDestroy() {
-        removeListener(popupWindow)
+		logInfo("VPN service destroyed")
+		stopVPN()
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
