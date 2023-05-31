@@ -10,6 +10,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.zIndex
 import dev.sora.protohax.util.ContextUtils.readBoolean
 import dev.sora.protohax.util.ContextUtils.writeBoolean
 
@@ -30,11 +31,7 @@ class BoolSetting(override val name: Int, override val description: Int, val key
 					restartRequiredCallback()
 				}
 		) {
-			Switch(value, onCheckedChange = {
-				value = !value
-				setValue(mContext, value)
-				restartRequiredCallback()
-			})
+			Switch(value, modifier = Modifier.zIndex(-1f), onCheckedChange = null)
 		}
 	}
 

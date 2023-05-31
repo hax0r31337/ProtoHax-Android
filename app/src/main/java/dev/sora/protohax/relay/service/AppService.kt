@@ -191,8 +191,8 @@ class AppService : VpnService() {
         const val CHANNEL_ID = "dev.sora.protohax.NOTIFICATION_CHANNEL_ID"
 
         const val VPN_MTU = 1500
-        const val PRIVATE_VLAN4_CLIENT = "26.26.26.1"
-        const val PRIVATE_VLAN6_CLIENT = "da26:2626::1"
+        const val PRIVATE_VLAN4_CLIENT = "10.13.37.1"
+        const val PRIVATE_VLAN6_CLIENT = "1337::1"
 
         var isActive = false
         private val serviceListeners = mutableSetOf<ServiceListener>()

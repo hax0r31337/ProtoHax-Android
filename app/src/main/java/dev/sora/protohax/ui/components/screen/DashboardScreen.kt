@@ -9,6 +9,7 @@ import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -196,8 +197,8 @@ private fun BottomFloatingActionButton(
                 }
             },
             modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(16.dp),
+				.align(Alignment.BottomEnd)
+				.padding(16.dp),
             containerColor = if (connectionState.value) MaterialTheme.colorScheme.tertiaryContainer else MaterialTheme.colorScheme.primaryContainer,
             contentColor = if (connectionState.value) MaterialTheme.colorScheme.onTertiaryContainer else MaterialTheme.colorScheme.onPrimaryContainer
         ) {
@@ -237,7 +238,9 @@ private fun MenuDashboard(state: MutableState<Boolean>, aboutState: MutableState
 
 @Composable
 private fun DialogAbout(state: MutableState<Boolean>) {
-    if (state.value) {
+    AnimatedVisibility(
+		visible = state.value
+	) {
         AlertDialog(
             icon = { AppIcon() },
             onDismissRequest = { state.value = false },

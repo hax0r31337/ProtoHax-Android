@@ -34,6 +34,7 @@
     <string name="config_import">Import Config</string>
     <string name="config_deselect">Deselect</string>
     <string name="config_delete_dialog_message">Are you sure about delete config %s</string>
+    <string name="config_delete_dialog_message_completed">Config deleted</string>
     <string name="config_rename_dialog_message">Rename</string>
     <string name="config_copy_dialog_message">Copy</string>
 
@@ -42,6 +43,7 @@
     <string name="account_select">Select</string>
     <string name="account_selected">(Selected)</string>
     <string name="account_delete_dialog_message">Are you sure about delete account %s</string>
+    <string name="account_delete_dialog_message_complete">Account deleted</string>
 
     <string name="setting_encryption">Offline Session Override</string>
     <string name="setting_encryption_desc">Allows encryption for offline mode</string>

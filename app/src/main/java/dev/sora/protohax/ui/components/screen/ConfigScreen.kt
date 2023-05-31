@@ -3,7 +3,10 @@ package dev.sora.protohax.ui.components.screen
 import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
@@ -27,6 +30,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.toMutableStateList
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -43,16 +47,17 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun ConfigScreen(navigationType: NavigationType) {
     val mContext = LocalContext.current
+	val scope = rememberCoroutineScope()
     val list = remember { MinecraftRelay.configManager.listConfig().sorted().toMutableStateList() }
     val refreshList = {
         list.clear()
         list.addAll(MinecraftRelay.configManager.listConfig())
         list.sort()
     }
-    val scope = rememberCoroutineScope()
 
     val dialogCreate = remember { mutableStateOf(false) }
     DialogCreate(dialogCreate, refreshList)
@@ -98,51 +103,56 @@ fun ConfigScreen(navigationType: NavigationType) {
 
         LazyColumn(
             contentPadding = innerPadding,
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp),
         ) {
-            items(list) {
-                val expanded = remember { mutableStateOf(false) }
-                ListItem(title = it, expanded = expanded) {
-                    DropdownMenuItem(
-                        text = { Text(stringResource(R.string.config_copy)) },
-                        onClick = {
-                            dialogCopy.value = it
-                            expanded.value = false
-                        },
-                        leadingIcon = { Icon(Icons.Outlined.ContentCopy, contentDescription = null) }
-                    )
-                    DropdownMenuItem(
-                        text = { Text(stringResource(R.string.config_rename)) },
-                        onClick = {
-                            dialogRename.value = it
-                            expanded.value = false
-                        },
-                        leadingIcon = { Icon(Icons.Outlined.Edit, contentDescription = null) }
-                    )
-                    DropdownMenuItem(
-                        text = { Text(stringResource(R.string.config_share)) },
-                        onClick = {
-                            val shareIntent = Intent().apply {
-                                action = Intent.ACTION_SEND
-                                putExtra(Intent.EXTRA_STREAM,
-                                    FileProvider.getUriForFile(mContext, mContext.packageName,
-                                        MinecraftRelay.configManager.getConfigFile(it)))
-                                type = "application/json"
-                            }
-                            mContext.startActivity(Intent.createChooser(shareIntent, null))
-                            expanded.value = false
-                        },
-                        leadingIcon = { Icon(Icons.Outlined.Share, contentDescription = null) }
-                    )
-                    DropdownMenuItem(
-                        text = { Text(stringResource(R.string.config_delete)) },
-                        onClick = {
-                            dialogDelete.value = it
-                            expanded.value = false
-                        },
-                        leadingIcon = { Icon(Icons.Outlined.Delete, contentDescription = null) }
-                    )
-                }
+            items(list, key = { it }) {
+                Box(modifier = Modifier.animateItemPlacement()) {
+					val expanded = remember { mutableStateOf(false) }
+					ListItem(
+						title = it,
+						expanded = expanded
+					) {
+						DropdownMenuItem(
+							text = { Text(stringResource(R.string.config_copy)) },
+							onClick = {
+								dialogCopy.value = it
+								expanded.value = false
+							},
+							leadingIcon = { Icon(Icons.Outlined.ContentCopy, contentDescription = null) }
+						)
+						DropdownMenuItem(
+							text = { Text(stringResource(R.string.config_rename)) },
+							onClick = {
+								dialogRename.value = it
+								expanded.value = false
+							},
+							leadingIcon = { Icon(Icons.Outlined.Edit, contentDescription = null) }
+						)
+						DropdownMenuItem(
+							text = { Text(stringResource(R.string.config_share)) },
+							onClick = {
+								val shareIntent = Intent().apply {
+									action = Intent.ACTION_SEND
+									putExtra(Intent.EXTRA_STREAM,
+										FileProvider.getUriForFile(mContext, mContext.packageName,
+											MinecraftRelay.configManager.getConfigFile(it)))
+									type = "application/json"
+								}
+								mContext.startActivity(Intent.createChooser(shareIntent, null))
+								expanded.value = false
+							},
+							leadingIcon = { Icon(Icons.Outlined.Share, contentDescription = null) }
+						)
+						DropdownMenuItem(
+							text = { Text(stringResource(R.string.config_delete)) },
+							onClick = {
+								dialogDelete.value = it
+								expanded.value = false
+							},
+							leadingIcon = { Icon(Icons.Outlined.Delete, contentDescription = null) }
+						)
+					}
+				}
             }
         }
     }
@@ -150,15 +160,17 @@ fun ConfigScreen(navigationType: NavigationType) {
 
 @Composable
 private fun DialogCreate(target: MutableState<Boolean>, callback: () -> Unit) {
-    if (target.value) {
-        val name = remember { mutableStateOf("") }
+	AnimatedVisibility(
+		visible = target.value,
+	) {
+		val name = remember { mutableStateOf("") }
 		if (name.value.isEmpty()) {
 			name.value = suggestRemark()
 		}
 
-        AlertDialog(
-            onDismissRequest = { target.value = false },
-            title = { Text(stringResource(R.string.config_create)) },
+		AlertDialog(
+			onDismissRequest = { target.value = false },
+			title = { Text(stringResource(R.string.config_create)) },
 			text = {
 				TextField(
 					value = name.value,
@@ -170,36 +182,38 @@ private fun DialogCreate(target: MutableState<Boolean>, callback: () -> Unit) {
 					}
 				)
 			},
-            confirmButton = {
-                TextButton(
+			confirmButton = {
+				TextButton(
 					enabled = isValidRemark(MinecraftRelay.configManager.listConfig(), name.value),
-                    onClick = {
-                        target.value = false
-                        MinecraftRelay.configManager.getConfigFile(name.value)
-                            .writeText("{}")
+					onClick = {
+						target.value = false
+						MinecraftRelay.configManager.getConfigFile(name.value)
+							.writeText("{}")
 						name.value = ""
-                        callback()
-                    }
-                ) {
-                    Text(stringResource(R.string.dialog_confirm))
-                }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = { target.value = false }
-                ) {
-                    Text(stringResource(R.string.dialog_cancel))
-                }
-            }
-        )
-    }
+						callback()
+					}
+				) {
+					Text(stringResource(R.string.dialog_confirm))
+				}
+			},
+			dismissButton = {
+				TextButton(
+					onClick = { target.value = false }
+				) {
+					Text(stringResource(R.string.dialog_cancel))
+				}
+			}
+		)
+	}
 }
 
 @Composable
 private fun DialogRenameCopy(target: MutableState<String?>, copy: Boolean, callback: () -> Unit) {
     val value = target.value
 
-	if (value != null) {
+	AnimatedVisibility(
+		visible = value != null,
+	) {
 		val name: MutableState<String?> = remember { mutableStateOf(null) }
 		if (name.value == null) {
 			name.value = value
@@ -223,14 +237,16 @@ private fun DialogRenameCopy(target: MutableState<String?>, copy: Boolean, callb
                 TextButton(
 					enabled = isValidRemark(MinecraftRelay.configManager.listConfig(), name.value ?: ""),
                     onClick = {
-                        if (copy) {
-                            MinecraftRelay.configManager.copyConfig(value, name.value ?: "")
-                        } else {
-                            MinecraftRelay.configManager.renameConfig(value, name.value ?: "")
-                        }
-                        target.value = null
-						name.value = null
-                        callback()
+						if (value != null) {
+							if (copy) {
+								MinecraftRelay.configManager.copyConfig(value, name.value ?: "")
+							} else {
+								MinecraftRelay.configManager.renameConfig(value, name.value ?: "")
+							}
+							target.value = null
+							name.value = null
+							callback()
+						}
                     }
                 ) {
                     Text(stringResource(R.string.dialog_confirm))
@@ -251,17 +267,25 @@ private fun DialogRenameCopy(target: MutableState<String?>, copy: Boolean, callb
 private fun DialogDelete(target: MutableState<String?>, callback: () -> Unit) {
 	val value = target.value
 
-	if (value != null) {
+	AnimatedVisibility(
+		visible = value != null,
+	) {
         AlertDialog(
             onDismissRequest = { target.value = null },
             title = { Text(stringResource(R.string.dialog_title)) },
-            text = { Text(stringResource(R.string.config_delete_dialog_message, value)) },
+            text = { Text(if (value != null) {
+				stringResource(R.string.config_delete_dialog_message, value)
+			} else {
+				stringResource(R.string.config_delete_dialog_message_completed)
+			}) },
             confirmButton = {
                 TextButton(
                     onClick = {
-                        MinecraftRelay.configManager.deleteConfig(value)
-                        target.value = null
-                        callback()
+						if (value != null) {
+							MinecraftRelay.configManager.deleteConfig(value)
+							target.value = null
+							callback()
+						}
                     }
                 ) {
                     Text(stringResource(R.string.dialog_confirm))

@@ -1,6 +1,8 @@
 package dev.sora.protohax.ui.components.screen
 
 import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -45,6 +47,7 @@ import dev.sora.protohax.util.isValidRemark
 import dev.sora.protohax.util.suggestRemark
 import dev.sora.relay.session.listener.xbox.XboxDeviceInfo
 
+@OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun AccountsScreen(navigationType: NavigationType) {
     val list = remember { AccountManager.accounts.toMutableStateList() }
@@ -83,71 +86,73 @@ fun AccountsScreen(navigationType: NavigationType) {
             contentPadding = innerPadding,
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            items(list) {
-                val expanded = remember { mutableStateOf(false) }
-                dev.sora.protohax.ui.components.ListItem(
-                    title = it.remark,
-                    description = {
-                        Row {
-                            Text(text = it.platform.deviceType, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                            if (it == AccountManager.currentAccount) {
-                                Text(
-                                    stringResource(R.string.account_selected),
-                                    modifier = Modifier.padding(6.dp, 0.dp),
-                                    color = MaterialTheme.colorScheme.primary,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            }
-                        }
-                    },
-                    onClick = {
-                        if (it == AccountManager.currentAccount) {
-                            AccountManager.currentAccount = null
-                        } else {
-                            AccountManager.currentAccount = it
-                        }
-                        refreshList()
-                    },
-                    expanded = expanded
-                ) {
-                    if (it == AccountManager.currentAccount) {
-                        DropdownMenuItem(
-                            text = { Text(stringResource(R.string.config_deselect)) },
-                            onClick = {
-                                AccountManager.currentAccount = null
-                                refreshList()
-                                expanded.value = false
-                            },
-                            leadingIcon = { Icon(Icons.Outlined.CheckBoxOutlineBlank, contentDescription = null) }
-                        )
-                    } else {
-                        DropdownMenuItem(
-                            text = { Text(stringResource(R.string.account_select)) },
-                            onClick = {
-                                AccountManager.currentAccount = it
-                                refreshList()
-                                expanded.value = false
-                            },
-                            leadingIcon = { Icon(Icons.Outlined.CheckBox, contentDescription = null) }
-                        )
-                    }
-                    DropdownMenuItem(
-                        text = { Text(stringResource(R.string.config_rename)) },
-                        onClick = {
-                            dialogRename.value = it
-                            expanded.value = false
-                        },
-                        leadingIcon = { Icon(Icons.Outlined.Edit, contentDescription = null) }
-                    )
-                    DropdownMenuItem(
-                        text = { Text(stringResource(R.string.config_delete)) },
-                        onClick = {
-                            dialogDelete.value = it
-                            expanded.value = false
-                        },
-                        leadingIcon = { Icon(Icons.Outlined.Delete, contentDescription = null) }
-                    )
-                }
+            items(list, key = { it.remark }) {
+				Box(modifier = Modifier.animateItemPlacement()) {
+					val expanded = remember { mutableStateOf(false) }
+					dev.sora.protohax.ui.components.ListItem(
+						title = it.remark,
+						description = {
+							Row {
+								Text(text = it.platform.deviceType, color = MaterialTheme.colorScheme.onSurfaceVariant)
+								if (it == AccountManager.currentAccount) {
+									Text(
+										stringResource(R.string.account_selected),
+										modifier = Modifier.padding(6.dp, 0.dp),
+										color = MaterialTheme.colorScheme.primary,
+										fontWeight = FontWeight.Bold
+									)
+								}
+							}
+						},
+						onClick = {
+							if (it == AccountManager.currentAccount) {
+								AccountManager.currentAccount = null
+							} else {
+								AccountManager.currentAccount = it
+							}
+							refreshList()
+						},
+						expanded = expanded
+					) {
+						if (it == AccountManager.currentAccount) {
+							DropdownMenuItem(
+								text = { Text(stringResource(R.string.config_deselect)) },
+								onClick = {
+									AccountManager.currentAccount = null
+									refreshList()
+									expanded.value = false
+								},
+								leadingIcon = { Icon(Icons.Outlined.CheckBoxOutlineBlank, contentDescription = null) }
+							)
+						} else {
+							DropdownMenuItem(
+								text = { Text(stringResource(R.string.account_select)) },
+								onClick = {
+									AccountManager.currentAccount = it
+									refreshList()
+									expanded.value = false
+								},
+								leadingIcon = { Icon(Icons.Outlined.CheckBox, contentDescription = null) }
+							)
+						}
+						DropdownMenuItem(
+							text = { Text(stringResource(R.string.config_rename)) },
+							onClick = {
+								dialogRename.value = it
+								expanded.value = false
+							},
+							leadingIcon = { Icon(Icons.Outlined.Edit, contentDescription = null) }
+						)
+						DropdownMenuItem(
+							text = { Text(stringResource(R.string.config_delete)) },
+							onClick = {
+								dialogDelete.value = it
+								expanded.value = false
+							},
+							leadingIcon = { Icon(Icons.Outlined.Delete, contentDescription = null) }
+						)
+					}
+				}
             }
         }
     }
@@ -185,15 +190,17 @@ private fun MenuCreate(state: MutableState<Boolean>, callback: () -> Unit) {
 @Composable
 private fun DialogRename(target: MutableState<Account?>, callback: () -> Unit) {
     val value = target.value
-    if (value != null) {
+	AnimatedVisibility(
+		visible = value != null,
+	) {
 		val name: MutableState<String?> = remember { mutableStateOf(null) }
 		if (name.value == null) {
-			name.value = value.remark
+			name.value = value?.remark
 		}
 
-        AlertDialog(
-            onDismissRequest = { target.value = null },
-            title = { Text(stringResource(R.string.config_rename_dialog_message)) },
+		AlertDialog(
+			onDismissRequest = { target.value = null },
+			title = { Text(stringResource(R.string.config_rename_dialog_message)) },
 			text = {
 				TextField(
 					value = name.value ?: "",
@@ -205,40 +212,47 @@ private fun DialogRename(target: MutableState<Account?>, callback: () -> Unit) {
 					}
 				)
 			},
-            confirmButton = {
-                TextButton(
+			confirmButton = {
+				TextButton(
 					enabled = isValidRemark(AccountManager.accounts.map { it.remark }, name.value ?: ""),
-                    onClick = {
-						value.remark = name.value ?: ""
+					onClick = {
+						value?.remark = name.value ?: ""
 						AccountManager.save()
 						target.value = null
 						name.value = null
 
 						callback()
-                    }
-                ) {
-                    Text(stringResource(R.string.dialog_confirm))
-                }
-            },
-            dismissButton = {
-                TextButton(
-                    onClick = { target.value = null }
-                ) {
-                    Text(stringResource(R.string.dialog_cancel))
-                }
-            }
-        )
-    }
+					}
+				) {
+					Text(stringResource(R.string.dialog_confirm))
+				}
+			},
+			dismissButton = {
+				TextButton(
+					onClick = { target.value = null }
+				) {
+					Text(stringResource(R.string.dialog_cancel))
+				}
+			}
+		)
+	}
 }
 
 @Composable
 private fun DialogDelete(target: MutableState<Account?>, callback: () -> Unit) {
     val value = target.value
-    if (value != null) {
+
+	AnimatedVisibility(
+		visible = value != null,
+	) {
         AlertDialog(
             onDismissRequest = { target.value = null },
             title = { Text(stringResource(R.string.dialog_title)) },
-            text = { Text(stringResource(R.string.account_delete_dialog_message, value.remark)) },
+            text = { Text(if (value != null) {
+				stringResource(R.string.account_delete_dialog_message, value.remark)
+			} else {
+				stringResource(R.string.account_delete_dialog_message_complete)
+			}) },
             confirmButton = {
                 TextButton(
                     onClick = {
