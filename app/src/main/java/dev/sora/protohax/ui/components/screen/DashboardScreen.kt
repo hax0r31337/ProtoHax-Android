@@ -9,7 +9,6 @@ import androidx.activity.compose.ManagedActivityResultLauncher
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.ActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -238,9 +237,7 @@ private fun MenuDashboard(state: MutableState<Boolean>, aboutState: MutableState
 
 @Composable
 private fun DialogAbout(state: MutableState<Boolean>) {
-    AnimatedVisibility(
-		visible = state.value
-	) {
+    if (state.value) {
         AlertDialog(
             icon = { AppIcon() },
             onDismissRequest = { state.value = false },

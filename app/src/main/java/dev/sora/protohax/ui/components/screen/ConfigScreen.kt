@@ -3,7 +3,6 @@ package dev.sora.protohax.ui.components.screen
 import android.content.Intent
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -160,9 +159,7 @@ fun ConfigScreen(navigationType: NavigationType) {
 
 @Composable
 private fun DialogCreate(target: MutableState<Boolean>, callback: () -> Unit) {
-	AnimatedVisibility(
-		visible = target.value,
-	) {
+	if (target.value) {
 		val name = remember { mutableStateOf("") }
 		if (name.value.isEmpty()) {
 			name.value = suggestRemark()
@@ -211,9 +208,7 @@ private fun DialogCreate(target: MutableState<Boolean>, callback: () -> Unit) {
 private fun DialogRenameCopy(target: MutableState<String?>, copy: Boolean, callback: () -> Unit) {
     val value = target.value
 
-	AnimatedVisibility(
-		visible = value != null,
-	) {
+	if (value != null) {
 		val name: MutableState<String?> = remember { mutableStateOf(null) }
 		if (name.value == null) {
 			name.value = value
@@ -237,17 +232,15 @@ private fun DialogRenameCopy(target: MutableState<String?>, copy: Boolean, callb
                 TextButton(
 					enabled = isValidRemark(MinecraftRelay.configManager.listConfig(), name.value ?: ""),
                     onClick = {
-						if (value != null) {
-							if (copy) {
-								MinecraftRelay.configManager.copyConfig(value, name.value ?: "")
-							} else {
-								MinecraftRelay.configManager.renameConfig(value, name.value ?: "")
-							}
-							target.value = null
-							name.value = null
-							callback()
+						if (copy) {
+							MinecraftRelay.configManager.copyConfig(value, name.value ?: "")
+						} else {
+							MinecraftRelay.configManager.renameConfig(value, name.value ?: "")
 						}
-                    }
+						target.value = null
+						name.value = null
+						callback()
+					}
                 ) {
                     Text(stringResource(R.string.dialog_confirm))
                 }
@@ -267,26 +260,18 @@ private fun DialogRenameCopy(target: MutableState<String?>, copy: Boolean, callb
 private fun DialogDelete(target: MutableState<String?>, callback: () -> Unit) {
 	val value = target.value
 
-	AnimatedVisibility(
-		visible = value != null,
-	) {
+	if (value != null) {
         AlertDialog(
             onDismissRequest = { target.value = null },
             title = { Text(stringResource(R.string.dialog_title)) },
-            text = { Text(if (value != null) {
-				stringResource(R.string.config_delete_dialog_message, value)
-			} else {
-				stringResource(R.string.config_delete_dialog_message_completed)
-			}) },
+            text = { Text(stringResource(R.string.config_delete_dialog_message, value)) },
             confirmButton = {
                 TextButton(
                     onClick = {
-						if (value != null) {
-							MinecraftRelay.configManager.deleteConfig(value)
-							target.value = null
-							callback()
-						}
-                    }
+						MinecraftRelay.configManager.deleteConfig(value)
+						target.value = null
+						callback()
+					}
                 ) {
                     Text(stringResource(R.string.dialog_confirm))
                 }

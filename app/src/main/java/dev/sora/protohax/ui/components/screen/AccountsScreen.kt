@@ -1,7 +1,6 @@
 package dev.sora.protohax.ui.components.screen
 
 import androidx.activity.compose.rememberLauncherForActivityResult
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -189,13 +188,11 @@ private fun MenuCreate(state: MutableState<Boolean>, callback: () -> Unit) {
 
 @Composable
 private fun DialogRename(target: MutableState<Account?>, callback: () -> Unit) {
-    val value = target.value
-	AnimatedVisibility(
-		visible = value != null,
-	) {
+	val value = target.value
+	if (value != null) {
 		val name: MutableState<String?> = remember { mutableStateOf(null) }
 		if (name.value == null) {
-			name.value = value?.remark
+			name.value = value.remark
 		}
 
 		AlertDialog(
@@ -216,7 +213,7 @@ private fun DialogRename(target: MutableState<Account?>, callback: () -> Unit) {
 				TextButton(
 					enabled = isValidRemark(AccountManager.accounts.map { it.remark }, name.value ?: ""),
 					onClick = {
-						value?.remark = name.value ?: ""
+						value.remark = name.value ?: ""
 						AccountManager.save()
 						target.value = null
 						name.value = null
@@ -242,17 +239,11 @@ private fun DialogRename(target: MutableState<Account?>, callback: () -> Unit) {
 private fun DialogDelete(target: MutableState<Account?>, callback: () -> Unit) {
     val value = target.value
 
-	AnimatedVisibility(
-		visible = value != null,
-	) {
+	if (value != null) {
         AlertDialog(
             onDismissRequest = { target.value = null },
             title = { Text(stringResource(R.string.dialog_title)) },
-            text = { Text(if (value != null) {
-				stringResource(R.string.account_delete_dialog_message, value.remark)
-			} else {
-				stringResource(R.string.account_delete_dialog_message_complete)
-			}) },
+            text = { Text(stringResource(R.string.account_delete_dialog_message, value.remark)) },
             confirmButton = {
                 TextButton(
                     onClick = {
