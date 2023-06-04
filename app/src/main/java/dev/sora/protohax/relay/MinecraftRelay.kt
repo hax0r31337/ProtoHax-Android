@@ -95,7 +95,6 @@ object MinecraftRelay {
 				return address
             }
         })
-		updateReliability()
     }
 
 	fun updateReliability() {
@@ -106,6 +105,7 @@ object MinecraftRelay {
 	fun announceRelayUp() {
 		if (relay == null) {
 			relay = constructRelay()
+			updateReliability()
 		}
 		loaderThread?.join()
 		if (!relay!!.isRunning) {
