@@ -47,9 +47,7 @@
 
         <service android:name="dev.sora.protohax.relay.service.AppService"
             android:permission="android.permission.BIND_VPN_SERVICE"
-            android:foregroundServiceType="specialUse"
             android:exported="false">
-            <property android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE" android:value="VPN" />
             <intent-filter>
                 <action android:name="android.net.VpnService" />
                 <action android:name="dev.sora.libmitm.vpn.start"/>

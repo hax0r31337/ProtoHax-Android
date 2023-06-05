@@ -1,14 +1,12 @@
-package dev.sora.protohax.relay.gui
+package dev.sora.protohax.ui.overlay
 
 import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.PixelFormat
-import android.graphics.Point
 import android.graphics.drawable.GradientDrawable
 import android.net.VpnService
-import android.os.Build
 import android.view.*
 import android.widget.ImageView
 import android.widget.LinearLayout
@@ -18,70 +16,18 @@ import androidx.core.content.res.ResourcesCompat
 import dev.sora.protohax.MyApplication
 import dev.sora.protohax.R
 import dev.sora.protohax.relay.MinecraftRelay
+import dev.sora.protohax.relay.gui.SelectionMenu
 import dev.sora.protohax.relay.service.ServiceListener
 import dev.sora.relay.cheat.module.CheatModule
 import kotlin.math.abs
 
-class PopupWindow(private val ctx: Context) : ServiceListener {
+class LayoutWindow(private val ctx: Context) : ServiceListener {
 
-	private var layoutView: View? = null
+	private var entranceView: View? = null
 	private var renderLayerView: View? = null
 
-	private var menuLayout: View? = null
-	private val menu = SelectionMenu(this)
+	private val menu = ConfigureMenu(this)
 	private val shortcuts = mutableMapOf<CheatModule, View>()
-
-	val screenSize = Point()
-
-	fun toggle(wm: WindowManager, ctx: Context) {
-		if (menuLayout == null) {
-			display(wm, ctx)
-		} else {
-			destroy(wm)
-		}
-	}
-
-	fun destroy(wm: WindowManager) {
-		if (menuLayout == null) return
-		wm.removeView(menuLayout)
-		menuLayout = null
-	}
-
-	private fun getScreenSize(wm: WindowManager): Point {
-		return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-			wm.maximumWindowMetrics.bounds.let {
-				Point(it.width(), it.height())
-			}
-		} else {
-			val point = Point()
-			wm.defaultDisplay.getRealSize(point)
-			point
-		}
-	}
-
-	fun display(wm: WindowManager, ctx: Context) {
-		if (menuLayout != null) return
-
-		getScreenSize(wm).also { screenSize.set(it.x, it.y) }
-
-		val layout = LinearLayout(ctx).apply {
-			orientation = LinearLayout.VERTICAL
-		}
-		menu.apply(ctx, layout, wm)
-
-		val params = WindowManager.LayoutParams(
-			WindowManager.LayoutParams.WRAP_CONTENT,
-			WindowManager.LayoutParams.WRAP_CONTENT,
-			WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-			WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
-			PixelFormat.TRANSLUCENT
-		)
-		params.gravity = Gravity.TOP or Gravity.END
-		params.x = 0   // Initial Position of window
-		params.y = 0 // Initial Position of window
-		wm.addView(layout, params)
-		this.menuLayout = layout
-	}
 
 	private fun View.draggable(params: WindowManager.LayoutParams, windowManager: WindowManager) {
 		var dragPosX = 0f
@@ -128,7 +74,7 @@ class PopupWindow(private val ctx: Context) : ServiceListener {
 
 	@SuppressLint("ClickableViewAccessibility")
 	override fun onServiceStarted() {
-		val windowManager = MyApplication.instance.getSystemService(VpnService.WINDOW_SERVICE) as WindowManager
+		val wm = MyApplication.instance.getSystemService(VpnService.WINDOW_SERVICE) as WindowManager
 		val params = WindowManager.LayoutParams(
 			WindowManager.LayoutParams.WRAP_CONTENT,
 			WindowManager.LayoutParams.WRAP_CONTENT,
@@ -155,15 +101,19 @@ class PopupWindow(private val ctx: Context) : ServiceListener {
 			imageView.setImageBitmap(bitmap)
 		} ?: imageView.setImageResource(R.drawable.notification_icon)
 		imageView.setOnClickListener {
-			toggle(windowManager, ctx)
+			if (!menu.hasDisplay) {
+				menu.display(wm, ctx)
+			} else {
+				menu.destroy(wm)
+			}
 		}
 
-		imageView.draggable(params, windowManager)
+		imageView.draggable(params, wm)
 
-		this.layoutView = imageView
-		windowManager.addView(imageView, params)
+		this.entranceView = imageView
+		wm.addView(imageView, params)
 
-		startRenderLayer(windowManager)
+		startRenderLayer(wm)
 
 		val shortcutList = shortcuts.keys.map { it }
 		shortcuts.clear()
@@ -185,7 +135,8 @@ class PopupWindow(private val ctx: Context) : ServiceListener {
 		params.alpha = 0.8f
 		params.gravity = Gravity.TOP or Gravity.END
 		val layout = RelativeLayout(ctx)
-		layout.addView(RenderLayerView(ctx, MinecraftRelay.session),
+		layout.addView(
+			RenderLayerView(ctx, MinecraftRelay.session),
 			ViewGroup.LayoutParams(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT))
 
 		renderLayerView = layout
@@ -193,14 +144,14 @@ class PopupWindow(private val ctx: Context) : ServiceListener {
 	}
 
 	override fun onServiceStopped() {
-		val windowManager = MyApplication.instance.getSystemService(VpnService.WINDOW_SERVICE) as WindowManager
-		layoutView?.let { windowManager.removeView(it) }
-		layoutView = null
-		renderLayerView?.let { windowManager.removeView(it) }
+		val wm = MyApplication.instance.getSystemService(VpnService.WINDOW_SERVICE) as WindowManager
+		entranceView?.let { wm.removeView(it) }
+		entranceView = null
+		renderLayerView?.let { wm.removeView(it) }
 		renderLayerView = null
-		destroy(windowManager)
+		menu.destroy(wm)
 		shortcuts.values.forEach {
-			windowManager.removeView(it)
+			wm.removeView(it)
 		}
 	}
 
