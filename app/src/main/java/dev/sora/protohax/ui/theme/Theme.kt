@@ -18,13 +18,12 @@ import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 @Composable
 fun MyApplicationTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
-    // Dynamic color is available on Android 12+
-    dynamicColor: Boolean = true,
+	isActivity: Boolean = true,
     content: @Composable () -> Unit
 ) {
+	val darkTheme = isSystemInDarkTheme()
     val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
+        Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
             val context = LocalContext.current
             if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
         }
@@ -32,7 +31,7 @@ fun MyApplicationTheme(
         else -> lightColorScheme()
     }
     val view = LocalView.current
-    if (!view.isInEditMode) {
+    if (isActivity && !view.isInEditMode) {
         rememberSystemUiController().setSystemBarsColor(Color.Transparent)
         if (view.context is Activity) {
             SideEffect {
@@ -44,7 +43,6 @@ fun MyApplicationTheme(
 
     MaterialTheme(
         colorScheme = colorScheme,
-        typography = Typography,
         content = content
     )
 }

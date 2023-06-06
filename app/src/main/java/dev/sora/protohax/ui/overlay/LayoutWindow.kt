@@ -101,11 +101,7 @@ class LayoutWindow(private val ctx: Context) : ServiceListener {
 			imageView.setImageBitmap(bitmap)
 		} ?: imageView.setImageResource(R.drawable.notification_icon)
 		imageView.setOnClickListener {
-			if (!menu.hasDisplay) {
-				menu.display(wm, ctx)
-			} else {
-				menu.destroy(wm)
-			}
+			menu.visibility = !menu.visibility
 		}
 
 		imageView.draggable(params, wm)
@@ -114,6 +110,8 @@ class LayoutWindow(private val ctx: Context) : ServiceListener {
 		wm.addView(imageView, params)
 
 		startRenderLayer(wm)
+		menu.visibility = false
+		menu.display(wm, ctx)
 
 		val shortcutList = shortcuts.keys.map { it }
 		shortcuts.clear()

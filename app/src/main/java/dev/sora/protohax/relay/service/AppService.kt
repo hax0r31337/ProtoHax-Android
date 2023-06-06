@@ -14,9 +14,9 @@ import android.view.WindowManager
 import androidx.core.app.NotificationCompat
 import dev.sora.protohax.R
 import dev.sora.protohax.relay.MinecraftRelay
-import dev.sora.protohax.ui.overlay.LayoutWindow
 import dev.sora.protohax.ui.activities.MainActivity
 import dev.sora.protohax.ui.components.screen.settings.Settings
+import dev.sora.protohax.ui.overlay.LayoutWindow
 import dev.sora.protohax.util.ContextUtils.getApplicationName
 import dev.sora.relay.utils.logError
 import dev.sora.relay.utils.logInfo
