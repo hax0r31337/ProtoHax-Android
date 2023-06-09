@@ -1,5 +1,7 @@
 package dev.sora.protohax.ui.activities
 
+import android.content.pm.PackageManager
+import android.os.Build
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
@@ -7,6 +9,7 @@ import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSiz
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.core.view.WindowCompat
 import com.google.accompanist.adaptive.calculateDisplayFeatures
+import android.Manifest
 import dev.sora.protohax.MyApplication
 import dev.sora.protohax.ui.components.PHaxApp
 import dev.sora.protohax.ui.theme.MyApplicationTheme
@@ -33,6 +36,12 @@ class MainActivity : ComponentActivity() {
                 )
             }
         }
+
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+			if (checkSelfPermission(Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+				requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 0)
+			}
+		}
     }
 
     companion object {

@@ -8,6 +8,7 @@
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"
         tools:ignore="QueryAllPackagesPermission" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS"/>
 
     <application
         android:allowBackup="true"
@@ -19,7 +20,7 @@
         android:name="dev.sora.protohax.MyApplication"
         android:theme="@style/Theme.ProtoHax"
         android:enableOnBackInvokedCallback="true"
-        tools:targetApi="33">
+        tools:targetApi="34">
 
         <activity
             android:name="dev.sora.protohax.ui.activities.MainActivity"
