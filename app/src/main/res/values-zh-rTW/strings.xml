@@ -3,7 +3,7 @@
     <string name="mitm_connected_launch">啟動應用程式</string>
     <string name="mitm_disconnected">已從 MITM 代理斷開連接</string>
     <string name="request_overlay">我們需要遮罩權限，以便在遊戲中顯示可以與其互動的 GUI</string>
-    <string name="proxy_notification">%s 正在處理 %s 的封包</string>
+    <string name="proxy_notification">%1$s 正在處理 %2$s 的封包</string>
 
     <string name="clickgui_modules">模塊</string>
     <string name="clickgui_modules_back">返回</string>
@@ -14,7 +14,7 @@
     <string name="dashboard_more">更多</string>
     <string name="dashboard_about">關於</string>
     <string name="dashboard_no_account_selected">請登錄 Microsoft 帳戶以連接 Xbox 認證伺服器</string>
-    <string name="dashboard_about_info">根据 %s 的许可证\n在 %s 上查看我们的原始碼\n加入我们的 %s</string>
+    <string name="dashboard_about_info">根据 %1$s 的许可证\n在 %2$s 上查看我们的原始碼\n加入我们的 %3$s</string>
     <string name="dashboard_select_application">選擇應用程式</string>
     <string name="dashboard_select_application_placeholder">選擇應用程式</string>
     <string name="dashboard_selected_application">已選擇的應用程式</string>
@@ -49,6 +49,10 @@
     <string name="setting_rak_reliability_desc">關閉以禁用RakNet的隊頭阻塞，會導致數據包混亂，但會提高延遲</string>
     <string name="setting_restart_required">需要重新啟動才能生效</string>
     <string name="setting_restart_required_action">重新啟動</string>
+    <string name="setting_ip_auto">自動</string>
+    <string name="setting_ip_enabled">已啟用</string>
+    <string name="setting_ip_disabled">已停用</string>
+    <string name="setting_ip_only">僅IPv6</string>
     <string name="setting_logs">日誌</string>
     <string name="setting_logs_desc">顯示日誌</string>
 

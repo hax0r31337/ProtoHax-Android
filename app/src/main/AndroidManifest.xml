@@ -7,6 +7,7 @@
     <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES"
         tools:ignore="QueryAllPackagesPermission" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
 
     <application
         android:allowBackup="true"
@@ -17,6 +18,7 @@
         android:supportsRtl="true"
         android:name="dev.sora.protohax.MyApplication"
         android:theme="@style/Theme.ProtoHax"
+        android:enableOnBackInvokedCallback="true"
         tools:targetApi="33">
 
         <activity
@@ -54,6 +56,7 @@
                 <action android:name="android.net.VpnService" />
                 <action android:name="dev.sora.libmitm.vpn.start"/>
                 <action android:name="dev.sora.libmitm.vpn.stop"/>
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </service>
 
