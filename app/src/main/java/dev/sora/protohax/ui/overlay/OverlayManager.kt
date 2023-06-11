@@ -1,27 +1,32 @@
 package dev.sora.protohax.ui.overlay
 
 import android.annotation.SuppressLint
+import android.app.Service
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.PixelFormat
 import android.graphics.drawable.GradientDrawable
+import android.hardware.input.InputManager
 import android.net.VpnService
+import android.os.Build
 import android.view.*
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.RelativeLayout
 import android.widget.TextView
 import androidx.core.content.res.ResourcesCompat
+import androidx.core.view.isInvisible
 import dev.sora.protohax.MyApplication
 import dev.sora.protohax.R
 import dev.sora.protohax.relay.MinecraftRelay
 import dev.sora.protohax.relay.gui.SelectionMenu
 import dev.sora.protohax.relay.service.ServiceListener
+import dev.sora.protohax.ui.components.screen.settings.Settings
 import dev.sora.relay.cheat.module.CheatModule
 import kotlin.math.abs
 
-class LayoutWindow(private val ctx: Context) : ServiceListener {
+class OverlayManager(val ctx: Context) : ServiceListener {
 
 	private var entranceView: View? = null
 	private var renderLayerView: View? = null
@@ -129,8 +134,9 @@ class LayoutWindow(private val ctx: Context) : ServiceListener {
 			PixelFormat.TRANSLUCENT
 		)
 		// this will fix https://developer.android.com/about/versions/12/behavior-changes-all#untrusted-touch-events
-		params.dimAmount = 0.8f
-		params.alpha = 0.8f
+		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !Settings.trustClicks.getValue(ctx)) {
+			params.alpha = (ctx.getSystemService(Service.INPUT_SERVICE) as? InputManager)?.maximumObscuringOpacityForTouch ?: 0.8f
+		}
 		params.gravity = Gravity.TOP or Gravity.END
 		val layout = RelativeLayout(ctx)
 		layout.addView(
@@ -139,6 +145,13 @@ class LayoutWindow(private val ctx: Context) : ServiceListener {
 
 		renderLayerView = layout
 		windowManager.addView(layout, params)
+	}
+
+	fun toggleRenderLayerViewVisibility(state: Boolean) {
+		val view = renderLayerView ?: return
+		if (state != !view.isInvisible) { // value changed
+			view.isInvisible = !state
+		}
 	}
 
 	override fun onServiceStopped() {

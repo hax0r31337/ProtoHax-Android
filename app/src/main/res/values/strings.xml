@@ -56,6 +56,9 @@
     <string name="setting_ip_enabled">Enabled</string>
     <string name="setting_ip_disabled">Disabled</string>
     <string name="setting_ip_only">IPv6 Only</string>
+    <string name="setting_trust_click">Trust clicks</string>
+    <string name="setting_trust_click_desc">Execute `adb shell settings put global block_untrusted_touches 0` to trust clicks through overlay</string>
+    <string name="setting_trust_click_disabled">All of clicks are trusted below Android 12</string>
     <string name="setting_logs">Logs</string>
     <string name="setting_logs_desc">Show Logs</string>
 

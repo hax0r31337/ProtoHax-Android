@@ -4,6 +4,7 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.PixelFormat
 import android.view.Gravity
+import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
 import androidx.compose.animation.AnimatedVisibility
@@ -12,26 +13,39 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.Recomposer
 import androidx.compose.runtime.State
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.AndroidUiDispatcher
 import androidx.compose.ui.platform.ComposeView
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.compositionContext
+import androidx.compose.ui.unit.dp
+import androidx.core.view.isInvisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.setViewTreeLifecycleOwner
 import androidx.lifecycle.setViewTreeViewModelStoreOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
+import dev.sora.protohax.ui.components.screen.settings.Settings
 import dev.sora.protohax.ui.theme.MyApplicationTheme
 import dev.sora.relay.utils.logInfo
 import kotlinx.coroutines.CoroutineScope
@@ -40,7 +54,7 @@ import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.launch
 
-class ConfigureMenu(private val layoutWindow: LayoutWindow) {
+class ConfigureMenu(private val overlayManager: OverlayManager) {
 
 	val hasDisplay: Boolean
 		get() = menuLayout != null
@@ -77,7 +91,7 @@ class ConfigureMenu(private val layoutWindow: LayoutWindow) {
 	@SuppressLint("ClickableViewAccessibility")
 	fun display(wm: WindowManager, ctx: Context) {
 		val params = WindowManager.LayoutParams(
-			WindowManager.LayoutParams.WRAP_CONTENT,
+			WindowManager.LayoutParams.MATCH_PARENT,
 			WindowManager.LayoutParams.WRAP_CONTENT,
 			WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
 			WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH,
@@ -92,13 +106,27 @@ class ConfigureMenu(private val layoutWindow: LayoutWindow) {
 			MyApplicationTheme(
 				isActivity = false
 			) {
-				val displayState = displayState()
+				val displayState = displayState(wm, params)
+
+				// states to remember
+				val state = remember { mutableStateOf(false) }
+
 				AnimatedVisibility(
 					visible = displayState.value,
 					enter = fadeIn() + scaleIn(initialScale = 0.5f),
 					exit = fadeOut() + scaleOut(targetScale = 0.5f)
 				) {
-					Content()
+					val configuration = LocalConfiguration.current
+
+					// rotate the menu due to the menu doesn't look well on portrait orientation
+					Box(
+						modifier = Modifier
+							.height((configuration.screenHeightDp * 0.8).toInt().dp)
+							.clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { visibility = false },
+						contentAlignment = Alignment.Center
+					) {
+						Content(state)
+					}
 				}
 			}
 		}
@@ -118,12 +146,12 @@ class ConfigureMenu(private val layoutWindow: LayoutWindow) {
 			}
 			firstRun = false
 		}
-//		composeView.setOnTouchListener { _, event ->
-//			if (event.action == MotionEvent.ACTION_OUTSIDE) {
-//				visibility = false
-//			}
-//			false
-//		}
+		composeView.setOnTouchListener { _, event ->
+			if (event.action == MotionEvent.ACTION_OUTSIDE) {
+				visibility = false
+			}
+			false
+		}
 
 		wm.addView(composeView, params)
 		menuLayout = composeView
@@ -136,12 +164,18 @@ class ConfigureMenu(private val layoutWindow: LayoutWindow) {
 	}
 
 	@Composable
-	private fun Content() {
-		Card(colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.onPrimary)) {
+	private fun Content(state: MutableState<Boolean>) {
+		Card(
+			colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.onPrimary),
+			modifier = Modifier
+				.fillMaxHeight()
+				.fillMaxWidth(0.8f)
+				.clickable(false) {}
+		) {
 			Text(text = "pad1")
 			Card {
 				Text(text = "pad2")
-				val state = remember { mutableStateOf(false) }
+				logInfo("state: ${state.value}")
 				Button(onClick = { state.value = !state.value }) {
 					Text(text = "${state.value}")
 				}
@@ -151,21 +185,34 @@ class ConfigureMenu(private val layoutWindow: LayoutWindow) {
 
 	@ExperimentalCoroutinesApi
 	@Composable
-	private fun displayState(): State<Boolean> {
+	private fun displayState(wm: WindowManager, params: WindowManager.LayoutParams): State<Boolean> {
 		// Creates a State<ConnectionState> with current connectivity state as initial value
 		return produceState(initialValue = visibility) {
 			// In a coroutine, can make suspend calls
-			observeConnectionAsFlow().collect {
-				value = it
-				logInfo("collect $value")
+			observeStateAsFlow().collect {
+				if (value != it) {
+					value = it
+					menuLayout?.let { l ->
+						if (Settings.trustClicks.getValue(overlayManager.ctx)) {
+							if (it) {
+								params.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
+							} else {
+								params.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
+							}
+							wm.updateViewLayout(l, params)
+						} else {
+							l.isInvisible = !it
+						}
+					}
+					overlayManager.toggleRenderLayerViewVisibility(!it)
+				}
 			}
 		}
 	}
 
 	@ExperimentalCoroutinesApi
-	private fun observeConnectionAsFlow() = callbackFlow {
+	private fun observeStateAsFlow() = callbackFlow {
 		val listener: (Boolean) -> Unit = {
-			logInfo("$it")
 			trySend(it)
 		}
 		listeners.add(listener)
