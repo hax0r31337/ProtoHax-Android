@@ -23,6 +23,7 @@ import dev.sora.protohax.relay.MinecraftRelay
 import dev.sora.protohax.relay.gui.SelectionMenu
 import dev.sora.protohax.relay.service.ServiceListener
 import dev.sora.protohax.ui.components.screen.settings.Settings
+import dev.sora.protohax.ui.overlay.menu.ConfigureMenu
 import dev.sora.relay.cheat.module.CheatModule
 import kotlin.math.abs
 

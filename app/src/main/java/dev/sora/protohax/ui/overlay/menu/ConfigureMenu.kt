@@ -1,4 +1,4 @@
-package dev.sora.protohax.ui.overlay
+package dev.sora.protohax.ui.overlay.menu
 
 import android.annotation.SuppressLint
 import android.content.Context
@@ -16,21 +16,16 @@ import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Code
-import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Feed
 import androidx.compose.material.icons.filled.Note
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material3.Button
+import androidx.compose.material.icons.outlined.Feed
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -40,15 +35,13 @@ import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.NavigationRailItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.Recomposer
 import androidx.compose.runtime.State
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.platform.AndroidUiDispatcher
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalConfiguration
@@ -62,12 +55,24 @@ import androidx.lifecycle.ViewModelStore
 import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.setViewTreeLifecycleOwner
 import androidx.lifecycle.setViewTreeViewModelStoreOwner
+import androidx.navigation.NavGraph
+import androidx.navigation.NavGraph.Companion.findStartDestination
+import androidx.navigation.NavHostController
+import androidx.navigation.compose.currentBackStackEntryAsState
+import androidx.navigation.createGraph
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
+import com.google.accompanist.navigation.animation.AnimatedNavHost
+import com.google.accompanist.navigation.animation.composable
+import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import dev.sora.protohax.R
 import dev.sora.protohax.ui.components.screen.settings.Settings
+import dev.sora.protohax.ui.navigation.PHaxRoute
+import dev.sora.protohax.ui.overlay.MyLifecycleOwner
+import dev.sora.protohax.ui.overlay.OverlayManager
+import dev.sora.protohax.ui.overlay.menu.tabs.CheatCategoryTab
+import dev.sora.protohax.ui.overlay.menu.tabs.ConfigTab
 import dev.sora.protohax.ui.theme.MyApplicationTheme
 import dev.sora.relay.cheat.module.CheatCategory
-import dev.sora.relay.utils.logInfo
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
@@ -129,7 +134,24 @@ class ConfigureMenu(private val overlayManager: OverlayManager) {
 				val displayState = displayState(wm, params)
 
 				// states to remember
-				val selectedItem = remember { mutableStateOf(0) }
+				val navController = rememberAnimatedNavController()
+				val navGraph = remember {
+					val categories = CheatCategory.values()
+					navController.createGraph(categories[0].choiceName) {
+						composable(PHaxRoute.CONFIG) {
+							Box(modifier = Modifier.fillMaxSize()) {
+								ConfigTab()
+							}
+						}
+						categories.forEach { category ->
+							composable(category.choiceName) {
+								Box(modifier = Modifier.fillMaxSize()) {
+									CheatCategoryTab(category)
+								}
+							}
+						}
+					}
+				}
 
 				AnimatedVisibility(
 					visible = displayState.value,
@@ -148,7 +170,7 @@ class ConfigureMenu(private val overlayManager: OverlayManager) {
 							) { visibility = false },
 						contentAlignment = Alignment.Center
 					) {
-						Content(selectedItem)
+						Content(navController, navGraph)
 					}
 				}
 			}
@@ -186,8 +208,25 @@ class ConfigureMenu(private val overlayManager: OverlayManager) {
 		menuLayout = null
 	}
 
+	private fun NavHostController.safeNavigate(dst: String) {
+		navigate(dst) {
+			// Pop up to the start destination of the graph to
+			// avoid building up a large stack of destinations
+			// on the back stack as users select items
+			popUpTo(graph.findStartDestination().id) {
+				saveState = true
+			}
+			// Avoid multiple copies of the same destination when
+			// reselecting the same item
+			launchSingleTop = true
+			// Restore state when reselecting a previously selected item
+			restoreState = true
+		}
+	}
+
+	@OptIn(ExperimentalAnimationApi::class)
 	@Composable
-	private fun Content(selectedItem: MutableState<Int>) {
+	private fun Content(navController: NavHostController, navGraph: NavGraph) {
 		Card(
 			colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
 			modifier = Modifier
@@ -199,29 +238,36 @@ class ConfigureMenu(private val overlayManager: OverlayManager) {
 				val categories = CheatCategory.values()
 				val icons = mapOf(CheatCategory.COMBAT to painterResource(id = R.drawable.mdi_swords), CheatCategory.MOVEMENT to painterResource(id = R.drawable.mdi_sprint),
 					CheatCategory.VISUAL to painterResource(id = R.drawable.mdi_view_in_ar), CheatCategory.MISC to painterResource(id = R.drawable.mdi_list_alt))
+
+				val navBackStackEntry by navController.currentBackStackEntryAsState()
+				val selectedDestination = navBackStackEntry?.destination?.route ?: categories[0].choiceName
+
 				NavigationRail(containerColor = MaterialTheme.colorScheme.primaryContainer, modifier = Modifier.fillMaxHeight()) {
 					Spacer(Modifier.weight(1f))
-					categories.forEachIndexed { index, item ->
+					categories.forEach { item ->
 						NavigationRailItem(
 							icon = { Icon(painter = icons[item]!!, contentDescription = item.choiceName) },
 							label = { Text(item.choiceName) },
-							selected = selectedItem.value == index,
-							onClick = { selectedItem.value = index },
+							selected = selectedDestination == item.choiceName,
+							onClick = { navController.safeNavigate(item.choiceName) },
 							colors = NavigationRailItemDefaults.colors(indicatorColor = MaterialTheme.colorScheme.primary, selectedIconColor = MaterialTheme.colorScheme.onPrimary)
 						)
 					}
 					NavigationRailItem(
-						icon = { Icon(Icons.Filled.Note, contentDescription = stringResource(id = R.string.clickgui_configs)) },
+						icon = { Icon(Icons.Outlined.Feed, contentDescription = stringResource(id = R.string.clickgui_configs)) },
 						label = { Text(stringResource(id = R.string.clickgui_configs)) },
-						selected = selectedItem.value == categories.size,
-						onClick = { selectedItem.value = categories.size },
+						selected = selectedDestination == PHaxRoute.CONFIG,
+						onClick = { navController.safeNavigate(PHaxRoute.CONFIG) },
 						colors = NavigationRailItemDefaults.colors(indicatorColor = MaterialTheme.colorScheme.primary, selectedIconColor = MaterialTheme.colorScheme.onPrimary)
 					)
 					Spacer(Modifier.weight(1f))
 				}
 
 				Card(modifier = Modifier.fillMaxSize()) {
-					Text(text = "pad2")
+					AnimatedNavHost(
+						navController = navController,
+						graph = navGraph
+					)
 				}
 			}
 		}

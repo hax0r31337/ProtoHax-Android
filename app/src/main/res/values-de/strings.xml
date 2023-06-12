@@ -5,11 +5,7 @@
     <string name="request_overlay">Wir benötigen Berechtigungen für Overlays, um GUIs anzuzeigen, mit denen Sie im Spiel interagieren können</string>
     <string name="proxy_notification">%s bearbeitet Pakete für %s</string>
 
-    <string name="clickgui_modules">Modul</string>
-    <string name="clickgui_modules_back">Zurück</string>
     <string name="clickgui_configs">Konfigurieren</string>
-    <string name="clickgui_configs_create">erstellen</string>
-    <string name="clickgui_configs_save">speichern</string>
 
     <string name="dashboard_more">Mehr</string>
     <string name="dashboard_about">Über</string>

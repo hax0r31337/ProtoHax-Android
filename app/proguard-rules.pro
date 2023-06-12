@@ -28,8 +28,8 @@
     @com.google.gson.annotations.SerializedName <fields>;
 }
 -keep class coelho.msftauth.** { *; }
--keep class dev.sora.** { *; }
--keep class org.cloudburstmc.** { *; }
+#-keep class dev.sora.** { *; }
+#-keep class org.cloudburstmc.** { *; }
 
 # disable R8 warning for missing classes
 -dontwarn **
