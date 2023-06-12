@@ -7,11 +7,7 @@
     <string name="request_overlay">We need overlay permission in order to display GUIs that you can interact in game</string>
     <string name="proxy_notification">%s is processing packets for %s</string>
 
-    <string name="clickgui_modules">Module</string>
-    <string name="clickgui_modules_back">Back</string>
     <string name="clickgui_configs">Config</string>
-    <string name="clickgui_configs_create">create</string>
-    <string name="clickgui_configs_save">save</string>
 
     <string name="dashboard_more">More</string>
     <string name="dashboard_about">About</string>

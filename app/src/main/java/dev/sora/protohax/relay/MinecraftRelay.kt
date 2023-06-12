@@ -10,7 +10,7 @@ import dev.sora.relay.cheat.command.CommandManager
 import dev.sora.relay.cheat.command.impl.CommandDownloadWorld
 import dev.sora.relay.cheat.config.ConfigManagerFileSystem
 import dev.sora.relay.cheat.module.ModuleManager
-import dev.sora.relay.cheat.module.impl.ModuleResourcePackSpoof
+import dev.sora.relay.cheat.module.impl.misc.ModuleResourcePackSpoof
 import dev.sora.relay.game.GameSession
 import dev.sora.relay.session.MinecraftRelaySession
 import dev.sora.relay.session.listener.RelayListenerAutoCodec

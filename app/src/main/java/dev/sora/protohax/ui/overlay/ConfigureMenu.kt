@@ -16,13 +16,28 @@ import androidx.compose.animation.scaleOut
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Code
+import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Note
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.NavigationRail
+import androidx.compose.material3.NavigationRailItem
+import androidx.compose.material3.NavigationRailItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.MutableState
@@ -33,10 +48,13 @@ import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.platform.AndroidUiDispatcher
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.compositionContext
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.view.isInvisible
 import androidx.lifecycle.Lifecycle
@@ -45,8 +63,10 @@ import androidx.lifecycle.ViewModelStoreOwner
 import androidx.lifecycle.setViewTreeLifecycleOwner
 import androidx.lifecycle.setViewTreeViewModelStoreOwner
 import androidx.savedstate.setViewTreeSavedStateRegistryOwner
+import dev.sora.protohax.R
 import dev.sora.protohax.ui.components.screen.settings.Settings
 import dev.sora.protohax.ui.theme.MyApplicationTheme
+import dev.sora.relay.cheat.module.CheatCategory
 import dev.sora.relay.utils.logInfo
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -109,7 +129,7 @@ class ConfigureMenu(private val overlayManager: OverlayManager) {
 				val displayState = displayState(wm, params)
 
 				// states to remember
-				val state = remember { mutableStateOf(false) }
+				val selectedItem = remember { mutableStateOf(0) }
 
 				AnimatedVisibility(
 					visible = displayState.value,
@@ -122,10 +142,13 @@ class ConfigureMenu(private val overlayManager: OverlayManager) {
 					Box(
 						modifier = Modifier
 							.height((configuration.screenHeightDp * 0.8).toInt().dp)
-							.clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { visibility = false },
+							.clickable(
+								interactionSource = remember { MutableInteractionSource() },
+								indication = null
+							) { visibility = false },
 						contentAlignment = Alignment.Center
 					) {
-						Content(state)
+						Content(selectedItem)
 					}
 				}
 			}
@@ -164,20 +187,41 @@ class ConfigureMenu(private val overlayManager: OverlayManager) {
 	}
 
 	@Composable
-	private fun Content(state: MutableState<Boolean>) {
+	private fun Content(selectedItem: MutableState<Int>) {
 		Card(
-			colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.onPrimary),
+			colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
 			modifier = Modifier
 				.fillMaxHeight()
 				.fillMaxWidth(0.8f)
 				.clickable(false) {}
 		) {
-			Text(text = "pad1")
-			Card {
-				Text(text = "pad2")
-				logInfo("state: ${state.value}")
-				Button(onClick = { state.value = !state.value }) {
-					Text(text = "${state.value}")
+			Row {
+				val categories = CheatCategory.values()
+				val icons = mapOf(CheatCategory.COMBAT to painterResource(id = R.drawable.mdi_swords), CheatCategory.MOVEMENT to painterResource(id = R.drawable.mdi_sprint),
+					CheatCategory.VISUAL to painterResource(id = R.drawable.mdi_view_in_ar), CheatCategory.MISC to painterResource(id = R.drawable.mdi_list_alt))
+				NavigationRail(containerColor = MaterialTheme.colorScheme.primaryContainer, modifier = Modifier.fillMaxHeight()) {
+					Spacer(Modifier.weight(1f))
+					categories.forEachIndexed { index, item ->
+						NavigationRailItem(
+							icon = { Icon(painter = icons[item]!!, contentDescription = item.choiceName) },
+							label = { Text(item.choiceName) },
+							selected = selectedItem.value == index,
+							onClick = { selectedItem.value = index },
+							colors = NavigationRailItemDefaults.colors(indicatorColor = MaterialTheme.colorScheme.primary, selectedIconColor = MaterialTheme.colorScheme.onPrimary)
+						)
+					}
+					NavigationRailItem(
+						icon = { Icon(Icons.Filled.Note, contentDescription = stringResource(id = R.string.clickgui_configs)) },
+						label = { Text(stringResource(id = R.string.clickgui_configs)) },
+						selected = selectedItem.value == categories.size,
+						onClick = { selectedItem.value = categories.size },
+						colors = NavigationRailItemDefaults.colors(indicatorColor = MaterialTheme.colorScheme.primary, selectedIconColor = MaterialTheme.colorScheme.onPrimary)
+					)
+					Spacer(Modifier.weight(1f))
+				}
+
+				Card(modifier = Modifier.fillMaxSize()) {
+					Text(text = "pad2")
 				}
 			}
 		}
