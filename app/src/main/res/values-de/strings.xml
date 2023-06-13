@@ -5,8 +5,6 @@
     <string name="request_overlay">Wir benötigen Berechtigungen für Overlays, um GUIs anzuzeigen, mit denen Sie im Spiel interagieren können</string>
     <string name="proxy_notification">%s bearbeitet Pakete für %s</string>
 
-    <string name="clickgui_configs">Konfigurieren</string>
-
     <string name="dashboard_more">Mehr</string>
     <string name="dashboard_about">Über</string>
     <string name="dashboard_no_account_selected">Melden Sie sich mit einem Microsoft-Konto an, um Xbox-authentifizierte Server zu verbinden</string>

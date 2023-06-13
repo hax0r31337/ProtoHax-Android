@@ -132,6 +132,7 @@ class ConfigureMenu(private val overlayManager: OverlayManager) {
 			WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH,
 			PixelFormat.TRANSLUCENT
 		)
+		params.dimAmount = 0.5f
 		params.gravity = Gravity.CENTER or Gravity.CENTER
 		params.x = 0
 		params.y = 0
@@ -271,8 +272,8 @@ class ConfigureMenu(private val overlayManager: OverlayManager) {
 						)
 					}
 					NavigationRailItem(
-						icon = { Icon(Icons.Outlined.Feed, contentDescription = stringResource(id = R.string.clickgui_configs)) },
-						label = { Text(stringResource(id = R.string.clickgui_configs)) },
+						icon = { Icon(Icons.Outlined.Feed, contentDescription = stringResource(id = R.string.tab_configs)) },
+						label = { Text(stringResource(id = R.string.tab_configs)) },
 						selected = selectedDestination == PHaxRoute.CONFIG,
 						onClick = { navController.safeNavigate(PHaxRoute.CONFIG) }
 					)
@@ -344,22 +345,20 @@ class ConfigureMenu(private val overlayManager: OverlayManager) {
 		return produceState(initialValue = visibility) {
 			// In a coroutine, can make suspend calls
 			observeStateAsFlow().collect {
-				if (value != it) {
-					value = it
-					menuLayout?.let { l ->
-						if (Settings.trustClicks.getValue(overlayManager.ctx)) {
-							if (it) {
-								params.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
-							} else {
-								params.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
-							}
-							wm.updateViewLayout(l, params)
-						} else {
-							l.isInvisible = !it
+				value = it
+				menuLayout?.let { l ->
+					params.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH or WindowManager.LayoutParams.FLAG_DIM_BEHIND
+					if (Settings.trustClicks.getValue(overlayManager.ctx)) {
+						if (!it) {
+							params.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
 						}
+						l.isInvisible = false
+					} else {
+						l.isInvisible = !it
 					}
-					overlayManager.toggleRenderLayerViewVisibility(!it)
+					wm.updateViewLayout(l, params)
 				}
+				overlayManager.toggleRenderLayerViewVisibility(!it)
 			}
 		}
 	}

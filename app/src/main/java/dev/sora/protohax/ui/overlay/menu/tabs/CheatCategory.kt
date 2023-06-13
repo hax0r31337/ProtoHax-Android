@@ -6,7 +6,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -32,6 +34,9 @@ import dev.sora.relay.cheat.module.CheatModule
 @Composable
 fun CheatCategoryTab(category: CheatCategory, modules: SnapshotStateMap<CheatModule, Boolean>, expandModules: SnapshotStateList<CheatModule>) {
 	LazyColumn {
+		item {
+			Spacer(modifier = Modifier.height(10.dp))
+		}
 		items(modules.keys.filter { it.category == category }.sortedBy { it.name }) { module ->
 			val expand = expandModules.contains(module)
 			Card(
@@ -57,7 +62,9 @@ fun CheatCategoryTab(category: CheatCategory, modules: SnapshotStateMap<CheatMod
 						Switch(
 							checked = module.state,
 							modifier = Modifier.align(Alignment.CenterEnd)
-								.let { if (module.canToggle) it else it.clickable { module.state = true }.minimumInteractiveComponentSize() },
+								.let { if (module.canToggle) it else it
+									.clickable { module.state = true }
+									.minimumInteractiveComponentSize() },
 							onCheckedChange = if (module.canToggle) { {
 								module.state = it
 							} } else null,
@@ -70,6 +77,9 @@ fun CheatCategoryTab(category: CheatCategory, modules: SnapshotStateMap<CheatMod
 					}
 				}
 			}
+		}
+		item {
+			Spacer(modifier = Modifier.height(10.dp))
 		}
 	}
 }
