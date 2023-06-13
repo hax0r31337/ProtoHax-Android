@@ -13,6 +13,9 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
@@ -22,9 +25,9 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Feed
-import androidx.compose.material.icons.filled.Note
 import androidx.compose.material.icons.outlined.Feed
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
@@ -32,14 +35,17 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.NavigationRail
 import androidx.compose.material3.NavigationRailItem
-import androidx.compose.material3.NavigationRailItemDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.Recomposer
 import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateMapOf
 import androidx.compose.runtime.produceState
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.AndroidUiDispatcher
@@ -65,6 +71,7 @@ import com.google.accompanist.navigation.animation.AnimatedNavHost
 import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import dev.sora.protohax.R
+import dev.sora.protohax.relay.MinecraftRelay
 import dev.sora.protohax.ui.components.screen.settings.Settings
 import dev.sora.protohax.ui.navigation.PHaxRoute
 import dev.sora.protohax.ui.overlay.MyLifecycleOwner
@@ -73,6 +80,9 @@ import dev.sora.protohax.ui.overlay.menu.tabs.CheatCategoryTab
 import dev.sora.protohax.ui.overlay.menu.tabs.ConfigTab
 import dev.sora.protohax.ui.theme.MyApplicationTheme
 import dev.sora.relay.cheat.module.CheatCategory
+import dev.sora.relay.cheat.module.CheatModule
+import dev.sora.relay.cheat.module.EventModuleToggle
+import dev.sora.relay.game.event.EventHook
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.channels.awaitClose
@@ -134,6 +144,8 @@ class ConfigureMenu(private val overlayManager: OverlayManager) {
 				val displayState = displayState(wm, params)
 
 				// states to remember
+				val modules = moduleState()
+				val expandModules = remember { mutableStateListOf<CheatModule>() }
 				val navController = rememberAnimatedNavController()
 				val navGraph = remember {
 					val categories = CheatCategory.values()
@@ -146,12 +158,13 @@ class ConfigureMenu(private val overlayManager: OverlayManager) {
 						categories.forEach { category ->
 							composable(category.choiceName) {
 								Box(modifier = Modifier.fillMaxSize()) {
-									CheatCategoryTab(category)
+									CheatCategoryTab(category, modules, expandModules)
 								}
 							}
 						}
 					}
 				}
+				val scrollState = rememberScrollState()
 
 				AnimatedVisibility(
 					visible = displayState.value,
@@ -170,7 +183,7 @@ class ConfigureMenu(private val overlayManager: OverlayManager) {
 							) { visibility = false },
 						contentAlignment = Alignment.Center
 					) {
-						Content(navController, navGraph)
+						Content(navController, navGraph, scrollState)
 					}
 				}
 			}
@@ -226,9 +239,9 @@ class ConfigureMenu(private val overlayManager: OverlayManager) {
 
 	@OptIn(ExperimentalAnimationApi::class)
 	@Composable
-	private fun Content(navController: NavHostController, navGraph: NavGraph) {
+	private fun Content(navController: NavHostController, navGraph: NavGraph, scrollState: ScrollState) {
 		Card(
-			colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer),
+			colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
 			modifier = Modifier
 				.fillMaxHeight()
 				.fillMaxWidth(0.8f)
@@ -242,35 +255,86 @@ class ConfigureMenu(private val overlayManager: OverlayManager) {
 				val navBackStackEntry by navController.currentBackStackEntryAsState()
 				val selectedDestination = navBackStackEntry?.destination?.route ?: categories[0].choiceName
 
-				NavigationRail(containerColor = MaterialTheme.colorScheme.primaryContainer, modifier = Modifier.fillMaxHeight()) {
+				NavigationRail(
+					containerColor = MaterialTheme.colorScheme.surface,
+					modifier = Modifier
+						.fillMaxHeight()
+						.verticalScroll(scrollState)
+				) {
 					Spacer(Modifier.weight(1f))
 					categories.forEach { item ->
 						NavigationRailItem(
 							icon = { Icon(painter = icons[item]!!, contentDescription = item.choiceName) },
 							label = { Text(item.choiceName) },
 							selected = selectedDestination == item.choiceName,
-							onClick = { navController.safeNavigate(item.choiceName) },
-							colors = NavigationRailItemDefaults.colors(indicatorColor = MaterialTheme.colorScheme.primary, selectedIconColor = MaterialTheme.colorScheme.onPrimary)
+							onClick = { navController.safeNavigate(item.choiceName) }
 						)
 					}
 					NavigationRailItem(
 						icon = { Icon(Icons.Outlined.Feed, contentDescription = stringResource(id = R.string.clickgui_configs)) },
 						label = { Text(stringResource(id = R.string.clickgui_configs)) },
 						selected = selectedDestination == PHaxRoute.CONFIG,
-						onClick = { navController.safeNavigate(PHaxRoute.CONFIG) },
-						colors = NavigationRailItemDefaults.colors(indicatorColor = MaterialTheme.colorScheme.primary, selectedIconColor = MaterialTheme.colorScheme.onPrimary)
+						onClick = { navController.safeNavigate(PHaxRoute.CONFIG) }
 					)
 					Spacer(Modifier.weight(1f))
 				}
 
-				Card(modifier = Modifier.fillMaxSize()) {
+				Card(modifier = Modifier.fillMaxSize(), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)) {
+					val stack = categories.map { it.choiceName }.toMutableSet().also {
+						it.add(PHaxRoute.CONFIG)
+					}
 					AnimatedNavHost(
 						navController = navController,
-						graph = navGraph
+						graph = navGraph,
+						enterTransition = {
+							if (stack.indexOf(this.initialState.destination.route ?: "") > stack.indexOf(this.targetState.destination.route ?: "")) {
+								slideInVertically { -it / 2 } + fadeIn()
+							} else {
+								slideInVertically { it / 2 } + fadeIn()
+							}
+						},
+						exitTransition = {
+							if (stack.indexOf(this.initialState.destination.route ?: "") > stack.indexOf(this.targetState.destination.route ?: "")) {
+								slideOutVertically { it / 2 } + fadeOut()
+							} else {
+								slideOutVertically { -it / 2 } + fadeOut()
+							}
+						}
 					)
 				}
 			}
 		}
+	}
+
+	@ExperimentalCoroutinesApi
+	@Composable
+	private fun moduleState(): SnapshotStateMap<CheatModule, Boolean> {
+		val stateMap = remember { mutableStateMapOf<CheatModule, Boolean>() }
+
+		LaunchedEffect(Unit) {
+			callbackFlow {
+				val listener = EventHook(EventModuleToggle::class.java, handler = {
+					trySend(it)
+				})
+
+				MinecraftRelay.session.eventManager.register(listener)
+
+				MinecraftRelay.moduleManager.modules.forEach { module ->
+					stateMap[module] = module.state
+				}
+
+				// Remove callback when not used
+				awaitClose {
+					MinecraftRelay.session.eventManager.removeHandler(listener)
+				}
+			}.collect {
+				if (it.module.canToggle) {
+					stateMap[it.module] = it.targetState
+				}
+			}
+		}
+
+		return stateMap
 	}
 
 	@ExperimentalCoroutinesApi

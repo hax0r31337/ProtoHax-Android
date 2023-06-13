@@ -15,6 +15,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.Card
+import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -40,6 +41,7 @@ import dev.sora.protohax.util.ContextUtils.getApplicationName
 import dev.sora.protohax.util.ContextUtils.getPackageInfo
 import dev.sora.relay.game.GameSession
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CardLoginAlert(
     navigateToTopLevelDestination: (PHaxTopLevelDestination) -> Unit
@@ -48,9 +50,10 @@ fun CardLoginAlert(
         Card(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(18.dp, 10.dp).clickable {
-                    navigateToTopLevelDestination(TOP_LEVEL_DESTINATIONS.find { it.iconTextId == R.string.tab_accounts } ?: return@clickable)
-                },
+                .padding(18.dp, 10.dp),
+			onClick = {
+				navigateToTopLevelDestination(TOP_LEVEL_DESTINATIONS.find { it.iconTextId == R.string.tab_accounts } ?: return@Card)
+			}
         ) {
             Row(
                 modifier = Modifier.padding(15.dp),
@@ -67,6 +70,7 @@ fun CardLoginAlert(
     }
 }
 
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun CardCurrentApplication(
     applicationSelected: MutableState<String>,
@@ -77,10 +81,10 @@ fun CardCurrentApplication(
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(18.dp, 10.dp)
-            .clickable {
-                pickAppActivityLauncher.launch(Intent(ctx, AppPickerActivity::class.java))
-            },
+            .padding(18.dp, 10.dp),
+		onClick = {
+			pickAppActivityLauncher.launch(Intent(ctx, AppPickerActivity::class.java))
+		}
     ) {
         Column(
             modifier = Modifier.padding(15.dp)

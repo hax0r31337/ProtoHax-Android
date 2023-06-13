@@ -27,7 +27,7 @@
 -keepclassmembers class * {
     @com.google.gson.annotations.SerializedName <fields>;
 }
--keep class coelho.msftauth.** { *; }
+-keep class coelho.msftauth.api.** { *; }
 #-keep class dev.sora.** { *; }
 #-keep class org.cloudburstmc.** { *; }
 
