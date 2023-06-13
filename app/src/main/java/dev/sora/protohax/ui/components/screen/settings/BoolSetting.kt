@@ -8,6 +8,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.zIndex
@@ -37,7 +38,7 @@ class BoolSetting(override val name: Int, override val description: Int, val key
 				} else it
 			}
 		) {
-			Switch(value, modifier = Modifier.zIndex(-1f), enabled = !override, onCheckedChange = null)
+			Switch(value, enabled = !override, onCheckedChange = null, modifier = Modifier.align(Alignment.CenterEnd))
 		}
 	}
 
