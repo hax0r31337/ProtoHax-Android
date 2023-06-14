@@ -1,62 +1,67 @@
 <resources>
-    <string name="mitm_connected">已連接到 MITM 代理</string>
+    <string name="mitm_connected">連接到 MITM 代理</string>
     <string name="mitm_connected_launch">啟動應用程式</string>
-    <string name="mitm_disconnected">已從 MITM 代理斷開連接</string>
-    <string name="request_overlay">我們需要遮罩權限，以便在遊戲中顯示可以與其互動的 GUI</string>
-    <string name="proxy_notification">%s 正在處理 %s 的封包</string>
+    <string name="mitm_disconnected">斷開 MITM 代理連接</string>
+    <string name="request_overlay">我哋需要懸浮權限嚟顯示遊戲入面嘅介面</string>
+    <string name="proxy_notification">%1$s 正喺處理 %2$s 嘅封包</string>
 
     <string name="dashboard_more">更多</string>
     <string name="dashboard_about">關於</string>
-    <string name="dashboard_no_account_selected">請登錄 Microsoft 帳戶以連接 Xbox 認證伺服器</string>
-    <string name="dashboard_about_info">根据 %s 的许可证\n在 %s 上查看我们的原始碼\n加入我们的 %s</string>
-    <string name="dashboard_select_application">選擇應用程式</string>
-    <string name="dashboard_select_application_placeholder">選擇應用程式</string>
-    <string name="dashboard_selected_application">已選擇的應用程式</string>
-    <string name="dashboard_no_application">未選擇應用程式</string>
-    <string name="dashboard_current_version">當前：v%s</string>
-    <string name="dashboard_recommended_version">推薦：v%s</string>
+    <string name="dashboard_no_account_selected">登入一個 Microsoft 帳戶嚟連接 Xbox 認證嘅伺服器</string>
+    <string name="dashboard_about_info">根據 %1$s 授權\n喺 %2$s 上檢視我哋嘅源代碼\n加入我哋嘅 %3$s</string>
+    <string name="dashboard_select_application">揀一個應用程式</string>
+    <string name="dashboard_select_application_placeholder">搜尋應用程式</string>
+    <string name="dashboard_selected_application">已揀嘅應用程式</string>
+    <string name="dashboard_no_application">冇揀應用程式</string>
+    <string name="dashboard_current_version">而家版本：v%s</string>
+    <string name="dashboard_recommended_version">建議版本：v%s</string>
     <string name="dashboard_fab_connect">連接</string>
     <string name="dashboard_fab_disconnect">斷開連接</string>
 
-    <string name="config_rename">重命名</string>
+    <string name="config_rename">重新命名</string>
     <string name="config_copy">複製</string>
-    <string name="config_share">共享</string>
+    <string name="config_share">分享</string>
     <string name="config_delete">刪除</string>
-    <string name="config_create">新建設定</string>
-    <string name="config_import">導入設定</string>
+    <string name="config_create">創建新設定</string>
+    <string name="config_import">匯入設定</string>
     <string name="config_deselect">取消選擇</string>
-    <string name="config_delete_dialog_message">確定要刪除設定 %s？</string>
+    <string name="config_delete_dialog_message">你肯定要刪除 %s 嘅設定嗎</string>
     <string name="config_rename_dialog_message">重新命名</string>
     <string name="config_copy_dialog_message">複製</string>
 
     <string name="accounts_login">登入</string>
-    <string name="accounts_login_as">以 %s 的身分登入</string>
+    <string name="accounts_login_as">登入為 %s</string>
     <string name="account_select">選擇</string>
     <string name="account_selected">(已選擇)</string>
-    <string name="account_delete_dialog_message">確定要刪除帳號 %s？</string>
+    <string name="account_delete_dialog_message">你肯定要刪除 %s 嘅帳戶嗎</string>
 
-    <string name="setting_encryption">離線模式覆寫</string>
-    <string name="setting_encryption_desc">允許離線模式加密</string>
-    <string name="setting_commands">命令</string>
-    <string name="setting_commands_desc">允許在遊戲中使用命令控制ProtoHax</string>
-    <string name="setting_rak_reliability">RakNet 可靠性</string>
-    <string name="setting_rak_reliability_desc">關閉以禁用RakNet的隊頭阻塞，會導致數據包混亂，但會提高延遲</string>
-    <string name="setting_restart_required">需要重新啟動才能生效</string>
+    <string name="setting_encryption">離線模式覆蓋</string>
+    <string name="setting_encryption_desc">允許離線模式使用加密</string>
+    <string name="setting_commands">指令</string>
+    <string name="setting_commands_desc">允許使用指令控制 ProtoHax 喺遊戲入面</string>
+    <string name="setting_rak_reliability">RakReliability</string>
+    <string name="setting_rak_reliability_desc">關閉以停用 HoL 封鎖 RakNet，會導致封包亂序但改善延遲</string>
+    <string name="setting_restart_required">需要重新啟動才會生效</string>
     <string name="setting_restart_required_action">重新啟動</string>
+    <string name="setting_ip" translatable="false">IPv6</string>
+    <string name="setting_ip_auto">自動</string>
+    <string name="setting_ip_enabled">已啟用</string>
+    <string name="setting_ip_disabled">已停用</string>
+    <string name="setting_ip_only">僅限 IPv6</string>
     <string name="setting_logs">日誌</string>
     <string name="setting_logs_desc">顯示日誌</string>
 
     <string name="logcat_clear">清除日誌</string>
-    <string name="logcat_share">共享日誌</string>
+    <string name="logcat_share">分享日誌</string>
 
-    <string name="tab_dashboard">儀表板</string>
+    <string name="tab_dashboard">主控板</string>
     <string name="tab_accounts">帳戶</string>
-    <string name="tab_configs">配置</string>
-    <string name="tab_settings">設定</string>
-    <string name="tab_btn_navigation_drawer">導覽抽屜</string>
+    <string name="tab_configs">設定</string>
+    <string name="tab_settings">設置</string>
+    <string name="tab_btn_navigation_drawer">導航抽屜</string>
 
     <string name="dialog_title">繼續？</string>
-    <string name="dialog_confirm">確認</string>
+    <string name="dialog_confirm">確定</string>
     <string name="dialog_cancel">取消</string>
-    <string name="dialog_loading">仍在加载</string>
+    <string name="dialog_loading">載入中</string>
 </resources>

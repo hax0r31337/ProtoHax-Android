@@ -3,12 +3,12 @@
     <string name="mitm_connected_launch">App starten</string>
     <string name="mitm_disconnected">Vom MITM-Proxy getrennt</string>
     <string name="request_overlay">Wir benötigen Berechtigungen für Overlays, um GUIs anzuzeigen, mit denen Sie im Spiel interagieren können</string>
-    <string name="proxy_notification">%s bearbeitet Pakete für %s</string>
+    <string name="proxy_notification">%1$s bearbeitet Pakete für %2$s</string>
 
     <string name="dashboard_more">Mehr</string>
     <string name="dashboard_about">Über</string>
     <string name="dashboard_no_account_selected">Melden Sie sich mit einem Microsoft-Konto an, um Xbox-authentifizierte Server zu verbinden</string>
-    <string name="dashboard_about_info">Lizensiert unter %s\nQuellcode auf %s ansehen\nUnser %s beitreten</string>
+    <string name="dashboard_about_info">Lizensiert unter %1$s\nQuellcode auf %2$s ansehen\nUnser %3$s beitreten</string>
     <string name="dashboard_select_application">Wähle eine Anwendung</string>
     <string name="dashboard_select_application_placeholder">Zoek naar Anwendungen</string>
     <string name="dashboard_selected_application">Ausgewählte Anwendung</string>
@@ -43,6 +43,10 @@
     <string name="setting_rak_reliability_desc">Deaktivieren Sie dies, um HoL-Blocking von RakNet zu deaktivieren, was zu Paketstörungen führen kann, aber die Latenz verbessert</string>
     <string name="setting_restart_required">Neustart erforderlich, um die Änderungen anzuwenden</string>
     <string name="setting_restart_required_action">Neustart</string>
+    <string name="setting_ip_auto">Automatisch</string>
+    <string name="setting_ip_enabled">Aktiviert</string>
+    <string name="setting_ip_disabled">Deaktiviert</string>
+    <string name="setting_ip_only">Nur IPv6</string>
     <string name="setting_logs">Logs</string>
     <string name="setting_logs_desc">Toon Logs</string>
 

@@ -5,12 +5,12 @@
     <string name="mitm_connected_launch">Launch App</string>
     <string name="mitm_disconnected">Disconnected from MITM proxy</string>
     <string name="request_overlay">We need overlay permission in order to display GUIs that you can interact in game</string>
-    <string name="proxy_notification">%s is processing packets for %s</string>
+    <string name="proxy_notification">%1$s is processing packets for %2$s</string>
 
     <string name="dashboard_more">More</string>
     <string name="dashboard_about">About</string>
     <string name="dashboard_no_account_selected">Sign in a Microsoft account to connect Xbox authenticated servers</string>
-    <string name="dashboard_about_info">Licensed under %s\nView our source code on %s\nJoin our %s</string>
+    <string name="dashboard_about_info">Licensed under %1$s\nView our source code on %2$s\nJoin our %3$s</string>
     <string name="dashboard_select_application">Select an Application</string>
     <string name="dashboard_select_application_placeholder">Search for applications</string>
     <string name="dashboard_selected_application">Selected Application</string>

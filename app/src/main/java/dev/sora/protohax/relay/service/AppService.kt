@@ -169,9 +169,9 @@ class AppService : VpnService() {
         intent.action = Intent.ACTION_MAIN
         val pendingIntent = PendingIntent.getActivity(this, 0, intent, flag)
 
-//        val stopIntent = Intent(ACTION_STOP)
-//        stopIntent.setPackage(packageName)
-//        val pendingIntent1 = PendingIntent.getActivity(this, 1, stopIntent, flag)
+        val stopIntent = Intent(ACTION_STOP)
+        stopIntent.setPackage(packageName)
+        val pendingIntent1 = PendingIntent.getForegroundService(this, 1, stopIntent, flag)
 
         val builder = NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle(getString(R.string.app_name))
@@ -181,6 +181,7 @@ class AppService : VpnService() {
             .setLargeIcon(BitmapFactory.decodeResource(resources, R.mipmap.ic_launcher))
             .setOngoing(true)
             .setContentIntent(pendingIntent)
+			.addAction(R.drawable.notification_icon, getString(R.string.dashboard_fab_disconnect), pendingIntent1)
 
         return builder.build()
     }
