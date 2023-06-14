@@ -42,6 +42,7 @@ import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.compositeOver
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -101,18 +102,19 @@ fun CheatCategoryTab(
 						)
 						Switch(
 							checked = module.state,
-							modifier = Modifier.align(Alignment.CenterEnd)
-								.let { if (module.canToggle) it else it
-									.clickable { module.state = true }
-									.minimumInteractiveComponentSize() },
-							onCheckedChange = if (module.canToggle) { {
+							modifier = Modifier.align(Alignment.CenterEnd),
+							onCheckedChange = {
 								module.state = it
-							} } else null,
-							enabled = module.canToggle,
-							colors = if (expand) {
-								SwitchDefaults.colors(checkedBorderColor = MaterialTheme.colorScheme.outlineVariant)
+							}8,
+							colors = if (module.canToggle) {
+								SwitchDefaults.colors(checkedBorderColor = if (expand) MaterialTheme.colorScheme.outlineVariant else Color.Transparent)
 							} else {
-								SwitchDefaults.colors()
+								SwitchDefaults.colors(
+									uncheckedThumbColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f).compositeOver(MaterialTheme.colorScheme.surface),
+									uncheckedTrackColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.12f).compositeOver(MaterialTheme.colorScheme.surface),
+									uncheckedBorderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f).compositeOver(MaterialTheme.colorScheme.surface),
+									uncheckedIconColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.38f).compositeOver(MaterialTheme.colorScheme.surface),
+								)
 							}
 						)
 					}
