@@ -6,77 +6,35 @@ import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.PixelFormat
-import android.graphics.drawable.GradientDrawable
 import android.hardware.input.InputManager
 import android.net.VpnService
 import android.os.Build
 import android.view.*
 import android.widget.ImageView
-import android.widget.LinearLayout
 import android.widget.RelativeLayout
-import android.widget.TextView
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.isInvisible
 import dev.sora.protohax.MyApplication
 import dev.sora.protohax.R
 import dev.sora.protohax.relay.MinecraftRelay
-import dev.sora.protohax.relay.gui.SelectionMenu
 import dev.sora.protohax.relay.service.ServiceListener
 import dev.sora.protohax.ui.components.screen.settings.Settings
 import dev.sora.protohax.ui.overlay.menu.ConfigureMenu
 import dev.sora.relay.cheat.module.CheatModule
 import kotlin.math.abs
 
-class OverlayManager(val ctx: Context) : ServiceListener {
+class OverlayManager : ServiceListener {
+
+	var currentContext: Context? = null
+
+	val ctx: Context
+		get() = currentContext!!
 
 	private var entranceView: View? = null
 	private var renderLayerView: View? = null
 
 	private val menu = ConfigureMenu(this)
-	private val shortcuts = mutableMapOf<CheatModule, View>()
-
-	private fun View.draggable(params: WindowManager.LayoutParams, windowManager: WindowManager) {
-		var dragPosX = 0f
-		var dragPosY = 0f
-		var canDrag = false
-		var pressDownTime = System.currentTimeMillis()
-		setOnTouchListener { v, event ->
-			when (event.action) {
-				MotionEvent.ACTION_DOWN -> {
-					dragPosX = event.rawX
-					dragPosY = event.rawY
-					pressDownTime = System.currentTimeMillis()
-					canDrag = true
-					true
-				}
-				MotionEvent.ACTION_UP -> {
-					if (System.currentTimeMillis() - pressDownTime < 500) {
-						v.performClick()
-					}
-					true
-				}
-				MotionEvent.ACTION_MOVE -> {
-					if (!canDrag) {
-						return@setOnTouchListener false
-					}
-					if (System.currentTimeMillis() - pressDownTime < 500) {
-						if (abs(dragPosX - event.rawX) > 100 || abs(dragPosY - event.rawY) > 100) {
-							canDrag = false
-						}
-						false
-					} else {
-						params.x += (event.rawX - dragPosX).toInt()
-						params.y += (event.rawY - dragPosY).toInt()
-						dragPosX = event.rawX
-						dragPosY = event.rawY
-						windowManager.updateViewLayout(this, params)
-						true
-					}
-				}
-				else -> false
-			}
-		}
-	}
+	val shortcuts = mutableListOf<Shortcut>()
 
 	@SuppressLint("ClickableViewAccessibility")
 	override fun onServiceStarted() {
@@ -119,10 +77,8 @@ class OverlayManager(val ctx: Context) : ServiceListener {
 		menu.visibility = false
 		menu.display(wm, ctx)
 
-		val shortcutList = shortcuts.keys.map { it }
-		shortcuts.clear()
-		shortcutList.forEach {
-			shortcutFor(it)
+		shortcuts.forEach {
+			it.display(wm)
 		}
 	}
 
@@ -162,72 +118,75 @@ class OverlayManager(val ctx: Context) : ServiceListener {
 		renderLayerView?.let { wm.removeView(it) }
 		renderLayerView = null
 		menu.destroy(wm)
-		shortcuts.values.forEach {
-			wm.removeView(it)
+		shortcuts.forEach {
+			it.remove(wm)
 		}
-	}
-
-	fun shortcutFor(module: CheatModule): Boolean {
-		val windowManager = MyApplication.instance.getSystemService(VpnService.WINDOW_SERVICE) as WindowManager
-		if (shortcuts.containsKey(module)) {
-			try {
-				windowManager.removeView(shortcuts[module])
-			} catch (t: Throwable) {
-				t.printStackTrace()
-			}
-			shortcuts.remove(module)
-			return false
-		}
-
-		fun TextView.updateTextColor() {
-			setTextColor(if (module.canToggle) if (module.state) SelectionMenu.TOGGLE_ON_COLOR_RGB else SelectionMenu.TOGGLE_OFF_COLOR_RGB else SelectionMenu.TEXT_COLOR)
-		}
-
-		val layout = LinearLayout(ctx).apply {
-			gravity = Gravity.CENTER or Gravity.CENTER
-			orientation = LinearLayout.HORIZONTAL
-		}
-		val text = TextView(ctx).apply {
-			gravity = Gravity.CENTER or Gravity.CENTER
-			text = module.name.filter { it.isUpperCase() }
-			textSize = 14f
-			updateTextColor()
-
-			setPadding(30, 30, 30, 30)
-
-			background = GradientDrawable().apply {
-				setColor(SelectionMenu.BACKGROUND_COLOR)
-				cornerRadius = 15f
-				alpha = 150
-			}
-		}
-		layout.addView(text)
-		layout.setOnClickListener {
-			module.toggle()
-			text.updateTextColor()
-		}
-
-		val params = WindowManager.LayoutParams(
-			WindowManager.LayoutParams.WRAP_CONTENT,
-			WindowManager.LayoutParams.WRAP_CONTENT,
-			WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-			WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
-			PixelFormat.TRANSLUCENT
-		)
-		params.gravity = Gravity.TOP or Gravity.START
-		params.x = 100
-		params.y = 100
-
-		layout.draggable(params, windowManager)
-
-		windowManager.addView(layout, params)
-
-		shortcuts[module] = layout
-
-		return true
 	}
 
 	fun hasShortcut(module: CheatModule): Boolean {
-		return shortcuts.containsKey(module)
+		return shortcuts.any { it.module == module }
+	}
+
+	fun removeShortcut(module: CheatModule): Boolean {
+		return shortcuts.removeIf { (it.module == module).also { v ->
+			if (v) {
+				it.remove(MyApplication.instance.getSystemService(VpnService.WINDOW_SERVICE) as WindowManager)
+			}
+		} }
+	}
+
+	fun addShortcut(shortcut: Shortcut) {
+		if (hasShortcut(shortcut.module)) {
+			throw IllegalStateException("Shortcut already exists for module: ${shortcut.module.name}")
+		}
+
+		shortcuts.add(shortcut)
+
+		if (renderLayerView != null) {
+			shortcut.display(MyApplication.instance.getSystemService(VpnService.WINDOW_SERVICE) as WindowManager)
+		}
+	}
+
+	fun View.draggable(params: WindowManager.LayoutParams, windowManager: WindowManager) {
+		var dragPosX = 0f
+		var dragPosY = 0f
+		var canDrag = false
+		var pressDownTime = System.currentTimeMillis()
+		setOnTouchListener { v, event ->
+			when (event.action) {
+				MotionEvent.ACTION_DOWN -> {
+					dragPosX = event.rawX
+					dragPosY = event.rawY
+					pressDownTime = System.currentTimeMillis()
+					canDrag = true
+					true
+				}
+				MotionEvent.ACTION_UP -> {
+					if (System.currentTimeMillis() - pressDownTime < 500) {
+						v.performClick()
+					}
+					true
+				}
+				MotionEvent.ACTION_MOVE -> {
+					if (!canDrag) {
+						return@setOnTouchListener false
+					}
+					if (System.currentTimeMillis() - pressDownTime < 500) {
+						if (abs(dragPosX - event.rawX) > 100 || abs(dragPosY - event.rawY) > 100) {
+							canDrag = false
+						}
+						false
+					} else {
+						params.x += (event.rawX - dragPosX).toInt()
+						params.y += (event.rawY - dragPosY).toInt()
+						dragPosX = event.rawX
+						dragPosY = event.rawY
+						windowManager.updateViewLayout(this, params)
+						true
+					}
+				}
+				else -> false
+			}
+		}
 	}
 }

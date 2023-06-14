@@ -24,7 +24,6 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -54,7 +53,6 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.compositionContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.unit.dp
 import androidx.core.view.isInvisible
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelStore
@@ -91,8 +89,8 @@ import kotlinx.coroutines.launch
 
 class ConfigureMenu(private val overlayManager: OverlayManager) {
 
-	val hasDisplay: Boolean
-		get() = menuLayout != null
+//	val hasDisplay: Boolean
+//		get() = menuLayout != null
 
 	private var menuLayout: View? = null
 	private val lifecycleOwner = MyLifecycleOwner()
@@ -127,7 +125,7 @@ class ConfigureMenu(private val overlayManager: OverlayManager) {
 	fun display(wm: WindowManager, ctx: Context) {
 		val params = WindowManager.LayoutParams(
 			WindowManager.LayoutParams.MATCH_PARENT,
-			WindowManager.LayoutParams.WRAP_CONTENT,
+			WindowManager.LayoutParams.MATCH_PARENT,
 			WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
 			WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH,
 			PixelFormat.TRANSLUCENT
@@ -159,7 +157,7 @@ class ConfigureMenu(private val overlayManager: OverlayManager) {
 						categories.forEach { category ->
 							composable(category.choiceName) {
 								Box(modifier = Modifier.fillMaxSize()) {
-									CheatCategoryTab(category, modules, expandModules)
+									CheatCategoryTab(category, modules, expandModules, overlayManager)
 								}
 							}
 						}
@@ -177,7 +175,6 @@ class ConfigureMenu(private val overlayManager: OverlayManager) {
 					// rotate the menu due to the menu doesn't look well on portrait orientation
 					Box(
 						modifier = Modifier
-							.height((configuration.screenHeightDp * 0.8).toInt().dp)
 							.clickable(
 								interactionSource = remember { MutableInteractionSource() },
 								indication = null
@@ -244,7 +241,7 @@ class ConfigureMenu(private val overlayManager: OverlayManager) {
 		Card(
 			colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surface),
 			modifier = Modifier
-				.fillMaxHeight()
+				.fillMaxHeight(0.9f)
 				.fillMaxWidth(0.8f)
 				.clickable(false) {}
 		) {

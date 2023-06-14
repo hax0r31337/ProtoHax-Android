@@ -8,7 +8,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ColumnScope
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -47,6 +46,8 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import dev.sora.protohax.ui.overlay.OverlayManager
+import dev.sora.protohax.ui.overlay.Shortcut
 import dev.sora.relay.cheat.module.CheatCategory
 import dev.sora.relay.cheat.module.CheatModule
 import dev.sora.relay.cheat.value.BoolValue
@@ -64,7 +65,8 @@ import kotlin.math.roundToInt
 fun CheatCategoryTab(
 	category: CheatCategory,
 	modules: SnapshotStateMap<CheatModule, Boolean>,
-	expandModules: SnapshotStateList<CheatModule>
+	expandModules: SnapshotStateList<CheatModule>,
+	overlayManager: OverlayManager
 ) {
 	LazyColumn {
 		item {
@@ -72,7 +74,19 @@ fun CheatCategoryTab(
 		}
 		items(modules.keys.filter { it.category == category }.sortedBy { it.name }) { module ->
 			val expand = expandModules.contains(module)
-			val content: @Composable ColumnScope.() -> Unit = {
+			Card(
+				colors = CardDefaults.cardColors(containerColor = animateColorAsState(targetValue = if (expand) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.inversePrimary).value),
+				modifier = Modifier
+					.fillMaxWidth()
+					.padding(15.dp, 7.dp),
+				onClick = {
+					if (expand) {
+						expandModules.remove(module)
+					} else {
+						expandModules.add(module)
+					}
+				}
+			) {
 				Column(modifier = Modifier.padding(PaddingValues(13.dp, 3.dp, 13.dp, if (expand) 13.dp else 3.dp))) {
 					Box(modifier = Modifier.fillMaxWidth()) {
 						Text(
@@ -106,47 +120,23 @@ fun CheatCategoryTab(
 							Box {
 								val recomposeTrigger = remember { mutableStateOf(0) }
 								Text(text = "${recomposeTrigger.value}", color = Color.Transparent)
+								val recomposeTriggerFunc = {
+									recomposeTrigger.value = if (recomposeTrigger.value == Int.MAX_VALUE) {
+										Int.MIN_VALUE
+									} else {
+										recomposeTrigger.value + 1
+									}
+								}
 								Column {
 									module.values.forEach { value ->
-										CheatValue(value) {
-											recomposeTrigger.value = if (recomposeTrigger.value == Int.MAX_VALUE) {
-												Int.MIN_VALUE
-											} else {
-												recomposeTrigger.value + 1
-											}
-										}
+										CheatValue(value, recomposeTriggerFunc)
 									}
+									CheatShortcut(module, recomposeTriggerFunc, overlayManager)
 								}
 							}
 						}
 					}
 				}
-			}
-
-			val colors = CardDefaults.cardColors(containerColor = animateColorAsState(targetValue = if (expand) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.inversePrimary).value)
-			if (module.values.isNotEmpty()) {
-				Card(
-					colors = colors,
-					modifier = Modifier
-						.fillMaxWidth()
-						.padding(15.dp, 7.dp),
-					onClick = {
-						if (expand) {
-							expandModules.remove(module)
-						} else {
-							expandModules.add(module)
-						}
-					},
-					content = content
-				)
-			} else {
-				Card(
-					colors = colors,
-					modifier = Modifier
-						.fillMaxWidth()
-						.padding(15.dp, 7.dp),
-					content = content
-				)
 			}
 		}
 		item {
@@ -157,7 +147,36 @@ fun CheatCategoryTab(
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-fun CheatValue(value: Value<*>, recomposeTrigger: () -> Unit) {
+private fun CheatShortcut(
+	module: CheatModule, recomposeTrigger: () -> Unit,
+	overlayManager: OverlayManager
+) {
+	Row(
+		verticalAlignment = Alignment.CenterVertically,
+		modifier = Modifier
+			.fillMaxWidth()
+			.height(30.dp)
+	) {
+		Text(text = "Shortcut", modifier = Modifier.basicMarquee(iterations = Int.MAX_VALUE))
+		Spacer(modifier = Modifier.weight(1f))
+		Checkbox(
+			checked = overlayManager.hasShortcut(module),
+			onCheckedChange = {
+				if (overlayManager.hasShortcut(module)) {
+					overlayManager.removeShortcut(module)
+				} else {
+					overlayManager.addShortcut(Shortcut(module, overlayManager))
+				}
+				recomposeTrigger()
+			},
+			colors = CheckboxDefaults.colors(checkedColor = MaterialTheme.colorScheme.onPrimary, uncheckedColor = MaterialTheme.colorScheme.onPrimary, checkmarkColor = MaterialTheme.colorScheme.secondary)
+		)
+	}
+}
+
+@OptIn(ExperimentalFoundationApi::class)
+@Composable
+private fun CheatValue(value: Value<*>, recomposeTrigger: () -> Unit) {
 	if (value is BoolValue) {
 		Row(
 			verticalAlignment = Alignment.CenterVertically,
