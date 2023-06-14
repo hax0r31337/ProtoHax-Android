@@ -289,35 +289,26 @@ private fun CheatValue(value: Value<*>, recomposeTrigger: () -> Unit) {
 			}
 		}
 	} else if (value is StringValue) {
-		Row(
+		Text(text = value.name)
+		TextField(
+			value = value.value,
+			onValueChange = {
+				value.value = it
+				recomposeTrigger()
+			},
+			singleLine = true,
 			modifier = Modifier
 				.fillMaxWidth()
-		) {
-			Column(
-				modifier = Modifier
-					.fillMaxWidth(),
-			) {
-				Text(text = value.name)
-				TextField(
-					value = value.value,
-					onValueChange = {
-						value.value = it
-						recomposeTrigger()
-					},
-					singleLine = true,
-					modifier = Modifier
-						.fillMaxWidth(),
-					colors = OutlinedTextFieldDefaults.colors(
-						focusedTextColor = MaterialTheme.colorScheme.onPrimary,
-						unfocusedTextColor = MaterialTheme.colorScheme.primaryContainer,
-						focusedBorderColor = MaterialTheme.colorScheme.onPrimary,
-						unfocusedBorderColor = MaterialTheme.colorScheme.primaryContainer,
-						focusedLabelColor = MaterialTheme.colorScheme.onPrimary,
-						unfocusedLabelColor = MaterialTheme.colorScheme.primaryContainer,
-					)
-				)
-			}
-		}
+				.padding(0.dp, 0.dp, 0.dp, 10.dp),
+			colors = OutlinedTextFieldDefaults.colors(
+				focusedTextColor = MaterialTheme.colorScheme.onPrimary,
+				unfocusedTextColor = MaterialTheme.colorScheme.primaryContainer,
+				focusedBorderColor = MaterialTheme.colorScheme.onPrimary,
+				unfocusedBorderColor = MaterialTheme.colorScheme.primaryContainer,
+				focusedLabelColor = MaterialTheme.colorScheme.onPrimary,
+				unfocusedLabelColor = MaterialTheme.colorScheme.primaryContainer,
+			)
+		)
 	}
 }
 
