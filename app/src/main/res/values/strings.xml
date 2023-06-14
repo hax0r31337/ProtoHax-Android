@@ -7,12 +7,6 @@
     <string name="request_overlay">We need overlay permission in order to display GUIs that you can interact in game</string>
     <string name="proxy_notification">%1$s is processing packets for %2$s</string>
 
-    <string name="clickgui_modules">Module</string>
-    <string name="clickgui_modules_back">Back</string>
-    <string name="clickgui_configs">Config</string>
-    <string name="clickgui_configs_create">create</string>
-    <string name="clickgui_configs_save">save</string>
-
     <string name="dashboard_more">More</string>
     <string name="dashboard_about">About</string>
     <string name="dashboard_no_account_selected">Sign in a Microsoft account to connect Xbox authenticated servers</string>
@@ -56,6 +50,9 @@
     <string name="setting_ip_enabled">Enabled</string>
     <string name="setting_ip_disabled">Disabled</string>
     <string name="setting_ip_only">IPv6 Only</string>
+    <string name="setting_trust_click">Trust clicks</string>
+    <string name="setting_trust_click_desc">Execute `adb shell settings put global block_untrusted_touches 0` to trust clicks through overlay</string>
+    <string name="setting_trust_click_disabled">All of clicks are trusted below Android 12</string>
     <string name="setting_logs">Logs</string>
     <string name="setting_logs_desc">Show Logs</string>
 

@@ -5,12 +5,6 @@
     <string name="request_overlay">我哋需要懸浮權限嚟顯示遊戲入面嘅介面</string>
     <string name="proxy_notification">%1$s 正喺處理 %2$s 嘅封包</string>
 
-    <string name="clickgui_modules">模組</string>
-    <string name="clickgui_modules_back">返轉</string>
-    <string name="clickgui_configs">設定</string>
-    <string name="clickgui_configs_create">創建</string>
-    <string name="clickgui_configs_save">保存</string>
-
     <string name="dashboard_more">更多</string>
     <string name="dashboard_about">關於</string>
     <string name="dashboard_no_account_selected">登入一個 Microsoft 帳戶嚟連接 Xbox 認證嘅伺服器</string>

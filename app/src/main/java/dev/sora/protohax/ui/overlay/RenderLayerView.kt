@@ -1,4 +1,4 @@
-package dev.sora.protohax.relay.gui
+package dev.sora.protohax.ui.overlay
 
 import android.annotation.SuppressLint
 import android.content.Context

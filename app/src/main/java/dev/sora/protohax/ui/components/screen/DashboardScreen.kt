@@ -23,6 +23,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -205,6 +206,7 @@ private fun BottomFloatingActionButton(
             modifier = Modifier
 				.align(Alignment.BottomEnd)
 				.padding(16.dp),
+			elevation = FloatingActionButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp),
             containerColor = if (connectionState.value) MaterialTheme.colorScheme.tertiaryContainer else MaterialTheme.colorScheme.primaryContainer,
             contentColor = if (connectionState.value) MaterialTheme.colorScheme.onTertiaryContainer else MaterialTheme.colorScheme.onPrimaryContainer
         ) {
@@ -225,9 +227,9 @@ private fun BottomFloatingActionButton(
 private fun MenuDashboard(state: MutableState<Boolean>, aboutState: MutableState<Boolean>) {
     Box(
         modifier = Modifier
-            .fillMaxSize()
-            .wrapContentSize(Alignment.TopEnd)
-            .padding(12.dp, 0.dp),
+			.fillMaxSize()
+			.wrapContentSize(Alignment.TopEnd)
+			.padding(12.dp, 0.dp),
         contentAlignment = Alignment.TopEnd
     ) {
         DropdownMenu(

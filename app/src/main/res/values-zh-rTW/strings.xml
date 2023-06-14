@@ -5,12 +5,6 @@
     <string name="request_overlay">我們需要遮罩權限，以便在遊戲中顯示可以與其互動的 GUI</string>
     <string name="proxy_notification">%1$s 正在處理 %2$s 的封包</string>
 
-    <string name="clickgui_modules">模塊</string>
-    <string name="clickgui_modules_back">返回</string>
-    <string name="clickgui_configs">設置</string>
-    <string name="clickgui_configs_create">創建</string>
-    <string name="clickgui_configs_save">保存</string>
-
     <string name="dashboard_more">更多</string>
     <string name="dashboard_about">關於</string>
     <string name="dashboard_no_account_selected">請登錄 Microsoft 帳戶以連接 Xbox 認證伺服器</string>

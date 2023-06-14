@@ -12,9 +12,9 @@ import android.net.VpnService
 import android.os.ParcelFileDescriptor
 import android.view.WindowManager
 import androidx.core.app.NotificationCompat
+import dev.sora.protohax.MyApplication
 import dev.sora.protohax.R
 import dev.sora.protohax.relay.MinecraftRelay
-import dev.sora.protohax.relay.gui.PopupWindow
 import dev.sora.protohax.ui.activities.MainActivity
 import dev.sora.protohax.ui.components.screen.settings.Settings
 import dev.sora.protohax.util.ContextUtils.getApplicationName
@@ -30,9 +30,6 @@ import java.net.NetworkInterface
 class AppService : VpnService() {
 
     private lateinit var windowManager: WindowManager
-    private val popupWindow = PopupWindow(this).also {
-        addListener(it)
-    }
 
     private var vpnDescriptor: ParcelFileDescriptor? = null
     private var tun: TUN? = null
@@ -47,11 +44,14 @@ class AppService : VpnService() {
         }
 
         windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
+
+		MyApplication.overlayManager.currentContext = this
     }
 
     override fun onDestroy() {
 		logInfo("VPN service destroyed")
 		stopVPN()
+		MyApplication.overlayManager.currentContext = null
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {

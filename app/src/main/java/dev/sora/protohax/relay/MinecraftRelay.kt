@@ -5,12 +5,14 @@ import dev.sora.protohax.relay.modules.ModuleESP
 import dev.sora.protohax.relay.netty.channel.NativeRakConfig
 import dev.sora.protohax.relay.netty.channel.NativeRakServerChannel
 import dev.sora.protohax.ui.components.screen.settings.Settings
+import dev.sora.protohax.ui.overlay.ConfigSectionShortcut
 import dev.sora.relay.MinecraftRelayListener
 import dev.sora.relay.cheat.command.CommandManager
 import dev.sora.relay.cheat.command.impl.CommandDownloadWorld
 import dev.sora.relay.cheat.config.ConfigManagerFileSystem
+import dev.sora.relay.cheat.config.section.ConfigSectionModule
 import dev.sora.relay.cheat.module.ModuleManager
-import dev.sora.relay.cheat.module.impl.ModuleResourcePackSpoof
+import dev.sora.relay.cheat.module.impl.misc.ModuleResourcePackSpoof
 import dev.sora.relay.game.GameSession
 import dev.sora.relay.session.MinecraftRelaySession
 import dev.sora.relay.session.listener.RelayListenerAutoCodec
@@ -59,7 +61,10 @@ object MinecraftRelay {
 			loaderThread = null
 		}
 
-        configManager = ConfigManagerFileSystem(MyApplication.instance.getExternalFilesDir("configs")!!, ".json", moduleManager)
+        configManager = ConfigManagerFileSystem(MyApplication.instance.getExternalFilesDir("configs")!!, ".json").also {
+			it.addSection(ConfigSectionModule(moduleManager))
+			it.addSection(ConfigSectionShortcut(MyApplication.overlayManager))
+		}
     }
 
     private fun registerAdditionalModules(moduleManager: ModuleManager) {

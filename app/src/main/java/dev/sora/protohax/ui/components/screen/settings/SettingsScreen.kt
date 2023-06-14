@@ -3,9 +3,8 @@ package dev.sora.protohax.ui.components.screen.settings
 import android.content.Intent
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -39,19 +38,21 @@ fun SettingsTab(
 	description: Int,
 	modifier: Modifier = Modifier,
 	extraPadding: Boolean = true,
-	extra: (@Composable () -> Unit)? = null,
+	extra: (@Composable BoxScope.() -> Unit)? = null,
 ) {
-	Row(
-		verticalAlignment = Alignment.CenterVertically,
+	Box(
 		modifier = modifier
 			.padding(18.dp, 10.dp)
 	) {
-		Column(modifier = Modifier.fillMaxWidth(if (extraPadding) 0.8f else 1f)) {
+		Column(
+			modifier = Modifier.fillMaxWidth()
+				.let { if (extraPadding) it.padding(0.dp, 0.dp, 60.dp, 0.dp) else it }
+				.align(Alignment.CenterStart)
+		) {
 			Text(text = stringResource(name))
 			Text(text = stringResource(description), color = MaterialTheme.colorScheme.outline, fontSize = 14.sp, lineHeight = 18.sp)
 		}
 		if (extra != null) {
-			Spacer(Modifier.weight(1f))
 			extra()
 		}
 	}
