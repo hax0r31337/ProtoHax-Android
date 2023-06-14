@@ -12,6 +12,11 @@ android {
             keyAlias 'sora'
             keyPassword '1145141919'
             storePassword '1145141919'
+
+            enableV1Signing true
+            enableV2Signing true
+            enableV3Signing true
+            enableV4Signing false
         }
     }
     namespace 'dev.sora.protohax'
