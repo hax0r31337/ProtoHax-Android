@@ -229,7 +229,7 @@ class ConfigureMenu(private val overlayManager: OverlayManager) {
 			modifier = Modifier
 				.fillMaxHeight(0.9f)
 				.fillMaxWidth(0.8f)
-				.clickableNoRipple {  }
+				.clickableNoRipple { }
 		) {
 			Row {
 				val categories = CheatCategory.values()
