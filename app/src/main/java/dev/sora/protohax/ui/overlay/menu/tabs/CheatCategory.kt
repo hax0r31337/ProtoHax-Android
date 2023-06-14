@@ -105,7 +105,7 @@ fun CheatCategoryTab(
 							modifier = Modifier.align(Alignment.CenterEnd),
 							onCheckedChange = {
 								module.state = it
-							}8,
+							},
 							colors = if (module.canToggle) {
 								SwitchDefaults.colors(checkedBorderColor = if (expand) MaterialTheme.colorScheme.outlineVariant else Color.Transparent)
 							} else {
