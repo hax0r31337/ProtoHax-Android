@@ -46,6 +46,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import dev.sora.protohax.ui.components.clickableNoRipple
 import dev.sora.protohax.ui.overlay.OverlayManager
 import dev.sora.protohax.ui.overlay.Shortcut
 import dev.sora.relay.cheat.module.CheatCategory
@@ -116,7 +117,7 @@ fun CheatCategoryTab(
 						)
 					}
 					if (module.values.isNotEmpty()) {
-						AnimatedVisibility(visible = expand, modifier = Modifier.clickable(false) {}) {
+						AnimatedVisibility(visible = expand, modifier = Modifier.clickableNoRipple {  }) {
 							Box {
 								val recomposeTrigger = remember { mutableStateOf(0) }
 								Text(text = "${recomposeTrigger.value}", color = Color.Transparent)

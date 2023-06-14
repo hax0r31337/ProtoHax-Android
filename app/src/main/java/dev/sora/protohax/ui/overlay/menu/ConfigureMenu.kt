@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import android.content.Context
 import android.graphics.PixelFormat
 import android.view.Gravity
-import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
 import androidx.compose.animation.AnimatedVisibility
@@ -16,8 +15,6 @@ import androidx.compose.animation.scaleOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.ScrollState
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -49,7 +46,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.AndroidUiDispatcher
 import androidx.compose.ui.platform.ComposeView
-import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.compositionContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
@@ -70,6 +66,7 @@ import com.google.accompanist.navigation.animation.composable
 import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import dev.sora.protohax.R
 import dev.sora.protohax.relay.MinecraftRelay
+import dev.sora.protohax.ui.components.clickableNoRipple
 import dev.sora.protohax.ui.components.screen.settings.Settings
 import dev.sora.protohax.ui.navigation.PHaxRoute
 import dev.sora.protohax.ui.overlay.MyLifecycleOwner
@@ -127,7 +124,7 @@ class ConfigureMenu(private val overlayManager: OverlayManager) {
 			WindowManager.LayoutParams.MATCH_PARENT,
 			WindowManager.LayoutParams.MATCH_PARENT,
 			WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-			WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH,
+			0,
 			PixelFormat.TRANSLUCENT
 		)
 		params.dimAmount = 0.5f
@@ -170,15 +167,10 @@ class ConfigureMenu(private val overlayManager: OverlayManager) {
 					enter = fadeIn() + scaleIn(initialScale = 0.5f),
 					exit = fadeOut() + scaleOut(targetScale = 0.5f)
 				) {
-					val configuration = LocalConfiguration.current
-
 					// rotate the menu due to the menu doesn't look well on portrait orientation
 					Box(
 						modifier = Modifier
-							.clickable(
-								interactionSource = remember { MutableInteractionSource() },
-								indication = null
-							) { visibility = false },
+							.clickableNoRipple { visibility = false },
 						contentAlignment = Alignment.Center
 					) {
 						Content(navController, navGraph, scrollState)
@@ -201,12 +193,6 @@ class ConfigureMenu(private val overlayManager: OverlayManager) {
 				recomposer.runRecomposeAndApplyChanges()
 			}
 			firstRun = false
-		}
-		composeView.setOnTouchListener { _, event ->
-			if (event.action == MotionEvent.ACTION_OUTSIDE) {
-				visibility = false
-			}
-			false
 		}
 
 		wm.addView(composeView, params)
@@ -243,7 +229,7 @@ class ConfigureMenu(private val overlayManager: OverlayManager) {
 			modifier = Modifier
 				.fillMaxHeight(0.9f)
 				.fillMaxWidth(0.8f)
-				.clickable(false) {}
+				.clickableNoRipple {  }
 		) {
 			Row {
 				val categories = CheatCategory.values()
@@ -344,7 +330,7 @@ class ConfigureMenu(private val overlayManager: OverlayManager) {
 			observeStateAsFlow().collect {
 				value = it
 				menuLayout?.let { l ->
-					params.flags = WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH or WindowManager.LayoutParams.FLAG_DIM_BEHIND
+					params.flags = WindowManager.LayoutParams.FLAG_DIM_BEHIND
 					if (Settings.trustClicks.getValue(overlayManager.ctx)) {
 						if (!it) {
 							params.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
@@ -353,6 +339,8 @@ class ConfigureMenu(private val overlayManager: OverlayManager) {
 					} else {
 						if (!it) {
 							params.flags = params.flags or WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+						} else {
+							params.flags = params.flags or WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
 						}
 						l.isInvisible = !it
 					}
