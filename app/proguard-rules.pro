@@ -22,6 +22,7 @@
 
 # keep netty related classes
 -keep class io.netty.** { *; }
+-keep class org.cloudburstmc.netty.** { *; }
 -keep @io.netty.channel.ChannelHandler$Sharable class *
 
 -keepclassmembers class * {
