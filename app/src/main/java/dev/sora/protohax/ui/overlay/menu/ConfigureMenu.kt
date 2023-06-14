@@ -339,8 +339,6 @@ class ConfigureMenu(private val overlayManager: OverlayManager) {
 					} else {
 						if (!it) {
 							params.flags = params.flags or WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-						} else {
-							params.flags = params.flags or WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM
 						}
 						l.isInvisible = !it
 					}

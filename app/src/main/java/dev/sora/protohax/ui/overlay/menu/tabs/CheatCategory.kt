@@ -116,24 +116,22 @@ fun CheatCategoryTab(
 							}
 						)
 					}
-					if (module.values.isNotEmpty()) {
-						AnimatedVisibility(visible = expand, modifier = Modifier.clickableNoRipple {  }) {
-							Box {
-								val recomposeTrigger = remember { mutableStateOf(0) }
-								Text(text = "${recomposeTrigger.value}", color = Color.Transparent)
-								val recomposeTriggerFunc = {
-									recomposeTrigger.value = if (recomposeTrigger.value == Int.MAX_VALUE) {
-										Int.MIN_VALUE
-									} else {
-										recomposeTrigger.value + 1
-									}
+					AnimatedVisibility(visible = expand, modifier = Modifier.clickableNoRipple {  }) {
+						Box {
+							val recomposeTrigger = remember { mutableStateOf(0) }
+							Text(text = "${recomposeTrigger.value}", color = Color.Transparent)
+							val recomposeTriggerFunc = {
+								recomposeTrigger.value = if (recomposeTrigger.value == Int.MAX_VALUE) {
+									Int.MIN_VALUE
+								} else {
+									recomposeTrigger.value + 1
 								}
-								Column {
-									module.values.forEach { value ->
-										CheatValue(value, recomposeTriggerFunc)
-									}
-									CheatShortcut(module, recomposeTriggerFunc, overlayManager)
+							}
+							Column {
+								module.values.forEach { value ->
+									CheatValue(value, recomposeTriggerFunc)
 								}
+								CheatShortcut(module, recomposeTriggerFunc, overlayManager)
 							}
 						}
 					}
