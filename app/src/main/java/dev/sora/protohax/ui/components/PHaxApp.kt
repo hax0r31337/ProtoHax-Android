@@ -21,7 +21,7 @@ import com.google.accompanist.navigation.animation.rememberAnimatedNavController
 import dev.sora.protohax.ui.components.screen.AccountsScreen
 import dev.sora.protohax.ui.components.screen.ConfigScreen
 import dev.sora.protohax.ui.components.screen.DashboardScreen
-import dev.sora.protohax.ui.components.screen.SettingsScreen
+import dev.sora.protohax.ui.components.screen.settings.SettingsScreen
 import dev.sora.protohax.ui.navigation.*
 import dev.sora.protohax.util.*
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -97,8 +97,7 @@ fun PHaxApp(
     )
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalAnimationApi::class,
-    ExperimentalCoroutinesApi::class)
+@OptIn(ExperimentalAnimationApi::class, ExperimentalCoroutinesApi::class)
 @Composable
 private fun PHaxNavigationWrapper(
     navigationType: NavigationType,

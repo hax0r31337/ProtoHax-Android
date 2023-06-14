@@ -5,18 +5,12 @@
     <string name="mitm_connected_launch">Launch App</string>
     <string name="mitm_disconnected">Disconnected from MITM proxy</string>
     <string name="request_overlay">We need overlay permission in order to display GUIs that you can interact in game</string>
-    <string name="proxy_notification">%s is processing packets for %s</string>
-
-    <string name="clickgui_modules">Module</string>
-    <string name="clickgui_modules_back">Back</string>
-    <string name="clickgui_configs">Config</string>
-    <string name="clickgui_configs_create">create</string>
-    <string name="clickgui_configs_save">save</string>
+    <string name="proxy_notification">%1$s is processing packets for %2$s</string>
 
     <string name="dashboard_more">More</string>
     <string name="dashboard_about">About</string>
     <string name="dashboard_no_account_selected">Sign in a Microsoft account to connect Xbox authenticated servers</string>
-    <string name="dashboard_about_info">Licensed under %s\nView our source code on %s\nJoin our %s</string>
+    <string name="dashboard_about_info">Licensed under %1$s\nView our source code on %2$s\nJoin our %3$s</string>
     <string name="dashboard_select_application">Select an Application</string>
     <string name="dashboard_select_application_placeholder">Search for applications</string>
     <string name="dashboard_selected_application">Selected Application</string>
@@ -51,6 +45,14 @@
     <string name="setting_rak_reliability_desc">Toggle off to disable HoL blocking of RakNet, causing packet disorder but improves latency</string>
     <string name="setting_restart_required">Restart required to take effect</string>
     <string name="setting_restart_required_action">Restart</string>
+    <string name="setting_ip" translatable="false">IPv6</string>
+    <string name="setting_ip_auto">Auto</string>
+    <string name="setting_ip_enabled">Enabled</string>
+    <string name="setting_ip_disabled">Disabled</string>
+    <string name="setting_ip_only">IPv6 Only</string>
+    <string name="setting_trust_click">Trust clicks</string>
+    <string name="setting_trust_click_desc">Execute `adb shell settings put global block_untrusted_touches 0` to trust clicks through overlay</string>
+    <string name="setting_trust_click_disabled">All of clicks are trusted below Android 12</string>
     <string name="setting_logs">Logs</string>
     <string name="setting_logs_desc">Show Logs</string>
 

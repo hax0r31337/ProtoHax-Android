@@ -3,9 +3,10 @@ package dev.sora.protohax.relay.modules
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
-import dev.sora.protohax.relay.gui.RenderLayerView
+import dev.sora.protohax.ui.overlay.RenderLayerView
+import dev.sora.relay.cheat.module.CheatCategory
 import dev.sora.relay.cheat.module.CheatModule
-import dev.sora.relay.cheat.module.impl.ModuleTargets
+import dev.sora.relay.cheat.module.impl.combat.ModuleTargets
 import dev.sora.relay.game.entity.Entity
 import dev.sora.relay.game.entity.EntityPlayer
 import org.cloudburstmc.math.matrix.Matrix4f
@@ -14,7 +15,7 @@ import kotlin.math.cos
 import kotlin.math.sin
 
 
-class ModuleESP : CheatModule("ESP") {
+class ModuleESP : CheatModule("ESP", CheatCategory.VISUAL) {
 
     private var fovValue by intValue("Fov", 110, 40..110)
     private var allObjectsValue by boolValue("AllObjects", false)

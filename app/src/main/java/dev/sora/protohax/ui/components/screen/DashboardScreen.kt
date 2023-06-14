@@ -23,6 +23,7 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FloatingActionButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -120,30 +121,37 @@ private fun BottomFloatingActionButton(
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
-    fun connectVPN(start: Boolean = true) {
-        val intent = Intent(if (start) AppService.ACTION_START else AppService.ACTION_STOP)
+    fun connectVPN() {
+        val intent = Intent(AppService.ACTION_START)
         intent.setPackage(mContext.packageName)
         mContext.startForegroundService(intent)
 
         scope.launch {
-            if (start) {
-                val result = snackbarHostState.showSnackbar(
-                    message = mContext.getString(R.string.mitm_connected),
-                    actionLabel = mContext.getString(R.string.mitm_connected_launch),
-                    duration = SnackbarDuration.Short
-                )
-                if (result == SnackbarResult.ActionPerformed) {
-                    val intent1 = mContext.packageManager.getLaunchIntentForPackage(applicationSelected.value)
-                    mContext.startActivity(intent1)
-                }
-            } else {
-                snackbarHostState.showSnackbar(
-                    message = mContext.getString(R.string.mitm_disconnected),
-                    duration = SnackbarDuration.Short
-                )
-            }
+			val result = snackbarHostState.showSnackbar(
+				message = mContext.getString(R.string.mitm_connected),
+				actionLabel = mContext.getString(R.string.mitm_connected_launch),
+				duration = SnackbarDuration.Short
+			)
+			if (result == SnackbarResult.ActionPerformed) {
+				val intent1 = mContext.packageManager.getLaunchIntentForPackage(applicationSelected.value)
+				mContext.startActivity(intent1)
+			}
         }
     }
+
+	fun disconnectVPN() {
+		val intent = Intent(AppService.ACTION_STOP)
+		intent.setPackage(mContext.packageName)
+		mContext.startForegroundService(intent)
+
+		scope.launch {
+			snackbarHostState.showSnackbar(
+				message = mContext.getString(R.string.mitm_disconnected),
+				duration = SnackbarDuration.Short
+			)
+		}
+	}
+
     val vpnRequestLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
         if (it.resultCode == Activity.RESULT_OK) {
             connectVPN()
@@ -174,7 +182,7 @@ private fun BottomFloatingActionButton(
         ExtendedFloatingActionButton(
             onClick = {
                 if (AppService.isActive) {
-                    connectVPN(false)
+                    disconnectVPN()
                 } else if (applicationSelected.value.isEmpty()){
                     scope.launch {
                         val result = snackbarHostState.showSnackbar(
@@ -196,8 +204,9 @@ private fun BottomFloatingActionButton(
                 }
             },
             modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(16.dp),
+				.align(Alignment.BottomEnd)
+				.padding(16.dp),
+			elevation = FloatingActionButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp),
             containerColor = if (connectionState.value) MaterialTheme.colorScheme.tertiaryContainer else MaterialTheme.colorScheme.primaryContainer,
             contentColor = if (connectionState.value) MaterialTheme.colorScheme.onTertiaryContainer else MaterialTheme.colorScheme.onPrimaryContainer
         ) {
@@ -218,9 +227,9 @@ private fun BottomFloatingActionButton(
 private fun MenuDashboard(state: MutableState<Boolean>, aboutState: MutableState<Boolean>) {
     Box(
         modifier = Modifier
-            .fillMaxSize()
-            .wrapContentSize(Alignment.TopEnd)
-            .padding(12.dp, 0.dp),
+			.fillMaxSize()
+			.wrapContentSize(Alignment.TopEnd)
+			.padding(12.dp, 0.dp),
         contentAlignment = Alignment.TopEnd
     ) {
         DropdownMenu(

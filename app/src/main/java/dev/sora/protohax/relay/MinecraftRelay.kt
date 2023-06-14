@@ -4,13 +4,15 @@ import dev.sora.protohax.MyApplication
 import dev.sora.protohax.relay.modules.ModuleESP
 import dev.sora.protohax.relay.netty.channel.NativeRakConfig
 import dev.sora.protohax.relay.netty.channel.NativeRakServerChannel
-import dev.sora.protohax.util.ContextUtils.readBoolean
+import dev.sora.protohax.ui.components.screen.settings.Settings
+import dev.sora.protohax.ui.overlay.ConfigSectionShortcut
 import dev.sora.relay.MinecraftRelayListener
 import dev.sora.relay.cheat.command.CommandManager
 import dev.sora.relay.cheat.command.impl.CommandDownloadWorld
 import dev.sora.relay.cheat.config.ConfigManagerFileSystem
+import dev.sora.relay.cheat.config.section.ConfigSectionModule
 import dev.sora.relay.cheat.module.ModuleManager
-import dev.sora.relay.cheat.module.impl.ModuleResourcePackSpoof
+import dev.sora.relay.cheat.module.impl.misc.ModuleResourcePackSpoof
 import dev.sora.relay.game.GameSession
 import dev.sora.relay.session.MinecraftRelaySession
 import dev.sora.relay.session.listener.RelayListenerAutoCodec
@@ -46,7 +48,7 @@ object MinecraftRelay {
 				ModuleResourcePackSpoof.resourcePackProvider = ModuleResourcePackSpoof.FileSystemResourcePackProvider(it)
 			}
 
-			if (MyApplication.instance.readBoolean(Constants.KEY_ENABLE_COMMAND_MANAGER, Constants.KEY_ENABLE_COMMAND_MANAGER_DEFAULT)) {
+			if (Settings.enableCommandManager.getValue(MyApplication.instance)) {
 				// command manager will register listener itself
 				val commandManager = CommandManager(session)
 				commandManager.init(moduleManager)
@@ -59,7 +61,10 @@ object MinecraftRelay {
 			loaderThread = null
 		}
 
-        configManager = ConfigManagerFileSystem(MyApplication.instance.getExternalFilesDir("configs")!!, ".json", moduleManager)
+        configManager = ConfigManagerFileSystem(MyApplication.instance.getExternalFilesDir("configs")!!, ".json").also {
+			it.addSection(ConfigSectionModule(moduleManager))
+			it.addSection(ConfigSectionShortcut(MyApplication.overlayManager))
+		}
     }
 
     private fun registerAdditionalModules(moduleManager: ModuleManager) {
@@ -81,7 +86,7 @@ object MinecraftRelay {
                         logInfo("logged in as ${it.remark}")
                         RelayListenerXboxLogin(accessToken, it.platform)
                     }
-                } else if (MyApplication.instance.readBoolean(Constants.KEY_OFFLINE_SESSION_ENCRYPTION, Constants.KEY_OFFLINE_SESSION_ENCRYPTION_DEFAULT)) {
+                } else if (Settings.offlineSessionEncryption.getValue(MyApplication.instance)) {
 					sessionEncryptor = RelayListenerEncryptedSession()
 				}
                 sessionEncryptor?.let {
@@ -94,15 +99,18 @@ object MinecraftRelay {
                 logInfo("SessionCreation $address")
 				return address
             }
-        }).also {
-			it.optionReliability = if (MyApplication.instance.readBoolean(Constants.KEY_ENABLE_RAK_RELIABILITY, Constants.KEY_ENABLE_RAK_RELIABILITY_DEFAULT))
-				RakReliability.RELIABLE_ORDERED else RakReliability.RELIABLE
-		}
+        })
     }
+
+	fun updateReliability() {
+		relay?.optionReliability = if (Settings.enableRakReliability.getValue(MyApplication.instance))
+			RakReliability.RELIABLE_ORDERED else RakReliability.RELIABLE
+	}
 
 	fun announceRelayUp() {
 		if (relay == null) {
 			relay = constructRelay()
+			updateReliability()
 		}
 		loaderThread?.join()
 		if (!relay!!.isRunning) {
@@ -118,17 +126,5 @@ object MinecraftRelay {
 				NativeRakServerChannel()
 			}
 		}
-	}
-
-	object Constants {
-
-		const val KEY_OFFLINE_SESSION_ENCRYPTION = "OFFLINE_SESSION_ENCRYPTION"
-		const val KEY_OFFLINE_SESSION_ENCRYPTION_DEFAULT = false
-
-		const val KEY_ENABLE_COMMAND_MANAGER = "ENABLE_COMMAND_MANAGER"
-		const val KEY_ENABLE_COMMAND_MANAGER_DEFAULT = true
-
-		const val KEY_ENABLE_RAK_RELIABILITY = "ENABLE_RAK_RELIABILITY"
-		const val KEY_ENABLE_RAK_RELIABILITY_DEFAULT = true
 	}
 }

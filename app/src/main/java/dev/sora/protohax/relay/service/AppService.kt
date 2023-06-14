@@ -12,10 +12,11 @@ import android.net.VpnService
 import android.os.ParcelFileDescriptor
 import android.view.WindowManager
 import androidx.core.app.NotificationCompat
+import dev.sora.protohax.MyApplication
 import dev.sora.protohax.R
 import dev.sora.protohax.relay.MinecraftRelay
-import dev.sora.protohax.relay.gui.PopupWindow
 import dev.sora.protohax.ui.activities.MainActivity
+import dev.sora.protohax.ui.components.screen.settings.Settings
 import dev.sora.protohax.util.ContextUtils.getApplicationName
 import dev.sora.relay.utils.logError
 import dev.sora.relay.utils.logInfo
@@ -29,9 +30,6 @@ import java.net.NetworkInterface
 class AppService : VpnService() {
 
     private lateinit var windowManager: WindowManager
-    private val popupWindow = PopupWindow(this).also {
-        addListener(it)
-    }
 
     private var vpnDescriptor: ParcelFileDescriptor? = null
     private var tun: TUN? = null
@@ -46,10 +44,14 @@ class AppService : VpnService() {
         }
 
         windowManager = getSystemService(WINDOW_SERVICE) as WindowManager
+
+		MyApplication.overlayManager.currentContext = this
     }
 
     override fun onDestroy() {
-        removeListener(popupWindow)
+		logInfo("VPN service destroyed")
+		stopVPN()
+		MyApplication.overlayManager.currentContext = null
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
@@ -60,11 +62,9 @@ class AppService : VpnService() {
             if (ACTION_START == action) {
                 startVPN()
                 startForeground(1, createNotification())
-            } else if (ACTION_STOP == action) {
+            } else {
                 stopVPN()
                 stopForeground(STOP_FOREGROUND_REMOVE)
-                stopSelf()
-            } else {
                 stopSelf()
             }
         } catch (t: Throwable) {
@@ -74,7 +74,12 @@ class AppService : VpnService() {
     }
 
     private fun startVPN() {
-        val (hasIPv4, hasIPv6) = checkNetState()
+        val (hasIPv4, hasIPv6) = when(Settings.ipv6Status.getValue(this)) {
+			Settings.IPv6Choices.AUTOMATIC -> checkNetState()
+			Settings.IPv6Choices.ENABLED -> true to true
+			Settings.IPv6Choices.DISABLED -> true to false
+			Settings.IPv6Choices.V6ONLY -> false to true
+		}
 
         val builder = Builder()
         builder.setBlocking(true)
@@ -120,13 +125,15 @@ class AppService : VpnService() {
 
     private fun stopVPN() {
         isActive = false
-        try {
-            serviceListeners.forEach { it.onServiceStopped() }
-        } catch (t: Throwable) {
-            logError("stop callback", t)
-        }
-        tun?.close()
-        vpnDescriptor?.close()
+		vpnDescriptor?.close()
+		tun?.let {
+			try {
+				serviceListeners.forEach { l -> l.onServiceStopped() }
+			} catch (t: Throwable) {
+				logError("stop callback", t)
+			}
+			Thread(it::close).start()
+		}
     }
 
     private fun checkNetState(): Pair<Boolean, Boolean> {
@@ -162,9 +169,9 @@ class AppService : VpnService() {
         intent.action = Intent.ACTION_MAIN
         val pendingIntent = PendingIntent.getActivity(this, 0, intent, flag)
 
-//        val stopIntent = Intent(ACTION_STOP)
-//        stopIntent.setPackage(packageName)
-//        val pendingIntent1 = PendingIntent.getActivity(this, 1, stopIntent, flag)
+        val stopIntent = Intent(ACTION_STOP)
+        stopIntent.setPackage(packageName)
+        val pendingIntent1 = PendingIntent.getForegroundService(this, 1, stopIntent, flag)
 
         val builder = NotificationCompat.Builder(this, CHANNEL_ID)
             .setContentTitle(getString(R.string.app_name))
@@ -174,6 +181,7 @@ class AppService : VpnService() {
             .setLargeIcon(BitmapFactory.decodeResource(resources, R.mipmap.ic_launcher))
             .setOngoing(true)
             .setContentIntent(pendingIntent)
+			.addAction(R.drawable.notification_icon, getString(R.string.dashboard_fab_disconnect), pendingIntent1)
 
         return builder.build()
     }
@@ -184,8 +192,8 @@ class AppService : VpnService() {
         const val CHANNEL_ID = "dev.sora.protohax.NOTIFICATION_CHANNEL_ID"
 
         const val VPN_MTU = 1500
-        const val PRIVATE_VLAN4_CLIENT = "26.26.26.1"
-        const val PRIVATE_VLAN6_CLIENT = "da26:2626::1"
+        const val PRIVATE_VLAN4_CLIENT = "10.13.37.1"
+        const val PRIVATE_VLAN6_CLIENT = "1337::1"
 
         var isActive = false
         private val serviceListeners = mutableSetOf<ServiceListener>()

@@ -23,6 +23,8 @@ import dev.sora.relay.utils.logError
 import okhttp3.HttpUrl.Companion.toHttpUrlOrNull
 import org.cloudburstmc.protocol.bedrock.util.EncryptionUtils
 import kotlin.concurrent.thread
+import kotlin.random.Random
+import kotlin.random.nextInt
 
 class MicrosoftLoginActivity : Activity() {
 
@@ -118,6 +120,12 @@ h1 {
 			}
 			val url = request.url.toString().toHttpUrlOrNull() ?: return false
             if (url.host != "login.live.com" || url.encodedPath != "/oauth20_desktop.srf") {
+				if (url.queryParameter("res") == "cancel") {
+					logError("action cancelled")
+					activity.setResult(RESULT_CANCELED)
+					activity.finish()
+					return false
+				}
                 logError("invalid url ${request.url}")
                 return false
             }
@@ -143,7 +151,11 @@ h1 {
 						return@thread
 					}
 
-					AccountManager.accounts.add(Account(username, activity.device, refreshToken))
+					val account = Account(username, activity.device, refreshToken)
+					while (AccountManager.accounts.map { it.remark }.contains(account.remark)) {
+						account.remark += Random.nextInt(0..9)
+					}
+					AccountManager.accounts.add(account)
 					AccountManager.save()
 
 					activity.setResult(RESULT_OK)
