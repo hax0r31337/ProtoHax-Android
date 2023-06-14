@@ -1,9 +1,11 @@
 package dev.sora.protohax.ui.overlay.menu.tabs
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.ColumnScope
@@ -15,18 +17,23 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Checkbox
 import androidx.compose.material3.CheckboxDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.RangeSlider
+import androidx.compose.material3.Slider
+import androidx.compose.material3.SliderDefaults
 import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextField
 import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
@@ -36,21 +43,29 @@ import androidx.compose.runtime.snapshots.SnapshotStateMap
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextDecoration
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import dev.sora.relay.cheat.module.CheatCategory
 import dev.sora.relay.cheat.module.CheatModule
 import dev.sora.relay.cheat.value.BoolValue
+import dev.sora.relay.cheat.value.FloatValue
+import dev.sora.relay.cheat.value.IntRangeValue
+import dev.sora.relay.cheat.value.IntValue
 import dev.sora.relay.cheat.value.ListValue
 import dev.sora.relay.cheat.value.NamedChoice
 import dev.sora.relay.cheat.value.StringValue
 import dev.sora.relay.cheat.value.Value
+import kotlin.math.roundToInt
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
 @Composable
-fun CheatCategoryTab(category: CheatCategory, modules: SnapshotStateMap<CheatModule, Boolean>, expandModules: SnapshotStateList<CheatModule>) {
+fun CheatCategoryTab(
+	category: CheatCategory,
+	modules: SnapshotStateMap<CheatModule, Boolean>,
+	expandModules: SnapshotStateList<CheatModule>
+) {
 	LazyColumn {
 		item {
 			Spacer(modifier = Modifier.height(10.dp))
@@ -87,7 +102,7 @@ fun CheatCategoryTab(category: CheatCategory, modules: SnapshotStateMap<CheatMod
 						)
 					}
 					if (module.values.isNotEmpty()) {
-						AnimatedVisibility(visible = expand) {
+						AnimatedVisibility(visible = expand, modifier = Modifier.clickable(false) {}) {
 							Box {
 								val recomposeTrigger = remember { mutableStateOf(0) }
 								Text(text = "${recomposeTrigger.value}", color = Color.Transparent)
@@ -107,9 +122,11 @@ fun CheatCategoryTab(category: CheatCategory, modules: SnapshotStateMap<CheatMod
 					}
 				}
 			}
+
+			val colors = CardDefaults.cardColors(containerColor = animateColorAsState(targetValue = if (expand) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.inversePrimary).value)
 			if (module.values.isNotEmpty()) {
 				Card(
-					colors = CardDefaults.cardColors(containerColor = if (expand) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.inversePrimary),
+					colors = colors,
 					modifier = Modifier
 						.fillMaxWidth()
 						.padding(15.dp, 7.dp),
@@ -124,7 +141,7 @@ fun CheatCategoryTab(category: CheatCategory, modules: SnapshotStateMap<CheatMod
 				)
 			} else {
 				Card(
-					colors = CardDefaults.cardColors(containerColor = if (expand) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.inversePrimary),
+					colors = colors,
 					modifier = Modifier
 						.fillMaxWidth()
 						.padding(15.dp, 7.dp),
@@ -159,32 +176,132 @@ fun CheatValue(value: Value<*>, recomposeTrigger: () -> Unit) {
 				colors = CheckboxDefaults.colors(checkedColor = MaterialTheme.colorScheme.onPrimary, uncheckedColor = MaterialTheme.colorScheme.onPrimary, checkmarkColor = MaterialTheme.colorScheme.secondary)
 			)
 		}
-	} else if (value is StringValue) {
-		Row {
-			Text(text = value.name)
+	} else if (value is IntValue || value is FloatValue) {
+		Row(modifier = Modifier.padding(0.dp, 5.dp, 0.dp, 0.dp), verticalAlignment = Alignment.CenterVertically) {
+			Text(text = value.name, modifier = Modifier.basicMarquee(iterations = Int.MAX_VALUE))
 			Spacer(modifier = Modifier.weight(1f))
-			Text(
-				text = value.value,
-				maxLines = 1,
-				modifier = Modifier.basicMarquee(iterations = Int.MAX_VALUE),
-				textDecoration = TextDecoration.Underline
+			Text(text = if (value.value is Float) {
+				String.format("%.2f", value.value)
+			} else value.value.toString())
+		}
+		val colors = SliderDefaults.colors(
+			thumbColor = MaterialTheme.colorScheme.onPrimary,
+			activeTrackColor = MaterialTheme.colorScheme.onPrimary,
+			inactiveTrackColor = MaterialTheme.colorScheme.outline,
+		)
+		if (value is IntValue) {
+			Slider(
+				value = value.value.toFloat(),
+				valueRange = value.range.toFloatRange(),
+				onValueChange = {
+					value.value = it.roundToInt()
+					recomposeTrigger()
+				},
+				colors = colors,
+				modifier = Modifier.height(25.dp)
+			)
+		} else if (value is FloatValue) { // use kotlin smart cast
+			Slider(
+				value = value.value,
+				valueRange = value.range,
+				onValueChange = {
+					value.value = it
+					recomposeTrigger()
+				},
+				colors = colors,
+				modifier = Modifier.height(25.dp)
 			)
 		}
-	} else if (value is ListValue) {
-		Row {
-			Text(text = value.name)
+	} else if (value is IntRangeValue) {
+		Row(modifier = Modifier.padding(0.dp, 5.dp, 0.dp, 0.dp), verticalAlignment = Alignment.CenterVertically) {
+			Text(text = value.name, modifier = Modifier.basicMarquee(iterations = Int.MAX_VALUE))
 			Spacer(modifier = Modifier.weight(1f))
-			Row(modifier = Modifier.clickable {
-
-			}) {
-				Text(
-					text = value.value.let { if (it is NamedChoice) it.choiceName else it.toString() },
-					maxLines = 1,
-					modifier = Modifier.basicMarquee(iterations = Int.MAX_VALUE),
-					textDecoration = TextDecoration.Underline
+			Text(text = "${value.value.first}..${value.value.last}")
+		}
+		RangeSlider(
+			value = value.value.toFloatRange(),
+			valueRange = value.range.toFloatRange(),
+			onValueChange = {
+				value.value = it.start.roundToInt()..it.endInclusive.roundToInt()
+				recomposeTrigger()
+			},
+			colors = SliderDefaults.colors(
+				thumbColor = MaterialTheme.colorScheme.onPrimary,
+				activeTrackColor = MaterialTheme.colorScheme.onPrimary,
+				inactiveTrackColor = MaterialTheme.colorScheme.outline,
+			),
+			modifier = Modifier.height(25.dp)
+		)
+	} else if (value is ListValue) {
+		Text(
+			text = value.name,
+			modifier = Modifier
+				.padding(0.dp, 5.dp)
+				.basicMarquee(iterations = Int.MAX_VALUE)
+		)
+		Row(
+			modifier = Modifier
+				.horizontalScroll(rememberScrollState())
+				.fillMaxWidth()
+		) {
+			value.values.forEach {
+				val name = if (it is NamedChoice) it.choiceName else it.toString()
+				val selected = value.value == it
+				AssistChip(
+					modifier = Modifier
+						.padding(3.dp, 2.dp)
+						.height(30.dp),
+					onClick = {
+						value.fromString(name)
+						recomposeTrigger()
+					},
+					label = {
+						Text(
+							text = name,
+							style = TextStyle(fontSize = 14.sp)
+						)
+					},
+					colors = AssistChipDefaults.elevatedAssistChipColors(
+						containerColor = animateColorAsState(targetValue = if (selected) MaterialTheme.colorScheme.onPrimary else MaterialTheme.colorScheme.outline).value,
+						labelColor = animateColorAsState(targetValue = if (selected) MaterialTheme.colorScheme.secondary else Color.LightGray).value,
+					),
+					border = null
 				)
-				Icon(Icons.Filled.ArrowDropDown, null)
+			}
+		}
+	} else if (value is StringValue) {
+		Row(
+			modifier = Modifier
+				.fillMaxWidth()
+		) {
+			Column(
+				modifier = Modifier
+					.fillMaxWidth(),
+			) {
+				Text(text = value.name)
+				TextField(
+					value = value.value,
+					onValueChange = {
+						value.value = it
+						recomposeTrigger()
+					},
+					singleLine = true,
+					modifier = Modifier
+						.fillMaxWidth(),
+					colors = OutlinedTextFieldDefaults.colors(
+						focusedTextColor = MaterialTheme.colorScheme.onPrimary,
+						unfocusedTextColor = MaterialTheme.colorScheme.primaryContainer,
+						focusedBorderColor = MaterialTheme.colorScheme.onPrimary,
+						unfocusedBorderColor = MaterialTheme.colorScheme.primaryContainer,
+						focusedLabelColor = MaterialTheme.colorScheme.onPrimary,
+						unfocusedLabelColor = MaterialTheme.colorScheme.primaryContainer,
+					)
+				)
 			}
 		}
 	}
 }
+
+
+private fun IntRange.toFloatRange()
+	= first.toFloat()..last.toFloat()

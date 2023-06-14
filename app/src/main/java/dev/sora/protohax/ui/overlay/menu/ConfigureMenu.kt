@@ -347,13 +347,16 @@ class ConfigureMenu(private val overlayManager: OverlayManager) {
 			observeStateAsFlow().collect {
 				value = it
 				menuLayout?.let { l ->
-					params.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH or WindowManager.LayoutParams.FLAG_DIM_BEHIND
+					params.flags = WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH or WindowManager.LayoutParams.FLAG_DIM_BEHIND
 					if (Settings.trustClicks.getValue(overlayManager.ctx)) {
 						if (!it) {
 							params.flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
 						}
 						l.isInvisible = false
 					} else {
+						if (!it) {
+							params.flags = params.flags or WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+						}
 						l.isInvisible = !it
 					}
 					wm.updateViewLayout(l, params)
