@@ -19,10 +19,12 @@ import dev.sora.relay.session.listener.RelayListenerAutoCodec
 import dev.sora.relay.session.listener.RelayListenerEncryptedSession
 import dev.sora.relay.session.listener.RelayListenerNetworkSettings
 import dev.sora.relay.session.listener.xbox.RelayListenerXboxLogin
+import dev.sora.relay.session.listener.xbox.cache.XboxChainCacheFileSystem
 import dev.sora.relay.utils.logInfo
 import io.netty.channel.ChannelFactory
 import io.netty.channel.ServerChannel
 import org.cloudburstmc.netty.channel.raknet.RakReliability
+import java.io.File
 import java.net.InetSocketAddress
 import kotlin.concurrent.thread
 
@@ -33,6 +35,8 @@ object MinecraftRelay {
     val session = GameSession()
     val moduleManager: ModuleManager
     val configManager: ConfigManagerFileSystem
+
+	val chainCacheFile = File(MyApplication.instance.cacheDir, "chain_cache.json")
 
 	var loaderThread: Thread? = null
 
@@ -72,7 +76,6 @@ object MinecraftRelay {
 	}
 
     private fun constructRelay(): Relay {
-        var sessionEncryptor: RelayListenerEncryptedSession? = null
         return Relay(object : MinecraftRelayListener {
             override fun onSessionCreation(session: MinecraftRelaySession): InetSocketAddress {
                 // add listeners
@@ -80,14 +83,18 @@ object MinecraftRelay {
                 session.listeners.add(RelayListenerAutoCodec(session))
                 this@MinecraftRelay.session.netSession = session
                 session.listeners.add(this@MinecraftRelay.session)
-                if (sessionEncryptor == null) {
-                    sessionEncryptor = AccountManager.currentAccount?.let {
-                        val accessToken = it.refresh()
-                        logInfo("logged in as ${it.remark}")
-                        RelayListenerXboxLogin(accessToken, it.platform)
-                    }
-                } else if (Settings.offlineSessionEncryption.getValue(MyApplication.instance)) {
-					sessionEncryptor = RelayListenerEncryptedSession()
+
+                val sessionEncryptor = if (Settings.offlineSessionEncryption.getValue(MyApplication.instance) && AccountManager.currentAccount == null) {
+					RelayListenerEncryptedSession()
+				} else {
+					AccountManager.currentAccount?.let { account ->
+						logInfo("logged in as ${account.remark}")
+						RelayListenerXboxLogin({
+							account.refresh()
+						}, account.platform).also {
+							it.chainCache = XboxChainCacheFileSystem(chainCacheFile, account.remark)
+						}
+					}
 				}
                 sessionEncryptor?.let {
                     it.session = session
