@@ -5,7 +5,6 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
@@ -80,7 +79,10 @@ fun SettingsScreen(navigationType: NavigationType) {
 
 	PHaxAppBar(
 		title = stringResource(id = R.string.tab_settings),
-		navigationType = navigationType
+		navigationType = navigationType,
+		snackbarHost = {
+			SnackbarHost(snackbarHostState)
+		}
 	) { innerPadding ->
 		Column(
 			modifier = Modifier
@@ -99,13 +101,5 @@ fun SettingsScreen(navigationType: NavigationType) {
 				extraPadding = false
 			)
 		}
-	}
-
-	Box(modifier = Modifier.fillMaxSize()) {
-		SnackbarHost(
-			snackbarHostState,
-			modifier = Modifier
-				.align(Alignment.BottomEnd)
-		)
 	}
 }

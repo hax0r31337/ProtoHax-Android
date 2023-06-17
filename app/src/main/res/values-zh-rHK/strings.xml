@@ -28,6 +28,8 @@
     <string name="config_delete_dialog_message">你肯定要刪除 %s 嘅設定嗎</string>
     <string name="config_rename_dialog_message">重新命名</string>
     <string name="config_copy_dialog_message">複製</string>
+    <string name="config_loaded">%s 嘅設定檔載入完畢</string>
+    <string name="config_saved">%s 嘅設定檔儲存完畢</string>
 
     <string name="accounts_login">登入</string>
     <string name="accounts_login_as">登入為 %s</string>
@@ -48,6 +50,9 @@
     <string name="setting_ip_enabled">已啟用</string>
     <string name="setting_ip_disabled">已停用</string>
     <string name="setting_ip_only">僅限 IPv6</string>
+    <string name="setting_trust_click">信任啲點擊</string>
+    <string name="setting_trust_click_desc">執行 `adb shell settings put global block_untrusted_touches 0` 嚟信任透過疊加層嘅點擊</string>
+    <string name="setting_trust_click_disabled">Android 12 以前嘅所有點擊都係受到信任嘅</string>
     <string name="setting_logs">日誌</string>
     <string name="setting_logs_desc">顯示日誌</string>
 

@@ -28,6 +28,8 @@
     <string name="config_delete_dialog_message">Sind Sie sicher, dass Sie die Konfig %s löschen möchten?</string>
     <string name="config_rename_dialog_message">Umbenennen</string>
     <string name="config_copy_dialog_message">Kopieren</string>
+    <string name="config_loaded">Konfig %s geladen</string>
+    <string name="config_saved">Konfig %s gespeichert</string>
 
     <string name="accounts_login">Anmelden</string>
     <string name="accounts_login_as">Anmelden als %s</string>
@@ -47,6 +49,9 @@
     <string name="setting_ip_enabled">Aktiviert</string>
     <string name="setting_ip_disabled">Deaktiviert</string>
     <string name="setting_ip_only">Nur IPv6</string>
+    <string name="setting_trust_click">Klicks vertrauen</string>
+    <string name="setting_trust_click_desc">Führe `adb shell settings put global block_untrusted_touches 0` aus, um Klicks über Überlagerung zu vertrauen</string>
+    <string name="setting_trust_click_disabled">Alle Klicks sind unter Android 12 vertrauenswürdig</string>
     <string name="setting_logs">Logs</string>
     <string name="setting_logs_desc">Toon Logs</string>
 

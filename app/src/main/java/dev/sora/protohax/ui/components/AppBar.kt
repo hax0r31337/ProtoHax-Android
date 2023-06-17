@@ -15,7 +15,8 @@ fun PHaxAppBar(
     title: String,
     navigationType: NavigationType,
     actions: @Composable (RowScope.() -> Unit) = {},
-    snackbarHost: @Composable () -> Unit = {},
+	floatingActionButton: @Composable () -> Unit = {},
+	snackbarHost: @Composable () -> Unit = {},
     content:  @Composable (PaddingValues) -> Unit,
 ) {
     val scrollBehavior = if (navigationType == NavigationType.PERMANENT_NAVIGATION_DRAWER) {
@@ -60,6 +61,7 @@ fun PHaxAppBar(
             }
         },
         snackbarHost = snackbarHost,
+		floatingActionButton = floatingActionButton,
         content = content
     )
 }

@@ -153,9 +153,7 @@ class ConfigureMenu(private val overlayManager: OverlayManager) {
 						}
 						categories.forEach { category ->
 							composable(category.choiceName) {
-								Box(modifier = Modifier.fillMaxSize()) {
-									CheatCategoryTab(category, modules, expandModules, overlayManager)
-								}
+								CheatCategoryTab(category, modules, expandModules, overlayManager)
 							}
 						}
 					}

@@ -30,6 +30,8 @@
     <string name="config_delete_dialog_message">Are you sure about delete config %s</string>
     <string name="config_rename_dialog_message">Rename</string>
     <string name="config_copy_dialog_message">Copy</string>
+    <string name="config_loaded">Config %s loaded</string>
+    <string name="config_saved">Config %s saved</string>
 
     <string name="accounts_login">Login</string>
     <string name="accounts_login_as">Login as %s</string>
