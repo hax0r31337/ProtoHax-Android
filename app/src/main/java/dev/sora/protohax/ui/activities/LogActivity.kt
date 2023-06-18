@@ -110,13 +110,14 @@ class LogActivity : ComponentActivity() {
 
 	private fun CoroutineScope.refreshLogs(text: MutableState<String>, flush: Boolean = false) {
 		launch {
-			withContext(Dispatchers.IO) {
-				if (flush) {
-					val process = Runtime.getRuntime().exec(arrayOf("logcat", "-c"))
-					process.waitFor()
-				}
-				val process = Runtime.getRuntime().exec(arrayOf("logcat", "-d", "-v", "time", "-s", NettyLogger.TAG))
-				text.value = process.inputStream.bufferedReader().use { it.readText() }
+			if (flush) {
+				NettyLogger.clearLogs()
+			}
+
+			text.value = NettyLogger.getLogs()
+
+			if (text.value.isBlank()) {
+				text.value = "no logs currently"
 			}
 		}
 	}
