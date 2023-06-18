@@ -296,7 +296,7 @@ class ConfigureMenu(private val overlayManager: OverlayManager) {
 		LaunchedEffect(Unit) {
 			callbackFlow {
 				val listener = EventHook(EventModuleToggle::class.java, handler = {
-					trySend(it)
+					trySend(this)
 				})
 
 				MinecraftRelay.session.eventManager.register(listener)

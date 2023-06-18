@@ -30,16 +30,15 @@ class ModuleESP : CheatModule("ESP", CheatCategory.VISUAL) {
         session.eventManager.emit(RenderLayerView.EventRefreshRender(session))
     }
 
- 	private val handleRender = handle<RenderLayerView.EventRender> { event ->
-		event.needRefresh = true
-		if (avoidScreenValue && event.session.player.openContainer != null) return@handle
+ 	private val handleRender = handle<RenderLayerView.EventRender> {
+		needRefresh = true
+		if (avoidScreenValue && session.player.openContainer != null) return@handle
 		val moduleTargets = moduleManager.getModule(ModuleTargets::class.java)
-		val map = event.session.level.entityMap.values
+		val map = session.level.entityMap.values
 			.let { if (allObjectsValue) it else it.filter { e -> e is EntityPlayer && (botsValue || with(moduleTargets) { !e.isBot() })} }
 		if (map.isEmpty()) return@handle
 
-		val player = event.session.player
-		val canvas = event.canvas
+		val player = session.player
 		val screenWidth = canvas.width
 		val screenHeight = canvas.height
 		val renderPartialTicks = player.renderPartialTicks

@@ -129,10 +129,14 @@ fun CheatCategoryTab(
 							}
 							Column {
 								module.values.forEach { value ->
-									AnimatedVisibility(visible = value.visible) {
-										Column {
-											CheatValue(value, recomposeTriggerFunc)
+									if (value.isVisibilityVariable) {
+										AnimatedVisibility(visible = value.visible) {
+											Column {
+												CheatValue(value, recomposeTriggerFunc)
+											}
 										}
+									} else {
+										CheatValue(value, recomposeTriggerFunc)
 									}
 								}
 								CheatShortcut(module, recomposeTriggerFunc, overlayManager)

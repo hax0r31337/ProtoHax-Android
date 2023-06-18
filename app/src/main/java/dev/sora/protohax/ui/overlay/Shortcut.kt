@@ -25,8 +25,8 @@ class Shortcut(val module: CheatModule, private val overlayManager: OverlayManag
 	)
 	private var overlayView: TextView? = null
 	private val listener = EventHook(EventModuleToggle::class.java, handler = {
-		if (it.module == module) {
-			overlayView?.updateTextColor(it.targetState)
+		if (module == this@Shortcut.module) {
+			overlayView?.updateTextColor(targetState)
 		}
 	})
 

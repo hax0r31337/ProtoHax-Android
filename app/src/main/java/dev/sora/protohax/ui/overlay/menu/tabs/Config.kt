@@ -57,12 +57,13 @@ fun BoxScope.ConfigTab() {
 		item {
 			Spacer(modifier = Modifier.height(10.dp))
 		}
-		items(list) {
+		items(list, key = { it }) {
 			Card(
 				colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.inversePrimary),
 				modifier = Modifier
 					.fillMaxWidth()
 					.padding(15.dp, 7.dp)
+					.animateItemPlacement()
 			) {
 				Box(
 					modifier = Modifier.padding(PaddingValues(13.dp))
