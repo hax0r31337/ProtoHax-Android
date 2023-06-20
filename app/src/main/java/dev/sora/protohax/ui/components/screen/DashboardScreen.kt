@@ -86,6 +86,7 @@ fun DashboardScreen(
     val pickAppActivityLauncher = rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) {
         applicationSelected.value = getTargetPackage(ctx)
     }
+	val snackbarHostState = remember { SnackbarHostState() }
 
     MenuDashboard(menuCreate, dialogAbout)
     DialogAbout(dialogAbout)
@@ -100,25 +101,29 @@ fun DashboardScreen(
                     contentDescription = stringResource(id = R.string.dashboard_more)
                 )
             }
-        }
+        },
+		floatingActionButton = {
+			BottomFloatingActionButton(connectionState, applicationSelected, pickAppActivityLauncher, snackbarHostState)
+		},
+		snackbarHost = {
+			SnackbarHost(hostState = snackbarHostState)
+		}
     ) {
         Column(modifier = Modifier.padding(it)) {
             CardLoginAlert(navigateToTopLevelDestination)
             CardCurrentApplication(applicationSelected, pickAppActivityLauncher)
         }
     }
-
-    BottomFloatingActionButton(connectionState, applicationSelected, pickAppActivityLauncher)
 }
 
 @Composable
 private fun BottomFloatingActionButton(
     connectionState: State<Boolean>,
     applicationSelected: State<String>,
-    pickAppActivityLauncher: ManagedActivityResultLauncher<Intent, ActivityResult>
+    pickAppActivityLauncher: ManagedActivityResultLauncher<Intent, ActivityResult>,
+	snackbarHostState: SnackbarHostState
 ) {
     val mContext = LocalContext.current
-    val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
     fun connectVPN() {
@@ -171,56 +176,44 @@ private fun BottomFloatingActionButton(
         }
     }
 
-    Box(modifier = Modifier.fillMaxSize()) {
-        SnackbarHost(
-            snackbarHostState,
-            modifier = Modifier
-				.align(Alignment.BottomEnd)
-				.padding(0.dp, 70.dp)
-        )
-
-        ExtendedFloatingActionButton(
-            onClick = {
-                if (AppService.isActive) {
-                    disconnectVPN()
-                } else if (applicationSelected.value.isEmpty()){
-                    scope.launch {
-                        val result = snackbarHostState.showSnackbar(
-                            message = mContext.getString(R.string.dashboard_no_application),
-                            actionLabel = mContext.getString(R.string.dashboard_select_application),
-                            duration = SnackbarDuration.Short
-                        )
-                        if (result == SnackbarResult.ActionPerformed) {
-                            pickAppActivityLauncher.launch(Intent(mContext, AppPickerActivity::class.java))
-                        }
-                    }
-                } else {
-                    if (!Settings.canDrawOverlays(mContext)) {
-                        mContext.toast(R.string.request_overlay)
-                        overlayRequestLauncher.launch(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION))
-                    } else {
-                        checkVPN()
-                    }
-                }
-            },
-            modifier = Modifier
-				.align(Alignment.BottomEnd)
-				.padding(16.dp),
-			elevation = FloatingActionButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp),
-            containerColor = if (connectionState.value) MaterialTheme.colorScheme.tertiaryContainer else MaterialTheme.colorScheme.primaryContainer,
-            contentColor = if (connectionState.value) MaterialTheme.colorScheme.onTertiaryContainer else MaterialTheme.colorScheme.onPrimaryContainer
-        ) {
-            Icon(
-                painter = painterResource(id = R.drawable.notification_icon),
-                contentDescription = stringResource(id = if (connectionState.value) R.string.dashboard_fab_disconnect else R.string.dashboard_fab_connect),
-            )
-            Spacer(modifier = Modifier.size(8.dp, 0.dp))
-            Text(
-                text = stringResource(id = if (connectionState.value) R.string.dashboard_fab_disconnect else R.string.dashboard_fab_connect),
-                textAlign = TextAlign.Center
-            )
-        }
-    }
+	ExtendedFloatingActionButton(
+		onClick = {
+			if (AppService.isActive) {
+				disconnectVPN()
+			} else if (applicationSelected.value.isEmpty()){
+				scope.launch {
+					val result = snackbarHostState.showSnackbar(
+						message = mContext.getString(R.string.dashboard_no_application),
+						actionLabel = mContext.getString(R.string.dashboard_select_application),
+						duration = SnackbarDuration.Short
+					)
+					if (result == SnackbarResult.ActionPerformed) {
+						pickAppActivityLauncher.launch(Intent(mContext, AppPickerActivity::class.java))
+					}
+				}
+			} else {
+				if (!Settings.canDrawOverlays(mContext)) {
+					mContext.toast(R.string.request_overlay)
+					overlayRequestLauncher.launch(Intent(Settings.ACTION_MANAGE_OVERLAY_PERMISSION))
+				} else {
+					checkVPN()
+				}
+			}
+		},
+		elevation = FloatingActionButtonDefaults.elevation(0.dp, 0.dp, 0.dp, 0.dp),
+		containerColor = if (connectionState.value) MaterialTheme.colorScheme.tertiaryContainer else MaterialTheme.colorScheme.primaryContainer,
+		contentColor = if (connectionState.value) MaterialTheme.colorScheme.onTertiaryContainer else MaterialTheme.colorScheme.onPrimaryContainer
+	) {
+		Icon(
+			painter = painterResource(id = R.drawable.notification_icon),
+			contentDescription = stringResource(id = if (connectionState.value) R.string.dashboard_fab_disconnect else R.string.dashboard_fab_connect),
+		)
+		Spacer(modifier = Modifier.size(8.dp, 0.dp))
+		Text(
+			text = stringResource(id = if (connectionState.value) R.string.dashboard_fab_disconnect else R.string.dashboard_fab_connect),
+			textAlign = TextAlign.Center
+		)
+	}
 }
 
 @Composable

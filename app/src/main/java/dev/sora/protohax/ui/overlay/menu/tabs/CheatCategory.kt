@@ -4,7 +4,6 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.basicMarquee
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -33,7 +32,6 @@ import androidx.compose.material3.Switch
 import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
-import androidx.compose.material3.minimumInteractiveComponentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -107,7 +105,7 @@ fun CheatCategoryTab(
 								module.state = it
 							},
 							colors = if (module.canToggle) {
-								SwitchDefaults.colors(checkedBorderColor = if (expand) MaterialTheme.colorScheme.outlineVariant else Color.Transparent)
+								SwitchDefaults.colors(checkedBorderColor = animateColorAsState(targetValue = if (expand) MaterialTheme.colorScheme.outlineVariant else Color.Transparent).value)
 							} else {
 								SwitchDefaults.colors(
 									uncheckedThumbColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f).compositeOver(MaterialTheme.colorScheme.surface),
@@ -118,7 +116,7 @@ fun CheatCategoryTab(
 							}
 						)
 					}
-					AnimatedVisibility(visible = expand, modifier = Modifier.clickableNoRipple {  }) {
+					AnimatedVisibility(visible = expand, modifier = Modifier.clickableNoRipple { }) {
 						Box {
 							val recomposeTrigger = remember { mutableStateOf(0) }
 							Text(text = "${recomposeTrigger.value}", color = Color.Transparent)
@@ -131,7 +129,15 @@ fun CheatCategoryTab(
 							}
 							Column {
 								module.values.forEach { value ->
-									CheatValue(value, recomposeTriggerFunc)
+									if (value.isVisibilityVariable) {
+										AnimatedVisibility(visible = value.visible) {
+											Column {
+												CheatValue(value, recomposeTriggerFunc)
+											}
+										}
+									} else {
+										CheatValue(value, recomposeTriggerFunc)
+									}
 								}
 								CheatShortcut(module, recomposeTriggerFunc, overlayManager)
 							}

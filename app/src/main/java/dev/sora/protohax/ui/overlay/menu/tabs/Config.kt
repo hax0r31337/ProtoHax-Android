@@ -23,17 +23,22 @@ import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.toMutableStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import dev.sora.protohax.R
 import dev.sora.protohax.relay.MinecraftRelay
 import dev.sora.protohax.util.suggestRemark
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -44,17 +49,21 @@ fun BoxScope.ConfigTab() {
 		list.addAll(MinecraftRelay.configManager.listConfig())
 		list.sort()
 	}
+	val snackbarHostState = remember { SnackbarHostState() }
+	val scope = rememberCoroutineScope()
+	val mContext = LocalContext.current
 
 	LazyColumn {
 		item {
 			Spacer(modifier = Modifier.height(10.dp))
 		}
-		items(list) {
+		items(list, key = { it }) {
 			Card(
 				colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.inversePrimary),
 				modifier = Modifier
 					.fillMaxWidth()
 					.padding(15.dp, 7.dp)
+					.animateItemPlacement()
 			) {
 				Box(
 					modifier = Modifier.padding(PaddingValues(13.dp))
@@ -68,10 +77,30 @@ fun BoxScope.ConfigTab() {
 							.basicMarquee(iterations = Int.MAX_VALUE)
 					)
 					Row(modifier = Modifier.align(Alignment.CenterEnd)) {
-						IconButton(onClick = { MinecraftRelay.configManager.loadConfig(it) }, modifier = Modifier.height(25.dp).width(30.dp)) {
+						IconButton(
+							onClick = {
+								MinecraftRelay.configManager.loadConfig(it)
+								scope.launch {
+									snackbarHostState.showSnackbar(mContext.getString(R.string.config_loaded, it))
+								}
+							},
+							modifier = Modifier
+								.height(25.dp)
+								.width(30.dp)
+						) {
 							Icon(Icons.Filled.Publish, null)
 						}
-						IconButton(onClick = { MinecraftRelay.configManager.saveConfig(it) }, modifier = Modifier.height(25.dp).width(30.dp)) {
+						IconButton(
+							onClick = {
+								MinecraftRelay.configManager.saveConfig(it)
+								scope.launch {
+									snackbarHostState.showSnackbar(mContext.getString(R.string.config_saved, it))
+								}
+							},
+							modifier = Modifier
+								.height(25.dp)
+								.width(30.dp)
+						) {
 							Icon(Icons.Filled.Save, null)
 						}
 					}
@@ -83,6 +112,10 @@ fun BoxScope.ConfigTab() {
 		}
 	}
 
+	SnackbarHost(
+		hostState = snackbarHostState,
+		modifier = Modifier.align(Alignment.BottomEnd).padding(0.dp, 0.dp, 0.dp, 50.dp),
+	)
 	Card(
 		modifier = Modifier.align(Alignment.BottomEnd),
 		colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primary),
