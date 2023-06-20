@@ -8,7 +8,7 @@ plugins {
 android {
     signingConfigs {
         debug {
-            storeFile rootProject.file("signing.jks")
+            storeFile rootProject.file('signing.jks')
             keyAlias 'sora'
             keyPassword '1145141919'
             storePassword '1145141919'
@@ -23,11 +23,11 @@ android {
     compileSdk 34
 
     defaultConfig {
-        applicationId "dev.sora.protohax"
+        applicationId 'dev.sora.protohax'
         minSdk 28
         targetSdk 34
         versionCode 1
-        versionName "1.3.2"
+        versionName '1.3.3'
 
         vectorDrawables {
             useSupportLibrary true
@@ -80,13 +80,15 @@ android {
 }
 
 dependencies {
-    implementation 'dev.sora.relay:ProtoHax:1.3.2'
+    implementation 'dev.sora.relay:ProtoHax:1.3.3'
     implementation 'dev.sora.networking:libmitm:1.2.3-raknet'
+
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1'
 
     implementation 'androidx.core:core-ktx:1.10.1'
     implementation 'androidx.activity:activity-compose:1.7.2'
     implementation "androidx.compose.ui:ui:$compose_version"
-    implementation "androidx.compose.ui:ui-tooling-preview:$compose_version"
+//    implementation "androidx.compose.ui:ui-tooling-preview:$compose_version"
     implementation "androidx.compose.material3:material3:$compose_material_version"
     implementation "androidx.compose.material3:material3-window-size-class:$compose_material_version"
     implementation "androidx.compose.material:material-icons-extended:$compose_version"
