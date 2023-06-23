@@ -141,7 +141,7 @@ class AppPickerActivity : ComponentActivity() {
 					}
 				} else {
 					LazyColumn(modifier = Modifier.padding(innerPadding)) {
-						items(listItems.filter { it.first.startsWith(text, true) }, { it.first }) {
+						items(listItems.filter { it.first.startsWith(text, true) }, { it.second.packageName }) {
 							val packageName = it.second.packageName
 							Row(
 								modifier = Modifier
