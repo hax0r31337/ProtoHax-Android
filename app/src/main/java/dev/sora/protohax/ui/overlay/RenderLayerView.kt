@@ -7,7 +7,15 @@ import android.view.View
 import dev.sora.relay.game.GameSession
 import dev.sora.relay.game.event.*
 
-class RenderLayerView(context: Context, private val session: GameSession) : View(context), Listenable {
+class RenderLayerView(context: Context, private val session: GameSession) : View(context) {
+
+	private val listener = EventHook(EventRefreshRender::class.java, handler = {
+		invalidate()
+	})
+
+	init {
+	    session.eventManager.register(listener)
+	}
 
     @SuppressLint("DrawAllocation")
     override fun onDraw(canvas: Canvas) {
@@ -20,12 +28,10 @@ class RenderLayerView(context: Context, private val session: GameSession) : View
         }
     }
 
-	private val handleRefreshRender = handle<EventRefreshRender> {
-		invalidate()
+	fun destroy() {
+		// detach event listener
+		session.eventManager.removeHandler(listener)
 	}
-
-	override val eventManager: EventManager
-		get() = session.eventManager
 
     class EventRender(session: GameSession, val canvas: Canvas, var needRefresh: Boolean = false) : GameEvent(session, "render")
 

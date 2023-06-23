@@ -31,7 +31,7 @@ class OverlayManager : ServiceListener {
 		get() = currentContext!!
 
 	private var entranceView: View? = null
-	private var renderLayerView: View? = null
+	private var renderLayerView: RenderLayerView? = null
 
 	private val menu = ConfigureMenu(this)
 	val shortcuts = mutableListOf<Shortcut>()
@@ -95,13 +95,9 @@ class OverlayManager : ServiceListener {
 			params.alpha = (ctx.getSystemService(Service.INPUT_SERVICE) as? InputManager)?.maximumObscuringOpacityForTouch ?: 0.8f
 		}
 		params.gravity = Gravity.TOP or Gravity.END
-		val layout = RelativeLayout(ctx)
-		layout.addView(
-			RenderLayerView(ctx, MinecraftRelay.session),
-			ViewGroup.LayoutParams(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT))
 
-		renderLayerView = layout
-		windowManager.addView(layout, params)
+		renderLayerView = RenderLayerView(ctx, MinecraftRelay.session)
+		windowManager.addView(renderLayerView, params)
 	}
 
 	fun toggleRenderLayerViewVisibility(state: Boolean) {
@@ -115,7 +111,10 @@ class OverlayManager : ServiceListener {
 		val wm = MyApplication.instance.getSystemService(VpnService.WINDOW_SERVICE) as WindowManager
 		entranceView?.let { wm.removeView(it) }
 		entranceView = null
-		renderLayerView?.let { wm.removeView(it) }
+		renderLayerView?.let {
+			it.destroy()
+			wm.removeView(it)
+		}
 		renderLayerView = null
 		menu.destroy(wm)
 		shortcuts.forEach {
