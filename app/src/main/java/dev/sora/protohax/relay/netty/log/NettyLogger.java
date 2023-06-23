@@ -6,38 +6,39 @@ import java.util.Arrays;
 import java.util.LinkedList;
 
 import dev.sora.protohax.BuildConfig;
+import dev.sora.protohax.util.CircularBuffer;
 import io.netty.util.internal.logging.AbstractInternalLogger;
 
 public class NettyLogger extends AbstractInternalLogger {
 
     public static final String TAG = "ProtoHax";
 
-    private static final LinkedList<String> logs = new LinkedList<>();
+    private static final CircularBuffer logs = new CircularBuffer(250);
 
     public static String getLogs() {
         final StringBuilder sb = new StringBuilder();
 
-        for (String log : logs) {
-            sb.append(log);
-            sb.append('\n');
+        for (String log : logs.getArray()) {
+            if (log != null) {
+                sb.append(log);
+                sb.append('\n');
+            }
         }
 
         return sb.toString();
     }
 
     public static void clearLogs() {
-        logs.clear();
+        logs.wipe();
     }
 
     private static void log(final String log) {
         if (log.contains("\n")) {
-            logs.addAll(Arrays.asList(log.split("\n")));
+            for (String s : log.split("\n")) {
+                logs.add(s);
+            }
         } else {
             logs.add(log);
-        }
-
-        while (logs.size() > 500) {
-            logs.pop();
         }
     }
 
