@@ -6,6 +6,7 @@ import dev.sora.protohax.relay.netty.channel.NativeRakConfig
 import dev.sora.protohax.relay.netty.channel.NativeRakServerChannel
 import dev.sora.protohax.ui.components.screen.settings.Settings
 import dev.sora.protohax.ui.overlay.ConfigSectionShortcut
+import dev.sora.protohax.ui.overlay.hud.HudManager
 import dev.sora.relay.MinecraftRelayListener
 import dev.sora.relay.cheat.command.CommandManager
 import dev.sora.relay.cheat.command.impl.CommandDownloadWorld
@@ -35,6 +36,7 @@ object MinecraftRelay {
     val session = GameSession()
     val moduleManager: ModuleManager
     val configManager: ConfigManagerFileSystem
+	val hudManager: HudManager
 
 	val chainCacheFile = File(MyApplication.instance.cacheDir, "chain_cache.json")
 
@@ -42,6 +44,7 @@ object MinecraftRelay {
 
     init {
         moduleManager = ModuleManager(session)
+		hudManager = HudManager(session)
 
 		// load asynchronously
 		loaderThread = thread {
@@ -68,6 +71,7 @@ object MinecraftRelay {
         configManager = ConfigManagerFileSystem(MyApplication.instance.getExternalFilesDir("configs")!!, ".json").also {
 			it.addSection(ConfigSectionModule(moduleManager))
 			it.addSection(ConfigSectionShortcut(MyApplication.overlayManager))
+			it.addSection(hudManager)
 		}
     }
 
