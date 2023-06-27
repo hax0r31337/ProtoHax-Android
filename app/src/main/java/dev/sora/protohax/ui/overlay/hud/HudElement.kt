@@ -14,8 +14,8 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 abstract class HudElement(val name: String) : Configurable {
 
-	var posX = 0
-	var posY = 0
+	var posX = 100
+	var posY = 100
 	var alignment = HudAlignment.LEFT_TOP
 
 	abstract val height: Int
@@ -24,7 +24,7 @@ abstract class HudElement(val name: String) : Configurable {
 	override val values = mutableListOf<Value<*>>()
 	protected val handlers = mutableListOf<EventHook<in GameEvent>>()
 
-	// cache the value to avoid frequent object creation
+	// cache the value to avoid frequent instance creation
 	private val needRefresh = AtomicBoolean()
 
 	abstract fun onRender(canvas: Canvas, needRefresh: AtomicBoolean)
@@ -32,8 +32,8 @@ abstract class HudElement(val name: String) : Configurable {
 	open fun getPosition(canvasWidth: Int, canvasHeight: Int): Vector2i {
 		val position = alignment.getPosition(canvasWidth, canvasHeight)
 		return Vector2i.from(
-			(position.x + posX + width).coerceAtMost(width) - width,
-			(position.y + posY + height).coerceAtMost(height) - height
+			(position.x + posX + width).coerceAtMost(canvasWidth) - width,
+			(position.y + posY + height).coerceAtMost(canvasHeight) - height
 		)
 	}
 

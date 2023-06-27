@@ -25,6 +25,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Feed
+import androidx.compose.material.icons.outlined.Wysiwyg
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.Icon
@@ -73,6 +74,7 @@ import dev.sora.protohax.ui.overlay.MyLifecycleOwner
 import dev.sora.protohax.ui.overlay.OverlayManager
 import dev.sora.protohax.ui.overlay.menu.tabs.CheatCategoryTab
 import dev.sora.protohax.ui.overlay.menu.tabs.ConfigTab
+import dev.sora.protohax.ui.overlay.menu.tabs.HudTab
 import dev.sora.protohax.ui.theme.MyApplicationTheme
 import dev.sora.relay.cheat.module.CheatCategory
 import dev.sora.relay.cheat.module.CheatModule
@@ -149,6 +151,11 @@ class ConfigureMenu(private val overlayManager: OverlayManager) {
 						composable(PHaxRoute.CONFIG) {
 							Box(modifier = Modifier.fillMaxSize()) {
 								ConfigTab()
+							}
+						}
+						composable(PHaxRoute.HUD) {
+							Box(modifier = Modifier.fillMaxSize()) {
+								HudTab()
 							}
 						}
 						categories.forEach { category ->
@@ -258,12 +265,21 @@ class ConfigureMenu(private val overlayManager: OverlayManager) {
 						selected = selectedDestination == PHaxRoute.CONFIG,
 						onClick = { navController.safeNavigate(PHaxRoute.CONFIG) }
 					)
+					NavigationRailItem(
+						icon = { Icon(Icons.Outlined.Wysiwyg, contentDescription = stringResource(id = R.string.tab_hud)) },
+						label = { Text(stringResource(id = R.string.tab_hud)) },
+						selected = selectedDestination == PHaxRoute.HUD,
+						onClick = { navController.safeNavigate(PHaxRoute.HUD) }
+					)
 					Spacer(Modifier.weight(1f))
 				}
 
 				Card(modifier = Modifier.fillMaxSize(), colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.secondaryContainer)) {
-					val stack = categories.map { it.choiceName }.toMutableSet().also {
-						it.add(PHaxRoute.CONFIG)
+					val stack = remember {
+						categories.map { it.choiceName }.toMutableSet().also {
+							it.add(PHaxRoute.CONFIG)
+							it.add(PHaxRoute.HUD)
+						}
 					}
 					AnimatedNavHost(
 						navController = navController,

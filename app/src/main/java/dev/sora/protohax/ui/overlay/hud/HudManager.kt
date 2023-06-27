@@ -12,7 +12,7 @@ import dev.sora.relay.utils.asJsonObjectOrNull
 class HudManager(private val session: GameSession) : IConfigSection {
 
 	val elementRegistry: Map<String, () -> HudElement>
-	private val elements = mutableListOf<HudElement>()
+	val elements = mutableListOf<HudElement>()
 
 	init {
 	    elementRegistry = mapOf(
@@ -24,6 +24,10 @@ class HudManager(private val session: GameSession) : IConfigSection {
 		elements.add(element)
 		element.register(session.eventManager)
 		session.eventManager.emit(RenderLayerView.EventRefreshRender(session))
+	}
+
+	fun addElement(element: String) {
+		elementRegistry[element]?.also { e -> addElement(e()) } ?: error("no element called: $element")
 	}
 
 	fun removeElement(element: HudElement) {

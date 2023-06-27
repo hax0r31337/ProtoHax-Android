@@ -2,7 +2,8 @@ package dev.sora.protohax.ui.overlay.hud.elements
 
 import android.graphics.Canvas
 import android.graphics.Color
-import android.graphics.Paint
+import android.text.TextPaint
+import dev.sora.protohax.MyApplication
 import dev.sora.protohax.ui.overlay.hud.HudElement
 import dev.sora.protohax.ui.overlay.hud.HudManager
 import java.util.concurrent.atomic.AtomicBoolean
@@ -19,9 +20,15 @@ class TextElement : HudElement(HudManager.TEXT_ELEMENT_IDENTIFIER) {
 	private var colorRedValue by intValue("ColorRed", 255, 0..255)
 	private var colorGreenValue by intValue("ColorGreen", 255, 0..255)
 	private var colorBlueValue by intValue("ColorBlue", 255, 0..255)
+	private var textSizeValue by intValue("TextSize", 20, 10..50).listen {
+		paint.textSize = it * MyApplication.density
+		it
+	}
 
-	private val paint = Paint().also {
+	private val paint = TextPaint().also {
 		it.color = Color.WHITE
+		it.isAntiAlias = true
+		it.textSize = 20 * MyApplication.density
 	}
 
 	override var height = paint.fontMetrics.let { it.descent - it.ascent }.roundToInt()
