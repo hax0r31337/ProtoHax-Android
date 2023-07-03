@@ -1,8 +1,15 @@
 package dev.sora.protohax.ui.overlay.hud
 
 import android.graphics.Canvas
+import android.graphics.Color
+import android.graphics.Paint
+import android.graphics.RectF
+import android.os.Build
 import androidx.core.graphics.withTranslation
+import dev.sora.protohax.MyApplication
 import dev.sora.protohax.ui.overlay.RenderLayerView
+import dev.sora.protohax.ui.overlay.Shortcut
+import dev.sora.protohax.util.ContextUtils.getColor
 import dev.sora.relay.cheat.value.Configurable
 import dev.sora.relay.cheat.value.Value
 import dev.sora.relay.game.event.EventHook
@@ -43,10 +50,29 @@ abstract class HudElement(val name: String) : Configurable {
 			canvas.withTranslation(it.x.toFloat(), it.y.toFloat()) {
 				onRender(this, this@HudElement.needRefresh)
 			}
+			if (editMode) {
+				drawBorder(canvas, it)
+			}
 		}
 		if (this@HudElement.needRefresh.get()) {
 			needRefresh = true
 		}
+	}
+
+	protected open fun drawBorder(canvas: Canvas, position: Vector2i) {
+		val paint = Paint().apply {
+			style = Paint.Style.STROKE
+			val context = MyApplication.instance
+			color = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+				context.getColor(context.getColor(android.R.color.system_accent1_600, android.R.color.system_accent1_200))
+			} else context.getColor(Color.rgb(103, 80, 164), Color.rgb(208, 188, 255))
+			strokeWidth = 10f
+		}
+
+		canvas.drawRoundRect(
+			position.x - 5f, position.y - 5f, position.x + width + 5f, position.y + height + 5f,
+			15f, 15f, paint
+		)
 	}
 
 	@Suppress("unchecked_cast")

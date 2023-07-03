@@ -31,7 +31,8 @@ class OverlayManager : ServiceListener {
 		get() = currentContext!!
 
 	private var entranceView: View? = null
-	private var renderLayerView: RenderLayerView? = null
+	var renderLayerView: RenderLayerView? = null
+		private set
 
 	private val menu = ConfigureMenu(this)
 	val shortcuts = mutableListOf<Shortcut>()
@@ -73,31 +74,13 @@ class OverlayManager : ServiceListener {
 		this.entranceView = imageView
 		wm.addView(imageView, params)
 
-		startRenderLayer(wm)
+		renderLayerView = RenderLayerView(ctx, wm, MinecraftRelay.session)
 		menu.visibility = false
 		menu.display(wm, ctx)
 
 		shortcuts.forEach {
 			it.display(wm)
 		}
-	}
-
-	private fun startRenderLayer(windowManager: WindowManager) {
-		val params = WindowManager.LayoutParams(
-			WindowManager.LayoutParams.MATCH_PARENT,
-			WindowManager.LayoutParams.MATCH_PARENT,
-			WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-			WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE or WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
-			PixelFormat.TRANSLUCENT
-		)
-		// this will fix https://developer.android.com/about/versions/12/behavior-changes-all#untrusted-touch-events
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !Settings.trustClicks.getValue(ctx)) {
-			params.alpha = (ctx.getSystemService(Service.INPUT_SERVICE) as? InputManager)?.maximumObscuringOpacityForTouch ?: 0.8f
-		}
-		params.gravity = Gravity.TOP or Gravity.END
-
-		renderLayerView = RenderLayerView(ctx, MinecraftRelay.session)
-		windowManager.addView(renderLayerView, params)
 	}
 
 	fun toggleRenderLayerViewVisibility(state: Boolean) {
@@ -111,10 +94,7 @@ class OverlayManager : ServiceListener {
 		val wm = MyApplication.instance.getSystemService(VpnService.WINDOW_SERVICE) as WindowManager
 		entranceView?.let { wm.removeView(it) }
 		entranceView = null
-		renderLayerView?.let {
-			it.destroy()
-			wm.removeView(it)
-		}
+		renderLayerView?.destroy()
 		renderLayerView = null
 		menu.destroy(wm)
 		shortcuts.forEach {

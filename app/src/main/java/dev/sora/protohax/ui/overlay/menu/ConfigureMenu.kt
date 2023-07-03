@@ -102,6 +102,10 @@ class ConfigureMenu(private val overlayManager: OverlayManager) {
 	var visibility = false
 		set(value) {
 			if (field != value) {
+				if (value) {
+					overlayManager.renderLayerView?.quitEdit()
+				}
+
 				listeners.forEach {
 					it(value)
 				}
@@ -155,7 +159,7 @@ class ConfigureMenu(private val overlayManager: OverlayManager) {
 						}
 						composable(PHaxRoute.HUD) {
 							Box(modifier = Modifier.fillMaxSize()) {
-								HudTab()
+								HudTab(this@ConfigureMenu)
 							}
 						}
 						categories.forEach { category ->

@@ -10,6 +10,8 @@ import android.view.Gravity
 import android.view.WindowManager
 import android.widget.TextView
 import dev.sora.protohax.relay.MinecraftRelay
+import dev.sora.protohax.util.ContextUtils.getColor
+import dev.sora.protohax.util.ContextUtils.isNightMode
 import dev.sora.relay.cheat.module.CheatModule
 import dev.sora.relay.cheat.module.EventModuleToggle
 import dev.sora.relay.game.event.EventHook
@@ -90,31 +92,27 @@ class Shortcut(val module: CheatModule, private val overlayManager: OverlayManag
 		private val TOGGLE_ON_COLOR = Color.parseColor("#00a93f")
 		private val TOGGLE_OFF_COLOR = Color.parseColor("#c81000")
 
-		private fun Context.isNightMode(): Boolean {
-			return resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
-		}
-
 		private fun getTextColor(ctx: Context): Int {
 			return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-				if (ctx.isNightMode()) ctx.getColor(android.R.color.system_neutral1_100) else ctx.getColor(android.R.color.system_neutral1_900)
+				ctx.getColor(ctx.getColor(android.R.color.system_neutral1_900, android.R.color.system_neutral1_100))
 			} else TEXT_COLOR
 		}
 
 		private fun getBackgroundColor(ctx: Context): Int {
 			return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-				if (ctx.isNightMode()) ctx.getColor(android.R.color.system_neutral1_900) else ctx.getColor(android.R.color.system_neutral1_10)
+				ctx.getColor(ctx.getColor(android.R.color.system_neutral1_10, android.R.color.system_neutral1_900))
 			} else BACKGROUND_COLOR
 		}
 
 		private fun getToggleOnColor(ctx: Context): Int {
 			return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-				if (ctx.isNightMode()) ctx.getColor(android.R.color.system_accent1_200) else ctx.getColor(android.R.color.system_accent1_600)
+				ctx.getColor(ctx.getColor(android.R.color.system_accent1_600, android.R.color.system_accent1_200))
 			} else TOGGLE_ON_COLOR
 		}
 
 		private fun getToggleOffColor(ctx: Context): Int {
 			return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
-				if (ctx.isNightMode()) ctx.getColor(android.R.color.system_accent1_600) else ctx.getColor(android.R.color.system_accent1_200)
+				ctx.getColor(ctx.getColor(android.R.color.system_accent1_200, android.R.color.system_accent1_600))
 			} else TOGGLE_OFF_COLOR
 		}
 	}

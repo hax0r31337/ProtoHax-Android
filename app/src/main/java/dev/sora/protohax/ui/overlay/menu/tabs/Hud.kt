@@ -47,14 +47,16 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import dev.sora.protohax.MyApplication
 import dev.sora.protohax.R
 import dev.sora.protohax.relay.MinecraftRelay
 import dev.sora.protohax.ui.components.clickableNoRipple
+import dev.sora.protohax.ui.overlay.menu.ConfigureMenu
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalMaterial3Api::class)
 @Composable
-fun BoxScope.HudTab() {
+fun BoxScope.HudTab(configureMenu: ConfigureMenu) {
 	val list = remember { MinecraftRelay.hudManager.elements.toMutableStateList() }
 	val refreshList = {
 		list.clear()
@@ -167,9 +169,8 @@ fun BoxScope.HudTab() {
 	) {
 		Row {
 			IconButton(onClick = {
-				scope.launch {
-					snackbarHostState.showSnackbar("TODO")
-				}
+				configureMenu.visibility = false
+				MyApplication.overlayManager.renderLayerView?.edit()
 			}) {
 				Icon(Icons.Default.Edit, null)
 			}

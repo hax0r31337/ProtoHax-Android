@@ -66,7 +66,7 @@
     <string name="tab_dashboard">Dashboard</string>
     <string name="tab_accounts">Accounts</string>
     <string name="tab_configs">Configs</string>
-    <string name="tab_hud">Hud</string>
+    <string name="tab_hud">HUD</string>
     <string name="tab_settings">Settings</string>
     <string name="tab_btn_navigation_drawer">Navigation Drawer</string>
 
