@@ -6,18 +6,19 @@ import android.content.Context
 import android.graphics.*
 import android.hardware.input.InputManager
 import android.os.Build
+import android.view.GestureDetector
 import android.view.Gravity
+import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
-import dev.sora.protohax.MyApplication
 import dev.sora.protohax.R
 import dev.sora.protohax.ui.components.screen.settings.Settings
 import dev.sora.protohax.util.ContextUtils.getColor
-import dev.sora.protohax.util.ContextUtils.isNightMode
 import dev.sora.relay.game.GameSession
 import dev.sora.relay.game.event.*
 
 
+@SuppressLint("ClickableViewAccessibility")
 class RenderLayerView(ctx: Context, private val windowManager: WindowManager, private val session: GameSession) : View(ctx) {
 
 	private val listener = EventHook(EventRefreshRender::class.java, handler = {
@@ -44,6 +45,31 @@ class RenderLayerView(ctx: Context, private val windowManager: WindowManager, pr
 			params.alpha = (ctx.getSystemService(Service.INPUT_SERVICE) as? InputManager)?.maximumObscuringOpacityForTouch ?: 0.8f
 		}
 		params.gravity = Gravity.TOP or Gravity.END
+
+		val gestureDetector = GestureDetector(context, object : GestureDetector.SimpleOnGestureListener() {
+			override fun onDown(e: MotionEvent): Boolean {
+				return true
+			}
+
+			override fun onSingleTapUp(e: MotionEvent): Boolean {
+				session.eventManager.emit(EventRenderLayerClick(session, e, this@RenderLayerView))
+				if (e.y > height - 150 && e.x < 150f) {
+					quitEdit()
+				}
+				return true
+			}
+		})
+
+		setOnTouchListener { view, event ->
+			gestureDetector.onTouchEvent(event)
+			val sessionEvent = EventRenderLayerMotion(session, event, this@RenderLayerView)
+			session.eventManager.emit(sessionEvent)
+			if (sessionEvent.hasHandled) {
+				invalidate()
+			}
+
+			true
+		}
 
 		windowManager.addView(this, params)
 	}
@@ -100,8 +126,8 @@ class RenderLayerView(ctx: Context, private val windowManager: WindowManager, pr
 			} else context.getColor(Color.rgb(103, 80, 164), Color.rgb(208, 188, 255))
 		})
 
-		val icon = resources.getDrawable(R.drawable.ic_launcher_foreground, context.theme)
-		icon.setBounds(rect.left.toInt(), rect.top.toInt(), rect.right.toInt(), rect.bottom.toInt())
+		val icon = resources.getDrawable(R.drawable.mdi_arrow_back, context.theme)
+		icon.setBounds(rect.left.toInt() + 30, rect.top.toInt() + 30, rect.right.toInt() - 30, rect.bottom.toInt() - 30)
 		icon.setTint(if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
 			context.getColor(context.getColor(android.R.color.system_accent1_0, android.R.color.system_accent1_800))
 		} else context.getColor(Color.rgb(255, 255, 255), Color.rgb(56, 30, 114)))
@@ -121,4 +147,8 @@ class RenderLayerView(ctx: Context, private val windowManager: WindowManager, pr
      * it won't refresh if you don't call this event or set [needRefresh] to true in [EventRefreshRender]
      */
     class EventRefreshRender(session: GameSession) : GameEvent(session, "refresh_render")
+
+	class EventRenderLayerClick(session: GameSession, val event: MotionEvent, val view: RenderLayerView) : GameEvent(session, "render_click")
+
+	class EventRenderLayerMotion(session: GameSession, val event: MotionEvent, val view: RenderLayerView, var hasHandled: Boolean = false) : GameEvent(session, "render_motion")
 }

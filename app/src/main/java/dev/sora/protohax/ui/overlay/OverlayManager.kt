@@ -1,24 +1,19 @@
 package dev.sora.protohax.ui.overlay
 
 import android.annotation.SuppressLint
-import android.app.Service
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.PixelFormat
-import android.hardware.input.InputManager
 import android.net.VpnService
-import android.os.Build
 import android.view.*
 import android.widget.ImageView
-import android.widget.RelativeLayout
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.isInvisible
 import dev.sora.protohax.MyApplication
 import dev.sora.protohax.R
 import dev.sora.protohax.relay.MinecraftRelay
 import dev.sora.protohax.relay.service.ServiceListener
-import dev.sora.protohax.ui.components.screen.settings.Settings
 import dev.sora.protohax.ui.overlay.menu.ConfigureMenu
 import dev.sora.relay.cheat.module.CheatModule
 import kotlin.math.abs
@@ -129,7 +124,7 @@ class OverlayManager : ServiceListener {
 	fun View.draggable(params: WindowManager.LayoutParams, windowManager: WindowManager) {
 		var dragPosX = 0f
 		var dragPosY = 0f
-		var canDrag = false
+		var dragging = false
 		var pressDownTime = System.currentTimeMillis()
 		setOnTouchListener { v, event ->
 			when (event.action) {
@@ -137,7 +132,7 @@ class OverlayManager : ServiceListener {
 					dragPosX = event.rawX
 					dragPosY = event.rawY
 					pressDownTime = System.currentTimeMillis()
-					canDrag = true
+					dragging = false
 					true
 				}
 				MotionEvent.ACTION_UP -> {
@@ -147,21 +142,18 @@ class OverlayManager : ServiceListener {
 					true
 				}
 				MotionEvent.ACTION_MOVE -> {
-					if (!canDrag) {
-						return@setOnTouchListener false
-					}
-					if (System.currentTimeMillis() - pressDownTime < 500) {
-						if (abs(dragPosX - event.rawX) > 100 || abs(dragPosY - event.rawY) > 100) {
-							canDrag = false
-						}
-						false
-					} else {
+					if (dragging || System.currentTimeMillis() - pressDownTime > 500) {
 						params.x += (event.rawX - dragPosX).toInt()
 						params.y += (event.rawY - dragPosY).toInt()
 						dragPosX = event.rawX
 						dragPosY = event.rawY
 						windowManager.updateViewLayout(this, params)
 						true
+					} else {
+						if (abs(dragPosX - event.rawX) > 100 || abs(dragPosY - event.rawY) > 100) {
+							dragging = true
+						}
+						false
 					}
 				}
 				else -> false
