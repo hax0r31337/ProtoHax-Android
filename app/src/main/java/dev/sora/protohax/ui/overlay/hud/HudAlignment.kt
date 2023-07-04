@@ -1,8 +1,9 @@
 package dev.sora.protohax.ui.overlay.hud
 
+import dev.sora.relay.cheat.value.NamedChoice
 import org.cloudburstmc.math.vector.Vector2i
 
-enum class HudAlignment(val friendlyName: String) {
+enum class HudAlignment(override val choiceName: String) : NamedChoice {
 	LEFT_TOP("LeftTop") {
 		override fun getPosition(width: Int, height: Int): Vector2i {
 			return Vector2i.from(0, 0)

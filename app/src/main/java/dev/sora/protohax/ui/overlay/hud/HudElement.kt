@@ -20,15 +20,15 @@ import java.util.concurrent.atomic.AtomicBoolean
 
 abstract class HudElement(val name: String) : Configurable {
 
+	override val values = mutableListOf<Value<*>>()
+	protected val handlers = mutableListOf<EventHook<in GameEvent>>()
+
 	var posX = 100
 	var posY = 100
-	var alignment = HudAlignment.LEFT_TOP
+	var alignmentValue by listValue("Alignment", HudAlignment.values(), HudAlignment.LEFT_TOP)
 
 	abstract val height: Int
 	abstract val width: Int
-
-	override val values = mutableListOf<Value<*>>()
-	protected val handlers = mutableListOf<EventHook<in GameEvent>>()
 
 	// cache the value to avoid frequent instance creation
 	private val needRefresh = AtomicBoolean()
@@ -40,7 +40,7 @@ abstract class HudElement(val name: String) : Configurable {
 	abstract fun onRender(canvas: Canvas, needRefresh: AtomicBoolean)
 
 	open fun getPosition(canvasWidth: Int, canvasHeight: Int): Vector2i {
-		val position = alignment.getPosition(canvasWidth, canvasHeight)
+		val position = alignmentValue.getPosition(canvasWidth, canvasHeight)
 		return Vector2i.from(
 			(position.x + posX + width).coerceAtMost(canvasWidth) - width,
 			(position.y + posY + height).coerceAtMost(canvasHeight) - height
@@ -48,7 +48,7 @@ abstract class HudElement(val name: String) : Configurable {
 	}
 
 	open fun setPosition(canvasWidth: Int, canvasHeight: Int, x: Int, y: Int) {
-		val position = alignment.getPosition(canvasWidth, canvasHeight)
+		val position = alignmentValue.getPosition(canvasWidth, canvasHeight)
 
 		posX = x - position.x
 		posY = y - position.y
