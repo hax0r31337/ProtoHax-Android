@@ -7,11 +7,9 @@ import android.content.pm.ApplicationInfo
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
 import android.content.res.Configuration
-import android.graphics.Color
 import android.os.Build
 import android.widget.Toast
 import androidx.core.content.FileProvider
-import dev.sora.protohax.util.ContextUtils.isNightMode
 import java.io.File
 
 

@@ -20,7 +20,7 @@ import dev.sora.relay.session.listener.RelayListenerAutoCodec
 import dev.sora.relay.session.listener.RelayListenerEncryptedSession
 import dev.sora.relay.session.listener.RelayListenerNetworkSettings
 import dev.sora.relay.session.listener.xbox.RelayListenerXboxLogin
-import dev.sora.relay.session.listener.xbox.cache.XboxChainCacheFileSystem
+import dev.sora.relay.session.listener.xbox.cache.XboxIdentityTokenCacheFileSystem
 import dev.sora.relay.utils.logInfo
 import io.netty.channel.ChannelFactory
 import io.netty.channel.ServerChannel
@@ -38,7 +38,7 @@ object MinecraftRelay {
     val configManager: ConfigManagerFileSystem
 	val hudManager: HudManager
 
-	val chainCacheFile = File(MyApplication.instance.cacheDir, "chain_cache.json")
+	val tokenCacheFile = File(MyApplication.instance.cacheDir, "token_cache.json")
 
 	var loaderThread: Thread? = null
 
@@ -96,7 +96,7 @@ object MinecraftRelay {
 						RelayListenerXboxLogin({
 							account.refresh()
 						}, account.platform).also {
-							it.chainCache = XboxChainCacheFileSystem(chainCacheFile, account.remark)
+							it.tokenCache = XboxIdentityTokenCacheFileSystem(tokenCacheFile, account.remark)
 						}
 					}
 				}

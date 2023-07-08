@@ -1,7 +1,6 @@
 package dev.sora.protohax.ui.overlay
 
 import android.content.Context
-import android.content.res.Configuration
 import android.graphics.Color
 import android.graphics.PixelFormat
 import android.graphics.drawable.GradientDrawable
@@ -11,7 +10,6 @@ import android.view.WindowManager
 import android.widget.TextView
 import dev.sora.protohax.relay.MinecraftRelay
 import dev.sora.protohax.util.ContextUtils.getColor
-import dev.sora.protohax.util.ContextUtils.isNightMode
 import dev.sora.relay.cheat.module.CheatModule
 import dev.sora.relay.cheat.module.EventModuleToggle
 import dev.sora.relay.game.event.EventHook
