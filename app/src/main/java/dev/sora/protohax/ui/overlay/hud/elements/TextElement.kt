@@ -39,6 +39,6 @@ class TextElement : HudElement(HudManager.TEXT_ELEMENT_IDENTIFIER) {
 	override fun onRender(canvas: Canvas, needRefresh: AtomicBoolean) {
 		paint.color = Color.rgb(colorRedValue, colorGreenValue, colorBlueValue)
 
-		canvas.drawText(textValue, 0f, height - paint.fontMetrics.descent, paint)
+		canvas.drawText(textValue, 0f, -paint.fontMetrics.ascent, paint)
 	}
 }

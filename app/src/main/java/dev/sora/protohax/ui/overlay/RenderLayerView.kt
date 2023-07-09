@@ -143,8 +143,8 @@ class RenderLayerView(ctx: Context, private val windowManager: WindowManager, pr
     class EventRender(session: GameSession, val canvas: Canvas, val editMode: Boolean, var needRefresh: Boolean = false) : GameEvent(session, "render")
 
     /**
-     * call this event when module needs a refresh for the layer,
-     * it won't refresh if you don't call this event or set [needRefresh] to true in [EventRefreshRender]
+     * notify the render layer to refresh at next frame
+     * it won't refresh unless you don't call this event or set [needRefresh] to true in [EventRefreshRender]
      */
     class EventRefreshRender(session: GameSession) : GameEvent(session, "refresh_render")
 
