@@ -5,6 +5,7 @@ import com.google.gson.JsonElement
 import com.google.gson.JsonObject
 import dev.sora.protohax.ui.overlay.RenderLayerView
 import dev.sora.protohax.ui.overlay.hud.elements.ModuleIndicatorElement
+import dev.sora.protohax.ui.overlay.hud.elements.TargetIndicatorElement
 import dev.sora.protohax.ui.overlay.hud.elements.TextElement
 import dev.sora.relay.cheat.config.section.IConfigSection
 import dev.sora.relay.game.GameSession
@@ -14,7 +15,8 @@ class HudManager(private val session: GameSession) : IConfigSection {
 
 	val elementRegistry = mapOf(
 		TEXT_ELEMENT_IDENTIFIER to { TextElement() },
-		MODULE_INDICATOR_ELEMENT_IDENTIFIER to { ModuleIndicatorElement() }
+		MODULE_INDICATOR_ELEMENT_IDENTIFIER to { ModuleIndicatorElement() },
+		TARGET_INDICATOR_ELEMENT_IDENTIFIER to { TargetIndicatorElement() }
 	)
 	val elements = mutableListOf<HudElement>()
 
@@ -97,5 +99,6 @@ class HudManager(private val session: GameSession) : IConfigSection {
 	companion object {
 		const val TEXT_ELEMENT_IDENTIFIER = "Text"
 		const val MODULE_INDICATOR_ELEMENT_IDENTIFIER = "ModuleIndicator"
+		const val TARGET_INDICATOR_ELEMENT_IDENTIFIER = "TargetIndicator"
 	}
 }

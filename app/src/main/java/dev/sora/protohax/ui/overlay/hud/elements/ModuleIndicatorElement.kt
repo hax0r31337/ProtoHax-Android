@@ -13,7 +13,6 @@ import dev.sora.relay.cheat.module.CheatModule
 import dev.sora.relay.cheat.module.EventModuleToggle
 import dev.sora.relay.cheat.value.NamedChoice
 import java.util.concurrent.atomic.AtomicBoolean
-import kotlin.math.roundToInt
 
 class ModuleIndicatorElement : HudElement(HudManager.MODULE_INDICATOR_ELEMENT_IDENTIFIER) {
 
@@ -36,35 +35,38 @@ class ModuleIndicatorElement : HudElement(HudManager.MODULE_INDICATOR_ELEMENT_ID
 		it.textSize = 20 * MyApplication.density
 	}
 
-	override var height = 10
+	override var height = 10f
 		private set
-	override var width = 10
+	override var width = 10f
 		private set
 
 	init {
 	    alignmentValue = HudAlignment.RIGHT_TOP
+		posX = 0
+		posY = 0
 	}
 
-	override fun onRender(canvas: Canvas, needRefresh: AtomicBoolean) {
+	override fun onRender(canvas: Canvas, editMode: Boolean, needRefresh: AtomicBoolean) {
 		val modules = sortingModeValue.getModules(paint)
-		val lineHeight = paint.fontMetrics.let { it.descent - it.ascent }.roundToInt()
+		val lineHeight = paint.fontMetrics.let { it.descent - it.ascent }
 		if (modules.isEmpty()) {
-			if (height != lineHeight) {
-				needRefresh.set(true)
+			if (editMode) {
+				if (height != lineHeight) {
+					needRefresh.set(true)
+				}
+				height = lineHeight
+				val alertNoModules = "No modules has toggled on currently"
+				width = paint.measureText(alertNoModules)
+
+				paint.color = colorModeValue.getColor(0, 1, colorRedValue, colorGreenValue, colorBlueValue)
+				canvas.drawText(alertNoModules, 0f, -paint.fontMetrics.ascent, paint)
 			}
-			height = lineHeight
-			val alertNoModules = "No modules has toggled on currently"
-			width = paint.measureText(alertNoModules).roundToInt()
-
-			paint.color = colorModeValue.getColor(0, 1, colorRedValue, colorGreenValue, colorBlueValue)
-			canvas.drawText(alertNoModules, 0f, -paint.fontMetrics.ascent, paint)
-
 			return
 		}
 
-		var y = 0
-		val lineSpacing = (spacingValue * MyApplication.density).toInt()
-		val maxWidth = modules.maxOf { paint.measureText(it.name).toInt() }
+		var y = 0f
+		val lineSpacing = (spacingValue * MyApplication.density)
+		val maxWidth = modules.maxOf { paint.measureText(it.name) }
 		modules.forEachIndexed { i, module ->
 			paint.color = colorModeValue.getColor(if (colorReversedSortValue) modules.size - i else i, modules.size, colorRedValue, colorGreenValue, colorBlueValue)
 			canvas.drawText(module.name, if (textRTLValue) maxWidth - paint.measureText(module.name) else 0f, -paint.fontMetrics.ascent + y, paint)

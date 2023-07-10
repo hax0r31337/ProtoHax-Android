@@ -22,7 +22,7 @@ import dev.sora.relay.game.event.*
 class RenderLayerView(ctx: Context, private val windowManager: WindowManager, private val session: GameSession) : View(ctx) {
 
 	private val listener = EventHook(EventRefreshRender::class.java, handler = {
-		invalidate()
+		postInvalidate()
 	})
 
 	var editMode: Boolean = false

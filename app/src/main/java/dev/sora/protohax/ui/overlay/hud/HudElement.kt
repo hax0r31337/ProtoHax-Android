@@ -15,7 +15,7 @@ import dev.sora.relay.game.event.EventHook
 import dev.sora.relay.game.event.EventManager
 import dev.sora.relay.game.event.GameEvent
 import dev.sora.relay.game.event.Handler
-import org.cloudburstmc.math.vector.Vector2i
+import org.cloudburstmc.math.vector.Vector2f
 import java.util.concurrent.atomic.AtomicBoolean
 
 abstract class HudElement(val name: String) : Configurable {
@@ -27,8 +27,8 @@ abstract class HudElement(val name: String) : Configurable {
 	var posY = 100
 	var alignmentValue by listValue("Alignment", HudAlignment.values(), HudAlignment.LEFT_TOP)
 
-	abstract val height: Int
-	abstract val width: Int
+	abstract val height: Float
+	abstract val width: Float
 
 	// cache the value to avoid frequent instance creation
 	private val needRefresh = AtomicBoolean()
@@ -37,13 +37,13 @@ abstract class HudElement(val name: String) : Configurable {
 	private var dragPointerOffsetX = 0
 	private var dragPointerOffsetY = 0
 
-	abstract fun onRender(canvas: Canvas, needRefresh: AtomicBoolean)
+	abstract fun onRender(canvas: Canvas, editMode: Boolean, needRefresh: AtomicBoolean)
 
-	open fun getPosition(canvasWidth: Int, canvasHeight: Int): Vector2i {
+	open fun getPosition(canvasWidth: Int, canvasHeight: Int): Vector2f {
 		val position = alignmentValue.getPosition(canvasWidth, canvasHeight)
-		return Vector2i.from(
-			(position.x + posX + width).coerceAtMost(canvasWidth) - width,
-			(position.y + posY + height).coerceAtMost(canvasHeight) - height
+		return Vector2f.from(
+			(position.x + posX + width).coerceAtMost(canvasWidth.toFloat()) - width,
+			(position.y + posY + height).coerceAtMost(canvasHeight.toFloat()) - height
 		)
 	}
 
@@ -57,8 +57,8 @@ abstract class HudElement(val name: String) : Configurable {
 	private val handleRender = handle<RenderLayerView.EventRender> {
 		this@HudElement.needRefresh.set(false)
 		getPosition(canvas.width, canvas.height).also {
-			canvas.withTranslation(it.x.toFloat(), it.y.toFloat()) {
-				onRender(this, this@HudElement.needRefresh)
+			canvas.withTranslation(it.x, it.y) {
+				onRender(this, editMode, this@HudElement.needRefresh)
 			}
 			if (editMode) {
 				drawBorder(canvas, it)
@@ -69,7 +69,7 @@ abstract class HudElement(val name: String) : Configurable {
 		}
 	}
 
-	protected open fun drawBorder(canvas: Canvas, position: Vector2i) {
+	protected open fun drawBorder(canvas: Canvas, position: Vector2f) {
 		val paint = Paint().apply {
 			style = Paint.Style.STROKE
 			val context = MyApplication.instance
