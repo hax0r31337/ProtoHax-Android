@@ -1,24 +1,19 @@
 package dev.sora.protohax.ui.overlay
 
 import android.annotation.SuppressLint
-import android.app.Service
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.PixelFormat
-import android.hardware.input.InputManager
 import android.net.VpnService
-import android.os.Build
 import android.view.*
 import android.widget.ImageView
-import android.widget.RelativeLayout
 import androidx.core.content.res.ResourcesCompat
 import androidx.core.view.isInvisible
 import dev.sora.protohax.MyApplication
 import dev.sora.protohax.R
 import dev.sora.protohax.relay.MinecraftRelay
 import dev.sora.protohax.relay.service.ServiceListener
-import dev.sora.protohax.ui.components.screen.settings.Settings
 import dev.sora.protohax.ui.overlay.menu.ConfigureMenu
 import dev.sora.relay.cheat.module.CheatModule
 import kotlin.math.abs
@@ -31,7 +26,8 @@ class OverlayManager : ServiceListener {
 		get() = currentContext!!
 
 	private var entranceView: View? = null
-	private var renderLayerView: View? = null
+	var renderLayerView: RenderLayerView? = null
+		private set
 
 	private val menu = ConfigureMenu(this)
 	val shortcuts = mutableListOf<Shortcut>()
@@ -73,35 +69,13 @@ class OverlayManager : ServiceListener {
 		this.entranceView = imageView
 		wm.addView(imageView, params)
 
-		startRenderLayer(wm)
+		renderLayerView = RenderLayerView(ctx, wm, MinecraftRelay.session)
 		menu.visibility = false
 		menu.display(wm, ctx)
 
 		shortcuts.forEach {
 			it.display(wm)
 		}
-	}
-
-	private fun startRenderLayer(windowManager: WindowManager) {
-		val params = WindowManager.LayoutParams(
-			WindowManager.LayoutParams.MATCH_PARENT,
-			WindowManager.LayoutParams.MATCH_PARENT,
-			WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY,
-			WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE or WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN,
-			PixelFormat.TRANSLUCENT
-		)
-		// this will fix https://developer.android.com/about/versions/12/behavior-changes-all#untrusted-touch-events
-		if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && !Settings.trustClicks.getValue(ctx)) {
-			params.alpha = (ctx.getSystemService(Service.INPUT_SERVICE) as? InputManager)?.maximumObscuringOpacityForTouch ?: 0.8f
-		}
-		params.gravity = Gravity.TOP or Gravity.END
-		val layout = RelativeLayout(ctx)
-		layout.addView(
-			RenderLayerView(ctx, MinecraftRelay.session),
-			ViewGroup.LayoutParams(WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT))
-
-		renderLayerView = layout
-		windowManager.addView(layout, params)
 	}
 
 	fun toggleRenderLayerViewVisibility(state: Boolean) {
@@ -115,7 +89,7 @@ class OverlayManager : ServiceListener {
 		val wm = MyApplication.instance.getSystemService(VpnService.WINDOW_SERVICE) as WindowManager
 		entranceView?.let { wm.removeView(it) }
 		entranceView = null
-		renderLayerView?.let { wm.removeView(it) }
+		renderLayerView?.destroy()
 		renderLayerView = null
 		menu.destroy(wm)
 		shortcuts.forEach {
@@ -150,7 +124,7 @@ class OverlayManager : ServiceListener {
 	fun View.draggable(params: WindowManager.LayoutParams, windowManager: WindowManager) {
 		var dragPosX = 0f
 		var dragPosY = 0f
-		var canDrag = false
+		var dragging = false
 		var pressDownTime = System.currentTimeMillis()
 		setOnTouchListener { v, event ->
 			when (event.action) {
@@ -158,7 +132,7 @@ class OverlayManager : ServiceListener {
 					dragPosX = event.rawX
 					dragPosY = event.rawY
 					pressDownTime = System.currentTimeMillis()
-					canDrag = true
+					dragging = false
 					true
 				}
 				MotionEvent.ACTION_UP -> {
@@ -168,21 +142,18 @@ class OverlayManager : ServiceListener {
 					true
 				}
 				MotionEvent.ACTION_MOVE -> {
-					if (!canDrag) {
-						return@setOnTouchListener false
-					}
-					if (System.currentTimeMillis() - pressDownTime < 500) {
-						if (abs(dragPosX - event.rawX) > 100 || abs(dragPosY - event.rawY) > 100) {
-							canDrag = false
-						}
-						false
-					} else {
+					if (dragging || System.currentTimeMillis() - pressDownTime > 500) {
 						params.x += (event.rawX - dragPosX).toInt()
 						params.y += (event.rawY - dragPosY).toInt()
 						dragPosX = event.rawX
 						dragPosY = event.rawY
 						windowManager.updateViewLayout(this, params)
 						true
+					} else {
+						if (abs(dragPosX - event.rawX) > 100 || abs(dragPosY - event.rawY) > 100) {
+							dragging = true
+						}
+						false
 					}
 				}
 				else -> false

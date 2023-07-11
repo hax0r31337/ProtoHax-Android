@@ -16,9 +16,6 @@ object Settings {
 		"TRUST_CLICK", false, override = Build.VERSION.SDK_INT < Build.VERSION_CODES.S, true)
 	val ipv6Status = TabSetting(R.string.setting_ip, "INTERNET_PROTOCOL", IPv6Choices.AUTOMATIC, IPv6Choices.values())
 
-//	const val KEY_INTERNET_PROTOCOL = "ENABLE_INTERNET_PROTOCOL"
-//	const val KEY_INTERNET_PROTOCOL_DEFAULT = "auto"
-
 	val settings = arrayOf(offlineSessionEncryption, enableCommandManager, enableRakReliability, trustClicks, ipv6Status)
 
 	enum class IPv6Choices(override val displayName: Int, override val internalName: String) : TabChoice {
