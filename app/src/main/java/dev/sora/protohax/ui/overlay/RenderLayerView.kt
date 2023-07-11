@@ -60,7 +60,7 @@ class RenderLayerView(ctx: Context, private val windowManager: WindowManager, pr
 			}
 		})
 
-		setOnTouchListener { view, event ->
+		setOnTouchListener { _, event ->
 			gestureDetector.onTouchEvent(event)
 			val sessionEvent = EventRenderLayerMotion(session, event, this@RenderLayerView)
 			session.eventManager.emit(sessionEvent)
