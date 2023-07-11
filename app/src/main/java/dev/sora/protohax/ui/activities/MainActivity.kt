@@ -1,5 +1,6 @@
 package dev.sora.protohax.ui.activities
 
+import android.Manifest
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
@@ -9,7 +10,6 @@ import androidx.compose.material3.windowsizeclass.ExperimentalMaterial3WindowSiz
 import androidx.compose.material3.windowsizeclass.calculateWindowSizeClass
 import androidx.core.view.WindowCompat
 import com.google.accompanist.adaptive.calculateDisplayFeatures
-import android.Manifest
 import dev.sora.protohax.MyApplication
 import dev.sora.protohax.ui.components.PHaxApp
 import dev.sora.protohax.ui.theme.MyApplicationTheme

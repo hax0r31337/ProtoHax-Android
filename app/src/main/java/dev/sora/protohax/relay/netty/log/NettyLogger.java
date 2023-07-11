@@ -2,9 +2,6 @@ package dev.sora.protohax.relay.netty.log;
 
 import android.util.Log;
 
-import java.util.Arrays;
-import java.util.LinkedList;
-
 import dev.sora.protohax.BuildConfig;
 import dev.sora.protohax.util.CircularBuffer;
 import io.netty.util.internal.logging.AbstractInternalLogger;

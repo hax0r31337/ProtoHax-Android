@@ -35,9 +35,7 @@ import dev.sora.protohax.relay.netty.log.NettyLogger
 import dev.sora.protohax.ui.theme.MyApplicationTheme
 import dev.sora.protohax.util.ContextUtils.shareTextAsFile
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 
 class LogActivity : ComponentActivity() {
 

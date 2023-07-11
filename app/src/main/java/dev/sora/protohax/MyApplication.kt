@@ -11,13 +11,20 @@ class MyApplication : Application() {
 
     override fun onCreate() {
         super.onCreate()
+
 		InternalLoggerFactory.setDefaultFactory(NettyLoggerFactory())
+
+		density = resources.displayMetrics.density
+
         instance = this
     }
 
     companion object {
         lateinit var instance: MyApplication
             private set
+
+		var density: Float = 1f
+			private set
 
 		@SuppressLint("StaticFieldLeak")
 		val overlayManager = OverlayManager().also {

@@ -104,7 +104,7 @@ h1 {
 						// fetch username through chain
 						val identityToken = RelayListenerXboxLogin.fetchIdentityToken(account!!.first, activity.device)
 						activity.runOnUiThread { activity.showLoadingPage("Still loading (1/2)") }
-						val username = getUsernameFromChain(RelayListenerXboxLogin.fetchRawChain(identityToken, EncryptionUtils.createKeyPair().public).readText())
+						val username = getUsernameFromChain(RelayListenerXboxLogin.fetchRawChain(identityToken.token, EncryptionUtils.createKeyPair().public).readText())
 
 						AccountManager.accounts.add(Account(username, activity.device, account!!.second))
 						AccountManager.save()
@@ -142,7 +142,7 @@ h1 {
 					val username = try {
 						val identityToken = RelayListenerXboxLogin.fetchIdentityToken(accessToken, activity.device)
 						activity.runOnUiThread { activity.showLoadingPage("Still loading (2/3)") }
-						getUsernameFromChain(RelayListenerXboxLogin.fetchRawChain(identityToken, EncryptionUtils.createKeyPair().public).readText())
+						getUsernameFromChain(RelayListenerXboxLogin.fetchRawChain(identityToken.token, EncryptionUtils.createKeyPair().public).readText())
 					} catch (e: XboxGamerTagException) {
 						account = accessToken to refreshToken
 						activity.runOnUiThread {

@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
@@ -68,7 +69,7 @@ fun CheatCategoryTab(
 	expandModules: SnapshotStateList<CheatModule>,
 	overlayManager: OverlayManager
 ) {
-	LazyColumn {
+	LazyColumn(modifier = Modifier.fillMaxSize()) {
 		item {
 			Spacer(modifier = Modifier.height(10.dp))
 		}
@@ -183,7 +184,7 @@ private fun CheatShortcut(
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
-private fun CheatValue(value: Value<*>, recomposeTrigger: () -> Unit) {
+fun CheatValue(value: Value<*>, recomposeTrigger: () -> Unit) {
 	if (value is BoolValue) {
 		Row(
 			verticalAlignment = Alignment.CenterVertically,

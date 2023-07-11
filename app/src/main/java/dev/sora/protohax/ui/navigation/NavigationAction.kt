@@ -20,6 +20,9 @@ object PHaxRoute {
     const val CONFIG = "Config"
     const val ACCOUNTS = "Accounts"
     const val SETTINGS = "Settings"
+
+	// route for menu
+	const val HUD = "HUD"
 }
 
 data class PHaxTopLevelDestination(

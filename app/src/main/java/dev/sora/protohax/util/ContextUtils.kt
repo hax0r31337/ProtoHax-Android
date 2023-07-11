@@ -6,6 +6,7 @@ import android.content.Intent
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageInfo
 import android.content.pm.PackageManager
+import android.content.res.Configuration
 import android.os.Build
 import android.widget.Toast
 import androidx.core.content.FileProvider
@@ -107,4 +108,12 @@ object ContextUtils {
         val info = getApplicationInfo(packageName)
         return getApplicationLabel(info).toString()
     }
+
+	fun Context.isNightMode(): Boolean {
+		return resources.configuration.uiMode and Configuration.UI_MODE_NIGHT_MASK == Configuration.UI_MODE_NIGHT_YES
+	}
+
+	fun Context.getColor(day: Int, night: Int): Int {
+		return if (isNightMode()) night else day
+	}
 }
