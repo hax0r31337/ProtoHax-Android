@@ -13,7 +13,6 @@ import dev.sora.protohax.ui.overlay.hud.HudManager
 import dev.sora.relay.cheat.module.impl.combat.ModuleTargets
 import dev.sora.relay.game.entity.EntityPlayer
 import dev.sora.relay.game.entity.EntityUnknown
-import dev.sora.relay.utils.logInfo
 import org.cloudburstmc.protocol.bedrock.data.entity.EntityDataTypes
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.regex.Pattern
