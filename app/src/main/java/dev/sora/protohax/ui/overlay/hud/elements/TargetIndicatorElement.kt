@@ -12,7 +12,7 @@ import dev.sora.protohax.ui.overlay.hud.HudElement
 import dev.sora.protohax.ui.overlay.hud.HudManager
 import dev.sora.relay.cheat.module.impl.combat.ModuleTargets
 import dev.sora.relay.game.entity.EntityPlayer
-import dev.sora.relay.game.entity.EntityUnknown
+import dev.sora.relay.game.entity.EntityOther
 import org.cloudburstmc.protocol.bedrock.data.entity.EntityDataTypes
 import java.util.concurrent.atomic.AtomicBoolean
 import java.util.regex.Pattern
@@ -59,7 +59,7 @@ class TargetIndicatorElement : HudElement(HudManager.TARGET_INDICATOR_ELEMENT_ID
 
 			name = when (target) {
 				is EntityPlayer -> stripColor(target.displayName)
-				is EntityUnknown -> target.identifier.split(":").last()
+				is EntityOther -> target.identifier.split(":").last()
 				else -> return
 			}
 
