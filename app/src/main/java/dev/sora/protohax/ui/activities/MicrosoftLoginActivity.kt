@@ -102,9 +102,11 @@ h1 {
 					try {
 						activity.runOnUiThread { activity.showLoadingPage("Still loading (0/2)") }
 						// fetch username through chain
-						val identityToken = RelayListenerXboxLogin.fetchIdentityToken(account!!.first, activity.device)
+						val credentials = RelayListenerXboxLogin.fetchXboxCredentials(account!!.first, activity.device)
 						activity.runOnUiThread { activity.showLoadingPage("Still loading (1/2)") }
-						val username = getUsernameFromChain(RelayListenerXboxLogin.fetchRawChain(identityToken.token, EncryptionUtils.createKeyPair().public).readText())
+						// activate account on Minecraft authentication server
+						credentials.fetchMinecraftToken()
+						val username = getUsernameFromChain(RelayListenerXboxLogin.fetchRawChain(credentials.fetchIdentityToken().token, EncryptionUtils.createKeyPair().public).readText())
 
 						AccountManager.accounts.add(Account(username, activity.device, account!!.second))
 						AccountManager.save()
@@ -140,9 +142,11 @@ h1 {
 					activity.runOnUiThread { activity.showLoadingPage("Still loading (1/3)") }
 					// fetch username through chain
 					val username = try {
-						val identityToken = RelayListenerXboxLogin.fetchIdentityToken(accessToken, activity.device)
+						val credentials = RelayListenerXboxLogin.fetchXboxCredentials(accessToken, activity.device)
 						activity.runOnUiThread { activity.showLoadingPage("Still loading (2/3)") }
-						getUsernameFromChain(RelayListenerXboxLogin.fetchRawChain(identityToken.token, EncryptionUtils.createKeyPair().public).readText())
+						// activate account on Minecraft authentication server
+						credentials.fetchMinecraftToken()
+						getUsernameFromChain(RelayListenerXboxLogin.fetchRawChain(credentials.fetchIdentityToken().token, EncryptionUtils.createKeyPair().public).readText())
 					} catch (e: XboxGamerTagException) {
 						account = accessToken to refreshToken
 						activity.runOnUiThread {
@@ -169,8 +173,11 @@ h1 {
         }
 
         private fun getUsernameFromChain(chains: String): String {
-            val body = JsonParser.parseString(chains).asJsonObject.getAsJsonArray("chain")
-            for (chain in body) {
+            val body = JsonParser.parseString(chains).asJsonObject
+			if (!body.has("chain")) {
+				error("no field named \"chain\" found in json: $chains")
+			}
+            for (chain in body.getAsJsonArray("chain")) {
                 val chainBody = JsonParser.parseString(base64Decode(chain.asString.split(".")[1]).toString(Charsets.UTF_8)).asJsonObject
                 if (chainBody.has("extraData")) {
                     val extraData = chainBody.getAsJsonObject("extraData")
